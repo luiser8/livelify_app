@@ -23,3 +23,6 @@ export type PaginatedResponse<T> = {
 
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
+// Exportar tipos de autenticación
+export * from './auth.types';
+

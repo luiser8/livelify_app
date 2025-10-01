@@ -1,10 +1,15 @@
 import { AppRouter } from './routes';
+import { AuthProvider } from './features/auth/context';
 
 /**
  * Componente principal de la aplicación
  */
 function App() {
-  return <AppRouter />;
+  return (
+    <AuthProvider>
+      <AppRouter />
+    </AuthProvider>
+  );
 }
 
 export default App;

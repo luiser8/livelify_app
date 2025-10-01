@@ -49,6 +49,10 @@ export const OnboardingPage = () => {
     navigate('/login');
   };
 
+  const handleRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <div
       className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-6 py-8 text-white"
@@ -62,6 +66,14 @@ export const OnboardingPage = () => {
           className="text-white/90 hover:text-white transition-colors text-sm font-medium"
         >
           I have an account
+        </button>
+      </div>
+      <div className="w-full max-w-6xl flex justify-end">
+      <button
+          onClick={handleRegister}
+          className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+        >
+          I don't have an account, register
         </button>
       </div>
 

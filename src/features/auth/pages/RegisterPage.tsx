@@ -1,37 +1,63 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '../components';
+import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
 import { useAuth } from '@/features/auth/context';
+import { registerUseCase } from '@/core/usecases/auth/registerUseCase';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
 
 /**
- * Página de inicio de sesión
+ * Página de registro
  */
-export const LoginPage = () => {
+export const RegisterPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleRegister = async (formData: RegisterFormData) => {
     setIsLoading(true);
     setError('');
 
     try {
-      console.log('Intentando login con:', { email });
+      console.log('Intentando registro con:', {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      });
 
-      // Llamar al caso de uso de login que conecta con el backend
-      const { user } = await loginUseCase({ email, password });
+      // Preparar datos para el backend (sin confirmPassword)
+      const registerData = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        phone: formData.phone,
+        avatarUrl: formData.avatarUrl || 'https://example.com/avatar.jpg',
+      };
 
-      // Guardar usuario en el contexto (automáticamente guarda en localStorage)
-      login(user);
+      // Paso 1: Registrar usuario en el backend
+      const registerResult = await registerUseCase(registerData);
 
-      console.log('Login exitoso:', user);
+      console.log('Registro exitoso:', registerResult);
 
-      // Redirigir al home
-      navigate('/home');
+      // Paso 2: Hacer login automático con las credenciales
+      console.log('Iniciando sesión automáticamente...');
+
+      const loginResult = await loginUseCase({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Paso 3: Guardar usuario en el contexto (automáticamente guarda en localStorage)
+      login(loginResult.user);
+
+      console.log('Login automático exitoso:', loginResult.user);
+
+      // Paso 4: Redirigir al home
+      navigate('/login');
     } catch (error) {
-      console.error('Error de login:', error);
+      console.error('Error de registro:', error);
 
       // Manejar diferentes tipos de errores
       if (error instanceof Error) {
@@ -39,7 +65,7 @@ export const LoginPage = () => {
       } else if (typeof error === 'object' && error !== null && 'message' in error) {
         setError(String(error.message));
       } else {
-        setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
+        setError('Error al crear la cuenta. Por favor, intenta de nuevo.');
       }
     } finally {
       setIsLoading(false);
@@ -47,11 +73,11 @@ export const LoginPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/');
+    navigate('/login');
   };
 
-  const handleSignUp = () => {
-    navigate('/register');
+  const handleSignIn = () => {
+    navigate('/login');
   };
 
   return (
@@ -68,15 +94,15 @@ export const LoginPage = () => {
           Back
         </button>
         <button
-          onClick={handleSignUp}
+          onClick={handleSignIn}
           className="text-white/90 hover:text-white transition-colors text-sm font-medium"
         >
-          Create account
+          Sign in
         </button>
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8 py-8">
         {/* Logo */}
         <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
           <svg
@@ -90,13 +116,13 @@ export const LoginPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-lg md:text-xl text-white/90">Sign in to continue your journey</p>
+          <h1 className="text-5xl md:text-6xl font-bold mb-2">Join Livelify</h1>
+          <p className="text-lg md:text-xl text-white/90">Create your account and start your journey</p>
         </div>
 
-        {/* Formulario de login */}
-        <LoginForm 
-          onSubmit={handleLogin} 
+        {/* Formulario de registro */}
+        <RegisterForm 
+          onSubmit={handleRegister} 
           isLoading={isLoading}
           serverError={error}
         />
@@ -108,7 +134,7 @@ export const LoginPage = () => {
           <div className="flex-1 h-px bg-white/20"></div>
         </div>
 
-        {/* Social login buttons */}
+        {/* Social register buttons */}
         <div className="w-full max-w-md space-y-3">
           <button className="w-full py-3 px-6 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white font-medium rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-3">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -132,18 +158,16 @@ export const LoginPage = () => {
       {/* Footer */}
       <div className="w-full max-w-md">
         <p className="text-center text-white/80 text-sm">
-          Don't have an account?{' '}
+          Already have an account?{' '}
           <button
-            onClick={handleSignUp}
+            onClick={handleSignIn}
             className="text-white font-semibold hover:underline"
           >
-            Sign up for free
+            Sign in
           </button>
         </p>
       </div>
     </div>
   );
 };
-
-
 

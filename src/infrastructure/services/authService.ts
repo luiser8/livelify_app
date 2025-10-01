@@ -1,24 +1,49 @@
 import { apiClient } from '../api/client';
-import type { LoginCredentials, LoginResponse } from '../../core/usecases/auth/loginUseCase';
 
 /**
  * Servicio de autenticación
  * Maneja las peticiones relacionadas con autenticación
  */
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  refresh_token?: string;
+}
+
 export const authService = {
+  /**
+   * Inicia sesión con email y password
+   * Endpoint: POST /auth/login
+   */
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     return apiClient.post<LoginResponse>('/auth/login', credentials);
   },
 
+  /**
+   * Cierra la sesión del usuario
+   * Endpoint: POST /auth/logout
+   */
   logout: async (): Promise<void> => {
     return apiClient.post('/auth/logout');
   },
 
+  /**
+   * Obtiene la información del usuario actual
+   * Endpoint: GET /auth/me
+   */
   getCurrentUser: async () => {
     return apiClient.get('/auth/me');
   },
 
+  /**
+   * Refresca el token de autenticación
+   * Endpoint: POST /auth/refresh
+   */
   refreshToken: async (refreshToken: string) => {
     return apiClient.post('/auth/refresh', { refreshToken });
   },

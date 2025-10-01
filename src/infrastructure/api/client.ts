@@ -1,5 +1,5 @@
 import { env } from '../../config/env';
-import type { ApiError, ApiResponse } from '../../shared/types';
+import type { ApiError } from '../../shared/types';
 
 /**
  * Cliente API centralizado
@@ -19,10 +19,14 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    // Obtener access_token del localStorage si existe
+    const token = localStorage.getItem('access_token');
+    
     const config: RequestInit = {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...options?.headers,
       },
     };
@@ -30,15 +34,32 @@ class ApiClient {
     try {
       const response = await fetch(url, config);
 
+      // Intentar parsear la respuesta como JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
       if (!response.ok) {
+        // Crear error con el mensaje del servidor si está disponible
         const error: ApiError = {
-          message: `Error ${response.status}: ${response.statusText}`,
+          message: data?.message || data?.error || `Error ${response.status}: ${response.statusText}`,
           status: response.status,
+          code: data?.code,
         };
+
+        // Si es 401, limpiar el localStorage
+        if (response.status === 401) {
+          localStorage.clear();
+          // Opcional: redirigir al login
+          // window.location.href = '/login';
+        }
+
         throw error;
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
       console.error('API Error:', error);
@@ -80,5 +101,5 @@ class ApiClient {
 }
 
 // Instancia singleton del cliente API
-export const apiClient = new ApiClient(env.API_URL || 'http://localhost:3000/api');
+export const apiClient = new ApiClient(env.API_URL || 'http://localhost:3000/api/v1');
 
