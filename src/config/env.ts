@@ -1,0 +1,24 @@
+/**
+ * Configuración de variables de entorno
+ * Las variables deben estar prefijadas con VITE_ para estar disponibles en el cliente
+ */
+
+export const env = {
+  // Entorno actual
+  APP_ENV: import.meta.env.VITE_APP_ENV || 'development',
+
+  // Información de la aplicación
+  APP_NAME: import.meta.env.VITE_APP_NAME || 'Livelify',
+  APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.1.0',
+
+  // URLs de API
+  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+
+  // Flags de desarrollo
+  isDevelopment: import.meta.env.MODE === 'development',
+  isQA: import.meta.env.MODE === 'qa',
+  isProduction: import.meta.env.MODE === 'production',
+} as const
+
+// Tipo para autocompletado
+export type Env = typeof env

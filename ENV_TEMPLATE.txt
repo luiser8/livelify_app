@@ -1,0 +1,31 @@
+# ===============================================
+# PLANTILLA DE VARIABLES DE ENTORNO
+# ===============================================
+# Copia el contenido según el entorno que necesites
+# y créalo como .env.development, .env.qa o .env.production
+
+# ============== DEVELOPMENT ==============
+# Archivo: .env.development
+VITE_APP_ENV=development
+VITE_API_URL=http://localhost:3000/api
+VITE_APP_NAME=Livelify
+VITE_APP_VERSION=0.1.0
+
+# ============== QA ==============
+# Archivo: .env.qa
+VITE_APP_ENV=qa
+VITE_API_URL=https://qa-api.livelify.com/api
+VITE_APP_NAME=Livelify QA
+VITE_APP_VERSION=0.1.0
+
+# ============== PRODUCTION ==============
+# Archivo: .env.production
+VITE_APP_ENV=production
+VITE_API_URL=https://api.livelify.com/api
+VITE_APP_NAME=Livelify
+VITE_APP_VERSION=0.1.0
+
+# ============== NOTAS ==============
+# - Las variables DEBEN comenzar con VITE_ para estar disponibles en el navegador
+# - No incluyas secretos sensibles en estas variables (son visibles en el cliente)
+# - Para variables locales usa .env.local (no se sube a git)
