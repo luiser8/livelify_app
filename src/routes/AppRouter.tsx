@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { OnboardingPage } from '../features/onboarding/pages';
+import { LoginPage } from '../features/auth/pages';
 import { HomePage } from '../features/home/pages';
 
 /**
@@ -11,6 +12,9 @@ export const AppRouter = () => {
       <Routes>
         {/* Ruta de onboarding/landing */}
         <Route path="/" element={<OnboardingPage />} />
+        
+        {/* Ruta de autenticación */}
+        <Route path="/login" element={<LoginPage />} />
         
         {/* Página principal de la app */}
         <Route path="/home" element={<HomePage />} />

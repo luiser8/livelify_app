@@ -1,0 +1,96 @@
+import { useState, FormEvent } from 'react';
+import { Input } from '@/shared/components';
+
+interface LoginFormProps {
+  onSubmit: (email: string, password: string) => void;
+  isLoading?: boolean;
+}
+
+/**
+ * Formulario de inicio de sesión
+ */
+export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validate = () => {
+    const newErrors: { email?: string; password?: string } = {};
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (validate()) {
+      onSubmit(email, password);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+      <Input
+        type="email"
+        label="Email"
+        placeholder="your@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
+        autoComplete="email"
+        disabled={isLoading}
+      />
+
+      <Input
+        type="password"
+        label="Password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
+        autoComplete="current-password"
+        disabled={isLoading}
+      />
+
+      <div className="flex items-center justify-between text-sm">
+        <label className="flex items-center text-white/80 cursor-pointer hover:text-white transition-colors">
+          <input
+            type="checkbox"
+            className="mr-2 rounded border-white/30 bg-white/10 text-primary-500 focus:ring-white/50"
+          />
+          Remember me
+        </label>
+        <button
+          type="button"
+          className="text-white/80 hover:text-white transition-colors"
+        >
+          Forgot password?
+        </button>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      >
+        {isLoading ? 'Signing in...' : 'Sign In'}
+      </button>
+    </form>
+  );
+};
+
+
+

@@ -12,7 +12,7 @@ export const env = {
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.1.0',
 
   // URLs de API
-  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1',
 
   // Flags de desarrollo
   isDevelopment: import.meta.env.MODE === 'development',

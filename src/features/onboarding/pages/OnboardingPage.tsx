@@ -46,12 +46,11 @@ export const OnboardingPage = () => {
   };
 
   const handleLogin = () => {
-    // TODO: Navegar a la página de login
-    console.log('Login');
+    navigate('/login');
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-6 py-8 text-white"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -93,7 +92,7 @@ export const OnboardingPage = () => {
           >
             {slides[currentSlide].title}
           </h2>
-          <p 
+          <p
             key={`subtitle-${currentSlide}`}
             className="text-lg md:text-xl text-white/90 animate-fade-in-delay"
           >
