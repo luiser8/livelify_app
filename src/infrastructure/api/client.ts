@@ -18,10 +18,10 @@ class ApiClient {
     options?: RequestInit
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Obtener access_token del localStorage si existe
     const token = localStorage.getItem('access_token');
-    
+
     const config: RequestInit = {
       ...options,
       headers: {

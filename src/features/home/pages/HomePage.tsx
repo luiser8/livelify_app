@@ -1,100 +1,106 @@
-import { Button } from '../../../shared/components';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BottomNav } from '@/shared/components';
+import { LifeWheelHexagon } from '../components';
+import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
 
 /**
- * Página principal de la aplicación
+ * Página principal - Life Wheel
  */
 export const HomePage = () => {
+  const navigate = useNavigate();
+  const [lifeWheel, setLifeWheel] = useState<LifeWheelResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLifeWheel = async () => {
+      try {
+        const data = await lifeWheelService.getMyLifeWheel();
+        setLifeWheel(data);
+      } catch (error) {
+        console.error('Error fetching life wheel:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLifeWheel();
+  }, []);
+
+  const handleStartAssessment = () => {
+    navigate('/assessment/intro');
+  };
+
+  const handleBack = () => {
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white flex flex-col pb-20">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-          <a className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2" 
-              className="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full" 
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      <header className="bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={handleBack}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span className="ml-3 text-xl font-bold">Livelify</span>
-          </a>
-          <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
-            <a className="mr-5 hover:text-gray-900 cursor-pointer">Inicio</a>
-            <a className="mr-5 hover:text-gray-900 cursor-pointer">Características</a>
-            <a className="mr-5 hover:text-gray-900 cursor-pointer">Precios</a>
-            <a className="mr-5 hover:text-gray-900 cursor-pointer">Contacto</a>
-          </nav>
-          <Button variant="primary" size="md">
-            Comenzar
-          </Button>
+          </button>
+
+          <h1 className="text-lg font-semibold text-gray-900">Life Wheel</h1>
+
+          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="container mx-auto px-5 py-24">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Bienvenido a Livelify
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Una aplicación web moderna construida con arquitectura limpia, 
-            React, TypeScript y Tailwind CSS.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button variant="primary" size="lg">
-              Empezar ahora
-            </Button>
-            <Button variant="outline" size="lg">
-              Ver demo
-            </Button>
+      {/* Contenido principal */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        {/* Hexágono del Life Wheel */}
+        {loading ? (
+          <div className="mb-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="text-gray-500 mt-4">Loading your Life Wheel...</p>
           </div>
-        </div>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Rápido</h3>
-            <p className="text-gray-600">
-              Optimizado para rendimiento y velocidad de carga.
-            </p>
+        ) : (
+          <div className="mb-8">
+            <LifeWheelHexagon lifeAreas={lifeWheel?.lifeAreas || []} />
           </div>
+        )}
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Modular</h3>
-            <p className="text-gray-600">
-              Arquitectura limpia y escalable para crecer con tu proyecto.
-            </p>
-          </div>
+        {/* Botón de acción */}
+        <button
+          onClick={handleStartAssessment}
+          className="w-full max-w-sm py-4 px-6 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg transition-all shadow-md"
+        >
+          Start Assessment Now
+        </button>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Seguro</h3>
-            <p className="text-gray-600">
-              Construido con las mejores prácticas de seguridad.
+        {/* Advertencia */}
+        <div className="w-full max-w-sm mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-gray-700">
+              Once configured, your wheel cannot be reset. You'll improve it through transformations.
             </p>
           </div>
         </div>
+
+        {/* Texto informativo */}
+        <p className="text-center text-gray-600 text-sm mt-6 max-w-sm leading-relaxed">
+          Most people start with scores between 4-6 in each area. The assessment takes about 10 minutes and creates your personal baseline for transformation.
+        </p>
       </main>
+
+      {/* Navegación inferior */}
+      <BottomNav />
     </div>
   );
 };

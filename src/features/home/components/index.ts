@@ -1,0 +1,2 @@
+export { LifeWheelHexagon } from './LifeWheelHexagon';
+

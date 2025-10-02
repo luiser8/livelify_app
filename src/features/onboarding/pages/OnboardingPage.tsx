@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { CarouselDots } from '../components';
 import { useCarousel } from '../hooks';
+import { useAuth } from '@/features/auth/context';
 
 /**
  * Datos de las diapositivas del onboarding
@@ -29,6 +30,7 @@ const slides = [
  */
 export const OnboardingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
   const { currentSlide, goToSlide, setIsPaused } = useCarousel({
     totalSlides: slides.length,
     autoPlayInterval: 5000,
@@ -36,8 +38,12 @@ export const OnboardingPage = () => {
   });
 
   const handleExplore = () => {
-    // TODO: Navegar a la página principal o tour
-    console.log('Explore the App');
+    // Si está autenticado, va al home, sino al login
+    if (isAuthenticated) {
+      navigate('/home');
+    } else {
+      navigate('/login');
+    }
   };
 
   const handleStartAssessment = () => {
@@ -53,28 +59,53 @@ export const OnboardingPage = () => {
     navigate('/register');
   };
 
+  const handleLogout = () => {
+    logout();
+    // Opcional: mostrar mensaje de confirmación
+    console.log('Sesión cerrada');
+  };
+
   return (
     <div
       className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-6 py-8 text-white"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Header con botón de login */}
-      <div className="w-full max-w-6xl flex justify-end">
-        <button
-          onClick={handleLogin}
-          className="text-white/90 hover:text-white transition-colors text-sm font-medium"
-        >
-          I have an account
-        </button>
-      </div>
-      <div className="w-full max-w-6xl flex justify-end">
-      <button
-          onClick={handleRegister}
-          className="text-white/90 hover:text-white transition-colors text-sm font-medium"
-        >
-          I don't have an account, register
-        </button>
+      {/* Header - muestra diferentes opciones según autenticación */}
+      <div className="w-full max-w-6xl">
+        {isAuthenticated ? (
+          // Si está autenticado, mostrar info del usuario y logout
+          <div className="flex justify-between items-center">
+            <div className="text-white/90 text-sm">
+              Bienvenido, <span className="font-semibold">{user?.firstName}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-white/90 hover:text-white transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar sesión
+            </button>
+          </div>
+        ) : (
+          // Si NO está autenticado, mostrar botones de login/register
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={handleLogin}
+              className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+            >
+              I have an account
+            </button>
+            <button
+              onClick={handleRegister}
+              className="text-white/90 hover:text-white transition-colors text-sm font-medium px-4 py-2 border border-white/30 rounded-lg hover:bg-white/10"
+            >
+              Sign up
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Contenido principal */}
@@ -126,7 +157,7 @@ export const OnboardingPage = () => {
           onClick={handleExplore}
           className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg"
         >
-          Explore the App
+          {isAuthenticated ? 'Go to App' : 'Explore the App'}
         </button>
 
         <button
