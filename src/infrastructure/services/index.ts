@@ -30,3 +30,38 @@ export type {
   SubmitAreaAnswersResponse
 } from './answerService';
 
+// Servicio de Proyectos
+export { projectService } from './projectService';
+export type {
+  CreateProjectFromAreaRequest,
+  CreateProjectResponse,
+  Project,
+  ProjectDetail,
+  GetProjectsByAreaResponse,
+  GetAllProjectsResponse
+} from './projectService';
+
+// Servicio de Monedas
+export { currencyService } from './currencyService';
+export type {
+  Currency,
+  GetAllCurrenciesResponse
+} from './currencyService';
+
+// Servicio de Presupuestos
+export { budgetService } from './budgetService';
+export type {
+  CreateBudgetForProjectRequest,
+  CreateBudgetResponse,
+  Budget
+} from './budgetService';
+
+// Servicio de Contextos
+export { contextService } from './contextService';
+export type {
+  Context,
+  AddContextRequest,
+  AddContextResponse,
+  GetMyContextsResponse
+} from './contextService';
+

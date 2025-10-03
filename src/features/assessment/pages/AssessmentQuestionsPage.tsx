@@ -5,7 +5,7 @@ import {
   answerService,
   type AssessmentQuestion 
 } from '@/infrastructure/services';
-import { getAreaColor, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaColor, getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
 /**
  * Página de preguntas del Assessment para un área específica
@@ -24,7 +24,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       if (!areaId) return;
-      
+
       try {
         const data = await assessmentService.getAreaQuestions(areaId);
         setQuestions(data.questions.sort((a, b) => a.order - b.order));
@@ -43,9 +43,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
   const totalAnswered = Object.keys(answers).length;
   const yesCount = Object.values(answers).filter(val => val === true).length;
   const noCount = Object.values(answers).filter(val => val === false).length;
-  const estimatedScore = questions.length > 0 ? ((yesCount / questions.length) * 10).toFixed(1) : '0.0';
-  const areaProgress = ((currentQuestionIndex + 1) / questions.length) * 100;
   const allQuestionsAnswered = totalAnswered === questions.length;
+  const areaColors = getAreaColorVariants(areaName);
 
   // Debug: Log cuando cambian las respuestas
   useEffect(() => {
@@ -132,50 +131,50 @@ export const AssessmentQuestionsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="bg-white px-6 py-4 border-b border-gray-200">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 ${getAreaColor(areaName)} rounded-lg flex items-center justify-center text-2xl`}>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Header with Area Info */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-start justify-between mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 ${getAreaColor(areaName)} rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm`}>
                 {getAreaIcon(areaName)}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{areaName}</h1>
-                <p className="text-sm text-gray-500">Área 2 de 6</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{areaName}</h1>
+                <p className="text-sm sm:text-base text-gray-500">Area 2 of 6</p>
               </div>
             </div>
             <button
               onClick={handleSkipArea}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-blue-600 hover:text-blue-700 text-sm sm:text-base font-medium px-3 py-1.5 sm:px-4 sm:py-2 hover:bg-blue-50 rounded-lg transition-colors"
             >
               Skip Area
             </button>
           </div>
 
           {/* Overall Progress */}
-          <div className="mb-2">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-gray-600">Overall Progress</span>
-              <span className="text-xs text-gray-600">{totalAnswered} of 60 questions</span>
+          <div className="mb-4 sm:mb-5">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm sm:text-base text-gray-600">Overall Progress</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">{totalAnswered} of 60 questions</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
               <div
-                className="bg-blue-500 h-1.5 rounded-full transition-all"
+                className={`${areaColors.bg} h-2 sm:h-2.5 rounded-full transition-all duration-300`}
                 style={{ width: `${(totalAnswered / 60) * 100}%` }}
               />
             </div>
           </div>
 
-          {/* Question Progress */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-900">Question {currentQuestionIndex + 1} of {questions.length}</span>
-            <div className="flex gap-1">
-              {questions.map((q, idx) => (
+          {/* Question Progress Dots */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <span className="text-sm sm:text-base font-medium text-gray-900">Question {currentQuestionIndex + 1} of {questions.length}</span>
+            <div className="flex gap-1.5">
+              {questions.map((q) => (
                 <div
                   key={q.id}
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${
                     answers[q.id] !== undefined
                       ? answers[q.id]
                         ? 'bg-green-500'
@@ -189,215 +188,248 @@ export const AssessmentQuestionsPage: React.FC = () => {
         </div>
 
         {/* Question Card */}
-        <div className="px-6 py-12 bg-gradient-to-br from-blue-50 to-blue-100 mx-6 my-6 rounded-2xl">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <div className={`bg-gradient-to-br ${areaColors.gradient} rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 mb-6 shadow-xl`}>
+          <div className="text-center">
+            {/* Icon */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6 shadow-lg text-2xl sm:text-3xl lg:text-4xl">
+              {getAreaIcon(areaName)}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-relaxed">
+
+            {/* Question Text */}
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 leading-relaxed px-2 sm:px-4">
               {currentQuestion.text}
             </h2>
-            <p className="text-sm text-gray-600">
+
+            {/* Subtitle */}
+            <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-md mx-auto px-2">
               Think about your typical week. Are you able to disconnect from work and enjoy personal time without stress?
             </p>
+
+            {/* Work-Life Balance Visual */}
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-white text-xs font-medium">Work</span>
+              </div>
+              <div className="w-16 h-0.5 bg-white/30"></div>
+
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <span className="text-white text-xs font-medium">Life</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Answer Buttons */}
-        <div className="px-6 mb-6">
-          <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
-            {/* YES Button */}
-            <button
-              onClick={() => handleAnswerSelect(true)}
-              disabled={submitting}
-              className={`w-full p-6 rounded-xl border-2 transition-all ${
-                answers[currentQuestion.id] === true
-                  ? 'bg-green-500 text-white border-green-500 shadow-lg'
-                  : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:border-green-300'
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-xl font-bold mb-1">YES</div>
-                  <div className={`text-sm ${answers[currentQuestion.id] === true ? 'text-white' : 'text-green-600'}`}>
-                    I maintain good balance
-                  </div>
+        <div className="space-y-3 sm:space-y-4 mb-6">
+          {/* YES Button */}
+          <button
+            onClick={() => handleAnswerSelect(true)}
+            disabled={!currentQuestion || submitting}
+            className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
+              !currentQuestion || submitting
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
+                : answers[currentQuestion.id] === true
+                ? 'bg-green-500 text-white shadow-xl'
+                : 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-200'
+            }`}
+          >
+            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
+                !currentQuestion || submitting
+                  ? 'bg-gray-300'
+                  : answers[currentQuestion.id] === true ? 'bg-white/30' : 'bg-white'
+              }`}>
+                <svg className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                  !currentQuestion || submitting
+                    ? 'text-gray-500'
+                    : answers[currentQuestion.id] === true ? 'text-white' : 'text-green-600'
+                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="text-left flex-1">
+                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">YES</div>
+                <div className={`text-xs sm:text-sm font-medium ${
+                  !currentQuestion || submitting
+                    ? 'text-gray-500'
+                    : answers[currentQuestion.id] === true ? 'text-white/90' : 'text-green-600'
+                }`}>
+                  I maintain good balance
                 </div>
               </div>
-            </button>
+            </div>
+          </button>
 
-            {/* NO Button */}
-            <button
-              onClick={() => handleAnswerSelect(false)}
-              disabled={submitting}
-              className={`w-full p-6 rounded-xl border-2 transition-all ${
-                answers[currentQuestion.id] === false
-                  ? 'bg-red-500 text-white border-red-500 shadow-lg'
-                  : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:border-red-300'
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="text-xl font-bold mb-1">NO</div>
-                  <div className={`text-sm ${answers[currentQuestion.id] === false ? 'text-white' : 'text-red-600'}`}>
-                    Work dominates my life
-                  </div>
+          {/* NO Button */}
+          <button
+            onClick={() => handleAnswerSelect(false)}
+            disabled={!currentQuestion || submitting}
+            className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
+              !currentQuestion || submitting
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
+                : answers[currentQuestion.id] === false
+                ? 'bg-red-500 text-white shadow-xl'
+                : 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-200'
+            }`}
+          >
+            <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
+                !currentQuestion || submitting
+                  ? 'bg-gray-300'
+                  : answers[currentQuestion.id] === false ? 'bg-white/30' : 'bg-white'
+              }`}>
+                <svg className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                  !currentQuestion || submitting
+                    ? 'text-gray-500'
+                    : answers[currentQuestion.id] === false ? 'text-white' : 'text-red-600'
+                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="text-left flex-1">
+                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">NO</div>
+                <div className={`text-xs sm:text-sm font-medium ${
+                  !currentQuestion || submitting
+                    ? 'text-gray-500'
+                    : answers[currentQuestion.id] === false ? 'text-white/90' : 'text-red-600'
+                }`}>
+                  Work dominates my life
                 </div>
               </div>
-            </button>
-          </div>
+            </div>
+          </button>
         </div>
 
         {/* Consider these aspects */}
-        <div className="px-6 mb-6">
-          <div className="bg-blue-50 rounded-xl p-6">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Consider these aspects:</h3>
-                <ul className="space-y-1 text-sm text-gray-700">
-                  <li>• Can you disconnect from work emails/calls after hours?</li>
-                  <li>• Do you have time for hobbies and relationships?</li>
-                  <li>• Do you feel stressed about work during personal time?</li>
-                  <li>• Are you able to take breaks and vacations?</li>
-                </ul>
-              </div>
+        <div className={`${areaColors.bgLighter} rounded-2xl p-5 sm:p-6 lg:p-8 mb-6 border ${areaColors.border}`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-10 h-10 ${areaColors.bgLight} rounded-full flex items-center justify-center flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${areaColors.text}`} fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-gray-900 mb-3">Consider these aspects:</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className={`${areaColors.text} font-bold`}>•</span>
+                  <span>Can you disconnect from work emails/calls after hours?</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className={`${areaColors.text} font-bold`}>•</span>
+                  <span>Do you have time for hobbies and relationships?</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className={`${areaColors.text} font-bold`}>•</span>
+                  <span>Do you feel stressed about work during personal time?</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className={`${areaColors.text} font-bold`}>•</span>
+                  <span>Are you able to take breaks and vacations?</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* Area Progress */}
-        <div className="px-6 mb-6">
-          <h3 className="font-bold text-gray-900 mb-3">Progreso de {areaName}</h3>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-1">{yesCount}</div>
-              <div className="text-sm text-green-700">Respuestas Sí</div>
+        {/* Professional Activity Progress */}
+        <div className="bg-white rounded-2xl p-5 sm:p-6 lg:p-8 mb-6 shadow-sm">
+          <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-4 sm:mb-5">Professional Activity Progress</h3>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 sm:p-5 text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-600 mb-1">{yesCount}</div>
+              <div className="text-xs sm:text-sm text-green-700 font-medium">Yes answers</div>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold text-red-600 mb-1">{noCount}</div>
-              <div className="text-sm text-red-700">Respuestas No</div>
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 sm:p-5 text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600 mb-1">{noCount}</div>
+              <div className="text-xs sm:text-sm text-red-700 font-medium">No answers</div>
             </div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-1">Puntaje Estimado del Área</div>
-            <div className="text-4xl font-bold text-blue-600">{estimatedScore}/10</div>
           </div>
         </div>
-
-        {/* Recently Answered */}
-        {answeredQuestions.length > 0 && (
-          <div className="px-6 mb-6">
-            <h3 className="font-bold text-gray-900 mb-3">Respondidas Recientemente</h3>
-            <div className="space-y-2">
-              {answeredQuestions.map((q) => (
-                <div key={q.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {answers[q.id] ? (
-                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    <span className="text-sm text-gray-700 flex-1">{q.text}</span>
-                  </div>
-                  <span className={`text-sm font-semibold ${answers[q.id] ? 'text-green-600' : 'text-red-600'}`}>
-                    {answers[q.id] ? 'YES' : 'NO'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Assessment Tips */}
-        <div className="px-6 mb-6">
-          <div className="bg-purple-50 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Consejos para el Assessment</h3>
-                <ul className="space-y-1 text-sm text-gray-700">
-                  <li>• Responde basándote en tu situación actual, no en dónde quieres estar</li>
-                  <li>• Piensa en los últimos 3 meses al responder</li>
-                  <li>• Sé honesto - esto crea tu línea base para mejorar</li>
-                </ul>
+        <div className="bg-blue-50 rounded-2xl p-5 sm:p-6 lg:p-8 mb-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Assessment Tips</h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span>Answer based on your current situation, not where you want to be</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span>Think about the last 3 months when answering</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span>Be honest - this creates your baseline for improvement</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Choose your answer to continue */}
+        <div className="text-center mb-6">
+          <p className="text-sm sm:text-base text-gray-500 mb-4">Choose your answer to continue</p>
+          <div className="flex justify-center">
+            <div className="bg-gray-200 rounded-full px-4 py-2">
+              <div className="flex gap-2">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === 2 ? `${areaColors.bg} w-8` : 'bg-gray-400 w-2'
+                    }`}
+                  />
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Action */}
-        <div className="px-6 pb-8">
-          {/* Debug info */}
-          <div className="text-xs text-gray-500 text-center mb-2">
-            Respondidas: {totalAnswered}/{questions.length}
-          </div>
-          
-          {allQuestionsAnswered ? (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
-                submitting
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : `${getAreaColor(areaName)} text-white hover:opacity-90 shadow-lg`
-              }`}
-            >
-              {submitting ? 'Enviando...' : 'Enviar Assessment del Área'}
-            </button>
-          ) : (
-            <div className="bg-gray-800 text-white py-3 px-6 rounded-xl text-center">
-              <div className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
-                <span className="text-sm font-medium">Toca una respuesta para continuar</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Progress Bar */}
-        <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-sm font-semibold text-gray-900">{areaName}</div>
-              <div className="text-xs text-gray-600">
-                Pregunta {currentQuestionIndex + 1} en esta área • {areaProgress.toFixed(1)}% Completo
-              </div>
-            </div>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className={`h-2 rounded-full transition-all ${getAreaColor(areaName)}`}
-              style={{ width: `${areaProgress}%` }}
-            />
-          </div>
-        </div>
+        {/* Submit Button */}
+        {allQuestionsAnswered && (
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className={`w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all shadow-lg ${
+              submitting
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : `${areaColors.bg} text-white hover:opacity-90`
+            }`}
+          >
+            {submitting ? 'Submitting...' : 'Complete Area Assessment'}
+          </button>
+        )}
       </div>
     </div>
   );

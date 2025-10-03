@@ -5,7 +5,7 @@ import { HomePage } from '../features/home/pages';
 import { DashboardPage } from '../features/dashboard/pages';
 import { ActionsPage } from '../features/actions/pages';
 import { ProfilePage } from '../features/profile/pages';
-import { ProjectsPage } from '../features/project/pages';
+import { ProjectsPage, AreaProjectsPage, CreateProjectPage } from '../features/project/pages';
 import { AssessmentIntroPage, AssessmentQuestionsPage } from '../features/assessment/pages';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
@@ -76,6 +76,30 @@ export const AppRouter = () => {
           element={
             <ProtectedRoute>
               <ProjectsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/projects/create" 
+          element={
+            <ProtectedRoute>
+              <CreateProjectPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/area/:areaId/projects" 
+          element={
+            <ProtectedRoute>
+              <AreaProjectsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/area/:areaId/projects/create" 
+          element={
+            <ProtectedRoute>
+              <CreateProjectPage />
             </ProtectedRoute>
           } 
         />

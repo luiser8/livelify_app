@@ -56,33 +56,33 @@ export const AssessmentIntroPage = () => {
       </header>
 
       {/* Contenido principal */}
-      <main className="max-w-2xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Icono y título */}
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Life Wheel Assessment</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Life Wheel Assessment</h1>
+          <p className="text-base sm:text-lg text-gray-600">
             60 Questions. 10 Minutes. Your Starting Point.
           </p>
         </div>
 
         {/* Advertencia permanente */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-red-900 mb-1">
+              <h3 className="font-semibold text-base sm:text-lg text-red-900 mb-1">
                 This assessment is permanent and cannot be retaken
               </h3>
-              <p className="text-sm text-red-800">
+              <p className="text-sm sm:text-base text-red-800">
                 Your results become your baseline for all future transformations.
               </p>
             </div>
@@ -90,11 +90,11 @@ export const AssessmentIntroPage = () => {
         </div>
 
         {/* Mensaje motivacional */}
-        <div className="mb-6">
-          <h2 className="font-semibold text-gray-900 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="font-semibold text-base sm:text-lg text-gray-900 mb-2 sm:mb-3">
             Answer honestly - this is just your baseline. You'll improve from here.
           </h2>
-          <p className="text-sm text-gray-600 leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             This assessment creates your starting point across 6 life areas. There are no wrong answers - 
             we're measuring where you are now, not where you should be. Your transformation journey begins 
             with this honest snapshot.
@@ -102,27 +102,27 @@ export const AssessmentIntroPage = () => {
         </div>
 
         {/* 6 Life Areas */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-4">6 Life Areas You'll Assess</h3>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">6 Life Areas You'll Assess</h3>
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
               <p className="text-gray-500 text-sm mt-2">Loading areas...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {lifeWheel?.lifeAreas.map((area) => (
                 <button
                   key={area.id}
                   onClick={() => handleAreaClick(area.areaId)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-gray-300 transition-all text-left hover:scale-105"
+                  className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-5 hover:shadow-lg hover:border-gray-300 transition-all text-left hover:scale-105"
                 >
-                  <div className={`w-10 h-10 ${getAreaColor(area.areaName)} rounded-lg flex items-center justify-center text-2xl mb-2`}>
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getAreaColor(area.areaName)} rounded-lg flex items-center justify-center text-2xl sm:text-3xl mb-2 sm:mb-3`}>
                     {getAreaIcon(area.areaName)}
                   </div>
-                  <p className="text-sm font-medium text-gray-900">{area.areaName}</p>
-                  <p className="text-xs text-gray-500 mt-1">Puntaje actual: {area.score}/10</p>
-                  <p className="text-xs text-primary-600 mt-2 font-medium">Click para evaluar →</p>
+                  <p className="text-sm sm:text-base font-medium text-gray-900">{area.areaName}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Puntaje actual: {area.score}/10</p>
+                  <p className="text-xs sm:text-sm text-primary-600 mt-2 font-medium">Click para evaluar →</p>
                 </button>
               ))}
             </div>
@@ -130,45 +130,45 @@ export const AssessmentIntroPage = () => {
         </div>
 
         {/* Información adicional */}
-        <div className="space-y-3 mb-6">
-          <div className="flex items-start gap-3 bg-purple-50 rounded-lg p-3">
-            <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xs font-bold">?</span>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="flex items-start gap-3 bg-purple-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs sm:text-sm font-bold">?</span>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-purple-900">10 questions per area</h4>
-              <p className="text-xs text-purple-800">Simple YES/NO format for honest answers</p>
+              <h4 className="text-sm sm:text-base font-semibold text-purple-900">10 questions per area</h4>
+              <p className="text-xs sm:text-sm text-purple-800">Simple YES/NO format for honest answers</p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 bg-green-50 rounded-lg p-3">
-            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <div className="flex items-start gap-3 bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-green-900">Instant scoring</h4>
-              <p className="text-xs text-green-800">Each area gets a score from 0-10 based on your responses</p>
+              <h4 className="text-sm sm:text-base font-semibold text-green-900">Instant scoring</h4>
+              <p className="text-xs sm:text-sm text-green-800">Each area gets a score from 0-10 based on your responses</p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 bg-pink-50 rounded-lg p-3">
-            <div className="w-6 h-6 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <div className="flex items-start gap-3 bg-pink-50 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
               </svg>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-pink-900">Identifies focus area</h4>
-              <p className="text-xs text-pink-800">Your lowest scoring area becomes your first transformation priority</p>
+              <h4 className="text-sm sm:text-base font-semibold text-pink-900">Identifies focus area</h4>
+              <p className="text-xs sm:text-sm text-pink-800">Your lowest scoring area becomes your first transformation priority</p>
             </div>
           </div>
         </div>
 
         {/* Before you begin */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Before you begin:</h3>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">Before you begin:</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -221,8 +221,8 @@ export const AssessmentIntroPage = () => {
         </div>
 
         {/* What happens after */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-4">What happens after assessment:</h3>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">What happens after assessment:</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -270,7 +270,7 @@ export const AssessmentIntroPage = () => {
         {/* Botón de inicio */}
         <button
           onClick={handleStartAssessment}
-          className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl transition-all shadow-lg text-lg"
+          className="w-full py-4 sm:py-5 px-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg"
         >
           I'm Ready to Begin
         </button>
