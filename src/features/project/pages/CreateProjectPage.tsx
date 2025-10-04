@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { projectService, lifeWheelService, currencyService, budgetService, type LifeArea, type Currency } from '@/infrastructure/services';
+import { projectService, lifeWheelService, currencyService, budgetService, type LifeWheelArea, type Currency } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
+import { PageHeader } from '@/shared/components';
 
 /**
  * Página de creación de proyecto - Multi-step
@@ -11,7 +12,7 @@ export const CreateProjectPage = () => {
   const navigate = useNavigate();
   const { areaId: urlAreaId } = useParams<{ areaId?: string }>();
   
-  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
+  const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(urlAreaId ? 2 : 1); // Si viene con área, ir directo a step 2
@@ -44,6 +45,23 @@ export const CreateProjectPage = () => {
         ]);
         setLifeAreas(lifeWheelData.lifeAreas);
         setCurrencies(currenciesData.currencies);
+
+        // Si viene con un areaId, verificar límite de proyectos
+        if (urlAreaId) {
+          try {
+            const projectsData = await projectService.getProjectsByArea(urlAreaId);
+            const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
+            
+            // Si ya tiene 2 proyectos activos, redirigir
+            if (activeProjects.length >= 2) {
+              console.log('Area has reached project limit, redirecting...');
+              navigate(`/area/${urlAreaId}/projects`);
+              return;
+            }
+          } catch (error) {
+            console.error('Error checking project limit:', error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -52,7 +70,7 @@ export const CreateProjectPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [urlAreaId, navigate]);
 
   const averageScore = lifeAreas.length > 0 
     ? (lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length).toFixed(1)
@@ -143,29 +161,17 @@ export const CreateProjectPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(urlAreaId ? `/area/${urlAreaId}/projects` : '/projects')}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div className="text-center flex-1">
-              <h1 className="text-lg font-semibold text-gray-900">Create Project</h1>
-              <p className="text-xs text-gray-500">90-Day Transformation</p>
-            </div>
-            <div className="w-10"></div>
-          </div>
-        </div>
-      </header>
+      <PageHeader 
+        title="Create Project"
+        subtitle="90-Day Transformation"
+        backPath={urlAreaId ? `/area/${urlAreaId}/projects` : '/projects'}
+        showSearch={false}
+        showFilter={false}
+      />
 
       {/* Progress indicator */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
               Step {currentStep} of {urlAreaId ? '3' : '4'}
@@ -186,7 +192,7 @@ export const CreateProjectPage = () => {
       </div>
 
       {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <main className="max-w-7xl mx-auto w-full px-6 py-6">
         {/* Step 1: Choose Area */}
         {currentStep === 1 && (
           <div className="space-y-6">

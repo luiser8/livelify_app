@@ -50,11 +50,11 @@ class ApiClient {
           code: data?.code,
         };
 
-        // Si es 401, limpiar el localStorage
-        if (response.status === 401) {
-          localStorage.clear();
-          // Opcional: redirigir al login
-          // window.location.href = '/login';
+        // Si es 401, disparar evento personalizado para sesión expirada
+        // SOLO si hay un token (usuario ya autenticado)
+        const hasToken = localStorage.getItem('access_token');
+        if (response.status === 401 && hasToken) {
+          window.dispatchEvent(new CustomEvent('session-expired'));
         }
 
         throw error;
@@ -91,6 +91,18 @@ class ApiClient {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async patch<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestInit
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
       body: JSON.stringify(body),
     });
   }

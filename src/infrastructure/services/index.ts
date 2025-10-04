@@ -4,15 +4,26 @@
 
 // Servicio de autenticación
 export { authService } from './authService';
-export type { LoginCredentials, LoginResponse } from './authService';
+export type { LoginCredentials, LoginResponse, RefreshTokenRequest, RefreshTokenResponse } from './authService';
 
 // Servicio de usuarios
 export { userService } from './userService';
-export type { RegisterCredentials, RegisterResponse } from './userService';
+export type { 
+  RegisterCredentials, 
+  RegisterResponse, 
+  UserMeResponse,
+  User,
+  DashboardSummary,
+  LifeArea,
+  Action
+} from './userService';
+
+// Re-export types from userService with aliases to avoid conflicts
+export type { Goal as UserGoal, Project as UserProject, Budget as UserBudget } from './userService';
 
 // Servicio de Life Wheel
 export { lifeWheelService } from './lifeWheelService';
-export type { LifeWheelResponse, LifeArea } from './lifeWheelService';
+export type { LifeWheelResponse, LifeArea as LifeWheelArea } from './lifeWheelService';
 
 // Servicio de Assessment
 export { assessmentService } from './assessmentService';
@@ -61,7 +72,39 @@ export { contextService } from './contextService';
 export type {
   Context,
   AddContextRequest,
-  AddContextResponse,
   GetMyContextsResponse
 } from './contextService';
+
+// Servicio de Goals
+export { goalService } from './goalService';
+export type {
+  Goal,
+  GoalType,
+  CreateGoalRequest,
+  CreateGoalResponse,
+  MyGoalsResponse
+} from './goalService';
+
+// Servicio de Subscriptions
+export { subscriptionService } from './subscriptionService';
+export type {
+  Subscription,
+  PlanType,
+  GetAllSubscriptionsResponse,
+  UserSubscription,
+  Plan,
+  PlanFeatures,
+  AddSubscriptionRequest,
+  UpdateSubscriptionRequest
+} from './subscriptionService';
+
+// Servicio de Actions
+export { actionService } from './actionService';
+export type {
+  Action as ActionItem,
+  EnergyLevel,
+  CreateActionRequest,
+  CreateActionResponse,
+  MyActionsResponse
+} from './actionService';
 

@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { projectService, lifeWheelService, type Project, type LifeArea } from '@/infrastructure/services';
+import { projectService, lifeWheelService, type Project, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav } from '@/shared/components';
+import { BottomNav, PageHeader } from '@/shared/components';
 
 /**
  * Página de gestión de proyectos por área
@@ -11,7 +11,7 @@ export const AreaProjectsPage = () => {
   const { areaId } = useParams<{ areaId: string }>();
   const navigate = useNavigate();
   
-  const [area, setArea] = useState<LifeArea | null>(null);
+  const [area, setArea] = useState<LifeWheelArea | null>(null);
   const [projectsData, setProjectsData] = useState<{ projects: Project[]; totalProjects: number; activeProjects: number; completedProjects: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
@@ -41,10 +41,6 @@ export const AreaProjectsPage = () => {
     fetchData();
   }, [areaId]);
 
-  const handleBack = () => {
-    navigate('/home');
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -61,7 +57,7 @@ export const AreaProjectsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500">Area not found</p>
-          <button onClick={handleBack} className="mt-4 text-indigo-600 hover:text-indigo-700">
+          <button onClick={() => navigate('/home')} className="mt-4 text-indigo-600 hover:text-indigo-700">
             Go back
           </button>
         </div>
@@ -70,25 +66,24 @@ export const AreaProjectsPage = () => {
   }
 
   const colorVariants = getAreaColorVariants(area.areaName);
+  
+  // Validar límite de proyectos: máximo 2 proyectos activos por área
+  const activeProjectsCount = projectsData?.projects.filter(p => p.status === 'ACTIVE').length || 0;
+  const hasReachedLimit = activeProjectsCount >= 2;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={handleBack}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
-      </header>
+      <PageHeader 
+        title={area.areaName}
+        subtitle={`Score: ${area.score}/10`}
+        backPath="/home"
+        showSearch={false}
+        showFilter={false}
+      />
 
       {/* Contenido principal */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="max-w-7xl mx-auto w-full px-6 py-6">
         {/* Header del área */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -102,12 +97,34 @@ export const AreaProjectsPage = () => {
           </div>
 
           {/* Botón para crear proyecto */}
-          <button
-            onClick={() => navigate(`/area/${areaId}/projects/create`)}
-            className={`w-full sm:w-auto py-3 px-6 ${colorVariants.bg} text-white font-semibold rounded-xl transition-all shadow-lg hover:opacity-90`}
-          >
-            + Create New Project
-          </button>
+          <div>
+            <button
+              onClick={() => navigate(`/area/${areaId}/projects/create`)}
+              disabled={hasReachedLimit}
+              className={`w-full sm:w-auto py-3 px-6 font-semibold rounded-xl transition-all shadow-lg ${
+                hasReachedLimit 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' 
+                  : `${colorVariants.bg} text-white hover:opacity-90`
+              }`}
+            >
+              + Create New Project
+            </button>
+            
+            {/* Mensaje de límite alcanzado */}
+            {hasReachedLimit && (
+              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div className="text-sm text-amber-800">
+                    <p className="font-semibold">Maximum projects reached</p>
+                    <p className="mt-1">You can only have up to 2 active projects per area. Complete or archive an existing project to create a new one.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Estadísticas */}
@@ -135,12 +152,14 @@ export const AreaProjectsPage = () => {
           {!projectsData || projectsData.projects.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center">
               <p className="text-gray-500 mb-4">No projects yet in this area</p>
-              <button
-                onClick={() => navigate(`/area/${areaId}/projects/create`)}
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
-              >
-                Create your first project
-              </button>
+              {!hasReachedLimit && (
+                <button
+                  onClick={() => navigate(`/area/${areaId}/projects/create`)}
+                  className="text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  Create your first project
+                </button>
+              )}
             </div>
           ) : (
             projectsData.projects.map((project) => {
@@ -247,6 +266,12 @@ export const AreaProjectsPage = () => {
 
                       {/* Botones de acción */}
                       <div className="flex gap-3 pt-2">
+                        <button 
+                          onClick={() => navigate(`/projects/${project.id}/goals`)}
+                          className="flex-1 py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
+                        >
+                          📝 Goals
+                        </button>
                         <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
                           Edit
                         </button>

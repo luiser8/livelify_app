@@ -3,9 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   assessmentService, 
   answerService,
+  lifeWheelService,
   type AssessmentQuestion 
 } from '@/infrastructure/services';
 import { getAreaColor, getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
+import { BottomNav } from '@/shared/components';
 
 /**
  * Página de preguntas del Assessment para un área específica
@@ -26,18 +28,31 @@ export const AssessmentQuestionsPage: React.FC = () => {
       if (!areaId) return;
 
       try {
+        // Primero verificar si el área ya tiene score
+        const lifeWheel = await lifeWheelService.getMyLifeWheel();
+        const area = lifeWheel.lifeAreas.find(a => a.areaId === areaId);
+        
+        // Si el área ya tiene score > 0, redirigir al usuario
+        if (area && area.score > 0) {
+          console.log('Area already completed, redirecting...');
+          navigate('/assessment/intro');
+          return;
+        }
+
+        // Si no tiene score, cargar las preguntas normalmente
         const data = await assessmentService.getAreaQuestions(areaId);
         setQuestions(data.questions.sort((a, b) => a.order - b.order));
         setAreaName(data.area.name);
       } catch (error) {
         console.error('Error fetching questions:', error);
+        navigate('/assessment/intro');
       } finally {
         setLoading(false);
       }
     };
 
     fetchQuestions();
-  }, [areaId]);
+  }, [areaId, navigate]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const totalAnswered = Object.keys(answers).length;
@@ -131,8 +146,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-7xl mx-auto w-full px-6 py-6">
         {/* Header with Area Info */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-start justify-between mb-4 sm:mb-6">
@@ -431,6 +446,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
           </button>
         )}
       </div>
+
+      <BottomNav />
     </div>
   );
 };

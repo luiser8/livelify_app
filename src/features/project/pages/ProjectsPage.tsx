@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BottomNav } from '@/shared/components';
-import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type LifeArea } from '@/infrastructure/services';
+import { BottomNav, PageHeader } from '@/shared/components';
+import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
 /**
@@ -10,7 +10,7 @@ import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelper
 export const ProjectsPage = () => {
   const navigate = useNavigate();
   const [projectsData, setProjectsData] = useState<GetAllProjectsResponse | null>(null);
-  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
+  const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [showActiveProjects, setShowActiveProjects] = useState(true);
@@ -164,6 +164,12 @@ export const ProjectsPage = () => {
 
             {/* Botones de acción */}
             <div className="flex gap-3 pt-2">
+              <button 
+                onClick={() => navigate(`/projects/${project.id}/goals`)}
+                className="flex-1 py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
+              >
+                📝 Goals
+              </button>
               <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
                 Edit
               </button>
@@ -191,31 +197,16 @@ export const ProjectsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <h1 className="text-lg font-semibold text-gray-900">Projects</h1>
-            </div>
-            <div className="flex gap-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-600 mb-4">Manage your transformation goals</p>
-
+      <PageHeader 
+        title="Projects"
+        subtitle="Manage your transformation goals"
+        showBackButton={true}
+        showSearch={true}
+        showFilter={true}
+        onSearchClick={() => console.log('Search clicked')}
+        onFilterClick={() => console.log('Filter clicked')}
+      >
+        <div className="mt-4">
           {/* Estadísticas */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
@@ -232,10 +223,10 @@ export const ProjectsPage = () => {
             </div>
           </div>
         </div>
-      </header>
+      </PageHeader>
 
       {/* Contenido principal */}
-      <main className="flex-1 px-4 py-6 max-w-5xl mx-auto w-full">
+      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
         {/* Active Projects */}
         <div className="mb-6">
           <button

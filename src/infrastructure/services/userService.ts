@@ -25,15 +25,82 @@ export interface UserProfile {
   avatarUrl: string;
 }
 
+export interface Context {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Action {
+  id: string;
+  content: string;
+  isCompleted: boolean;
+  dueDate?: string;
+  completedAt?: string;
+}
+
+export interface Goal {
+  id: string;
+  goalType: 'BE' | 'DO' | 'HAVE';
+  content: string;
+  cost: number;
+  saved: number;
+  progress: number;
+  isCompleted: boolean;
+  actions: Action[];
+}
+
+export interface Budget {
+  id: string;
+  monthlyIncomeTarget: number;
+  dailyIncomeTarget: number;
+  currency: {
+    code: string;
+    name: string;
+    symbol: string;
+  };
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  budget?: Budget;
+  goals: Goal[];
+}
+
+export interface LifeArea {
+  id: string;
+  areaId: string;
+  areaName: string;
+  score: number;
+  projects: Project[];
+}
+
 export interface LifeWheel {
   id: string;
   globalScore: number;
-  lifeAreas: Array<{
-    id: string;
-    areaId: string;
-    areaName: string;
-    score: number;
-  }>;
+  lifeAreas: LifeArea[];
+}
+
+export interface DashboardSummary {
+  totalProjects: number;
+  totalGoals: number;
+  totalActions: number;
+  completedGoals: number;
+  completedActions: number;
+  overdueActions: number;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
 }
 
 export interface RegisterResponse {
@@ -45,11 +112,10 @@ export interface RegisterResponse {
 }
 
 export interface UserMeResponse {
-  id: string;
-  email: string;
-  profile: UserProfile;
+  user: User;
+  contexts: Context[];
   lifeWheel: LifeWheel;
-  createdAt: string;
+  summary: DashboardSummary;
 }
 
 export interface UpdateUserData {

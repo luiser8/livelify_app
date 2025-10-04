@@ -2,6 +2,16 @@
  * Utilidades para trabajar con Life Areas
  */
 
+// Mapeo de nombres de API a nombres en español
+export const AREA_NAME_MAP: Record<string, string> = {
+  'PERSONAL_DEVELOPMENT': 'Desarrollo Personal',
+  'PROFESSIONAL_ACTIVITY': 'Actividad Profesional',
+  'HEALTH_NUTRITION': 'Salud y Nutrición',
+  'MONEY_FINANCES': 'Dinero y Finanzas',
+  'SOCIAL_RELATIONSHIPS': 'Relaciones Sociales',
+  'COUPLE_INTIMACY': 'Pareja e Intimidad',
+};
+
 // Mapeo de nombres en español a colores
 export const LIFE_AREA_COLORS: Record<string, string> = {
   'Desarrollo Personal': 'bg-purple-500',
@@ -82,17 +92,26 @@ export const LIFE_AREA_ICONS: Record<string, string> = {
 };
 
 /**
- * Obtiene el color del área basado en el nombre
+ * Convierte el nombre de área de la API a español
  */
-export const getAreaColor = (areaName: string): string => {
-  return LIFE_AREA_COLORS[areaName] || 'bg-gray-500';
+export const getAreaDisplayName = (areaName: string): string => {
+  return AREA_NAME_MAP[areaName] || areaName;
 };
 
 /**
- * Obtiene todas las variantes de color para un área
+ * Obtiene el color del área basado en el nombre (soporta inglés y español)
+ */
+export const getAreaColor = (areaName: string): string => {
+  const displayName = getAreaDisplayName(areaName);
+  return LIFE_AREA_COLORS[displayName] || 'bg-gray-500';
+};
+
+/**
+ * Obtiene todas las variantes de color para un área (soporta inglés y español)
  */
 export const getAreaColorVariants = (areaName: string) => {
-  return LIFE_AREA_COLOR_VARIANTS[areaName] || {
+  const displayName = getAreaDisplayName(areaName);
+  return LIFE_AREA_COLOR_VARIANTS[displayName] || {
     bg: 'bg-gray-500',
     bgLight: 'bg-gray-100',
     bgLighter: 'bg-gray-50',
@@ -103,9 +122,10 @@ export const getAreaColorVariants = (areaName: string) => {
 };
 
 /**
- * Obtiene el icono del área basado en el nombre
+ * Obtiene el icono del área basado en el nombre (soporta inglés y español)
  */
 export const getAreaIcon = (areaName: string): string => {
-  return LIFE_AREA_ICONS[areaName] || '⭐';
+  const displayName = getAreaDisplayName(areaName);
+  return LIFE_AREA_ICONS[displayName] || '⭐';
 };
 

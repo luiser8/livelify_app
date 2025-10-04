@@ -15,6 +15,15 @@ export interface LoginResponse {
   refresh_token?: string;
 }
 
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
+export interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
 export const authService = {
   /**
    * Inicia sesión con email y password
@@ -44,8 +53,8 @@ export const authService = {
    * Refresca el token de autenticación
    * Endpoint: POST /auth/refresh
    */
-  refreshToken: async (refreshToken: string) => {
-    return apiClient.post('/auth/refresh', { refreshToken });
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    return apiClient.post<RefreshTokenResponse>('/auth/refresh', { refresh_token: refreshToken });
   },
 };
 

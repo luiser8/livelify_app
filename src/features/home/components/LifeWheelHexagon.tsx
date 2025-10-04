@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { type LifeArea } from '@/infrastructure/services';
+import { type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
 interface LifeWheelHexagonProps {
-  lifeAreas: LifeArea[];
+  lifeAreas: LifeWheelArea[];
   onAreaClick?: (areaId: string) => void;
 }
 
@@ -14,7 +14,7 @@ interface LifeWheelHexagonProps {
 export const LifeWheelHexagon = ({ lifeAreas, onAreaClick }: LifeWheelHexagonProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const orderedAreas = lifeAreas.filter((area): area is LifeArea => area !== undefined);
+  const orderedAreas = lifeAreas.filter((area): area is LifeWheelArea => area !== undefined);
 
   // Calcular las posiciones de los puntos del hexágono
   const getHexagonPoints = (centerX: number, centerY: number, radius: number) => {

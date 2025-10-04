@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
 import { getAreaColor, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
+import { BottomNav, PageHeader } from '@/shared/components';
 
 /**
  * Página de introducción al Life Wheel Assessment
@@ -31,32 +32,27 @@ export const AssessmentIntroPage = () => {
     console.log('Starting assessment...');
   };
 
-  const handleAreaClick = (areaId: string) => {
+  const handleAreaClick = (areaId: string, hasScore: boolean) => {
+    // Si el área ya tiene score, no permitir responder de nuevo
+    if (hasScore) {
+      return;
+    }
     navigate(`/assessment/area/${areaId}`);
-  };
-
-  const handleBack = () => {
-    navigate('/home');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={handleBack}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
-      </header>
+      <PageHeader 
+        title="Assessment"
+        subtitle="Life Wheel Assessment"
+        backPath="/home"
+        showSearch={false}
+        showFilter={false}
+      />
 
       {/* Contenido principal */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="max-w-7xl mx-auto w-full px-6 py-6">
         {/* Icono y título */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -111,20 +107,45 @@ export const AssessmentIntroPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {lifeWheel?.lifeAreas.map((area) => (
-                <button
-                  key={area.id}
-                  onClick={() => handleAreaClick(area.areaId)}
-                  className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-5 hover:shadow-lg hover:border-gray-300 transition-all text-left hover:scale-105"
-                >
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getAreaColor(area.areaName)} rounded-lg flex items-center justify-center text-2xl sm:text-3xl mb-2 sm:mb-3`}>
-                    {getAreaIcon(area.areaName)}
-                  </div>
-                  <p className="text-sm sm:text-base font-medium text-gray-900">{area.areaName}</p>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Puntaje actual: {area.score}/10</p>
-                  <p className="text-xs sm:text-sm text-primary-600 mt-2 font-medium">Click para evaluar →</p>
-                </button>
-              ))}
+              {lifeWheel?.lifeAreas.map((area) => {
+                const hasScore = area.score > 0;
+                const isCompleted = hasScore;
+                
+                return (
+                  <button
+                    key={area.id}
+                    onClick={() => handleAreaClick(area.areaId, hasScore)}
+                    disabled={isCompleted}
+                    className={`bg-white border rounded-lg sm:rounded-xl p-4 sm:p-5 transition-all text-left relative ${
+                      isCompleted 
+                        ? 'border-green-300 bg-green-50 cursor-not-allowed opacity-75' 
+                        : 'border-gray-200 hover:shadow-lg hover:border-gray-300 hover:scale-105 cursor-pointer'
+                    }`}
+                  >
+                    {/* Badge de completado */}
+                    {isCompleted && (
+                      <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                    
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getAreaColor(area.areaName)} rounded-lg flex items-center justify-center text-2xl sm:text-3xl mb-2 sm:mb-3 ${isCompleted ? 'opacity-60' : ''}`}>
+                      {getAreaIcon(area.areaName)}
+                    </div>
+                    <p className={`text-sm sm:text-base font-medium ${isCompleted ? 'text-gray-600' : 'text-gray-900'}`}>
+                      {area.areaName}
+                    </p>
+                    <p className={`text-xs sm:text-sm mt-1 ${isCompleted ? 'text-green-600 font-semibold' : 'text-gray-500'}`}>
+                      {isCompleted ? `✓ Completado: ${area.score}/10` : `Puntaje actual: ${area.score}/10`}
+                    </p>
+                    <p className={`text-xs sm:text-sm mt-2 font-medium ${isCompleted ? 'text-gray-500' : 'text-primary-600'}`}>
+                      {isCompleted ? 'Ya evaluado' : 'Click para evaluar →'}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -313,6 +334,8 @@ export const AssessmentIntroPage = () => {
           <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
         </div>
       </main>
+
+      <BottomNav />
     </div>
   );
 };

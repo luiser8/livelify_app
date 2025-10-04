@@ -11,19 +11,14 @@ export interface AddContextRequest {
   name: string;
 }
 
-export interface AddContextResponse {
-  success: boolean;
-  context: Context;
-  message?: string;
-}
-
 export interface GetMyContextsResponse {
   contexts: Context[];
 }
 
 export const contextService = {
-  addContext: async (data: AddContextRequest): Promise<AddContextResponse> => {
-    return apiClient.post<AddContextResponse>('/users/add-context', data);
+  // API returns the context object directly, not wrapped
+  addContext: async (data: AddContextRequest): Promise<Context> => {
+    return apiClient.post<Context>('/users/add-context', data);
   },
 
   getMyContexts: async (): Promise<GetMyContextsResponse> => {

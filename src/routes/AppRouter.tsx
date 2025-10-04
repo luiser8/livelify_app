@@ -1,22 +1,48 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { OnboardingPage } from '../features/onboarding/pages';
 import { LoginPage, RegisterPage } from '../features/auth/pages';
 import { HomePage } from '../features/home/pages';
 import { DashboardPage } from '../features/dashboard/pages';
 import { ActionsPage } from '../features/actions/pages';
 import { ProfilePage } from '../features/profile/pages';
-import { ProjectsPage, AreaProjectsPage, CreateProjectPage } from '../features/project/pages';
+import { SubscriptionPage } from '../features/subscription/pages';
+import { ProjectsPage, AreaProjectsPage, CreateProjectPage, ProjectGoalsPage } from '../features/project/pages';
 import { AssessmentIntroPage, AssessmentQuestionsPage } from '../features/assessment/pages';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
+import { ErrorBoundary, NotFoundPage, SessionExpiredModal } from '../shared/components';
 
 /**
  * Configuración de rutas de la aplicación
  */
 export const AppRouter = () => {
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    // Listener para el evento de sesión expirada
+    const handleSessionExpired = () => {
+      // Prevenir múltiples disparos del evento
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setShowSessionExpiredModal(true);
+      }, 100);
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
-    <BrowserRouter>
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
         {/* Ruta de onboarding/landing - accesible siempre */}
         <Route path="/" element={<OnboardingPage />} />
 
@@ -72,6 +98,14 @@ export const AppRouter = () => {
           } 
         />
         <Route 
+          path="/subscription" 
+          element={
+            <ProtectedRoute>
+              <SubscriptionPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/projects" 
           element={
             <ProtectedRoute>
@@ -84,6 +118,14 @@ export const AppRouter = () => {
           element={
             <ProtectedRoute>
               <CreateProjectPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/projects/:projectId/goals" 
+          element={
+            <ProtectedRoute>
+              <ProjectGoalsPage />
             </ProtectedRoute>
           } 
         />
@@ -120,10 +162,17 @@ export const AppRouter = () => {
           } 
         />
 
-        {/* Ruta 404 - redirige a onboarding */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Ruta 404 - Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      {/* Modal de sesión expirada */}
+      <SessionExpiredModal 
+        isOpen={showSessionExpiredModal} 
+        onClose={() => setShowSessionExpiredModal(false)} 
+      />
     </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
