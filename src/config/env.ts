@@ -14,6 +14,9 @@ export const env = {
   // URLs de API
   API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1',
 
+  // Configuración de sesión
+  SESSION_EXPIRE_SECONDS: parseInt(import.meta.env.VITE_SESSION_EXPIRE) || 10,
+
   // Flags de desarrollo
   isDevelopment: import.meta.env.MODE === 'development',
   isQA: import.meta.env.MODE === 'qa',

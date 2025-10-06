@@ -67,9 +67,15 @@ export const AreaProjectsPage = () => {
 
   const colorVariants = getAreaColorVariants(area.areaName);
   
+  // Validar que el área esté evaluada (score > 0)
+  const isAreaEvaluated = area.score > 0;
+  
   // Validar límite de proyectos: máximo 2 proyectos activos por área
   const activeProjectsCount = projectsData?.projects.filter(p => p.status === 'ACTIVE').length || 0;
   const hasReachedLimit = activeProjectsCount >= 2;
+  
+  // No se puede crear proyecto si el área no está evaluada o si se alcanzó el límite
+  const canCreateProject = isAreaEvaluated && !hasReachedLimit;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -100,9 +106,9 @@ export const AreaProjectsPage = () => {
           <div>
             <button
               onClick={() => navigate(`/area/${areaId}/projects/create`)}
-              disabled={hasReachedLimit}
+              disabled={!canCreateProject}
               className={`w-full sm:w-auto py-3 px-6 font-semibold rounded-xl transition-all shadow-lg ${
-                hasReachedLimit 
+                !canCreateProject 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' 
                   : `${colorVariants.bg} text-white hover:opacity-90`
               }`}
@@ -110,8 +116,31 @@ export const AreaProjectsPage = () => {
               + Create New Project
             </button>
             
+            {/* Mensaje de área no evaluada */}
+            {!isAreaEvaluated && (
+              <div className="mt-3 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="font-bold text-red-900 mb-1">Assessment Required</p>
+                    <p className="text-sm text-red-800 mb-3">
+                      You need to complete the Life Wheel assessment for this area before creating projects. This helps establish your baseline score and transformation goals.
+                    </p>
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="px-4 py-2 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Complete Assessment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Mensaje de límite alcanzado */}
-            {hasReachedLimit && (
+            {isAreaEvaluated && hasReachedLimit && (
               <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <div className="flex items-start gap-2">
                   <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -152,7 +181,7 @@ export const AreaProjectsPage = () => {
           {!projectsData || projectsData.projects.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center">
               <p className="text-gray-500 mb-4">No projects yet in this area</p>
-              {!hasReachedLimit && (
+              {canCreateProject && (
                 <button
                   onClick={() => navigate(`/area/${areaId}/projects/create`)}
                   className="text-indigo-600 hover:text-indigo-700 font-medium"

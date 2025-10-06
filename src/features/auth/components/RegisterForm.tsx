@@ -192,7 +192,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         disabled={isLoading}
       />
 
-      <Input
+      {/* <Input
         type="url"
         label="Avatar URL (Optional)"
         placeholder="https://example.com/avatar.jpg"
@@ -200,7 +200,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         onChange={handleChange('avatarUrl')}
         error={errors.avatarUrl}
         disabled={isLoading}
-      />
+      /> */}
 
       <button
         type="submit"

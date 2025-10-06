@@ -135,7 +135,7 @@ export const RegisterPage = () => {
         </div>
 
         {/* Social register buttons */}
-        <div className="w-full max-w-md space-y-3">
+        {/* <div className="w-full max-w-md space-y-3">
           <button className="w-full py-3 px-6 bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white font-medium rounded-xl hover:bg-white/20 transition-all flex items-center justify-center gap-3">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -152,7 +152,7 @@ export const RegisterPage = () => {
             </svg>
             Continue with Facebook
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Footer */}

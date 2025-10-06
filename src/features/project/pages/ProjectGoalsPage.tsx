@@ -22,8 +22,8 @@ export const ProjectGoalsPage = () => {
   // Form state para crear goal
   const [formData, setFormData] = useState({
     content: '',
-    cost: 0,
-    saved: 0,
+    baseCapital: 0,
+    currencyCode: 'USD',
   });
 
   useEffect(() => {
@@ -78,12 +78,12 @@ export const ProjectGoalsPage = () => {
         projectDetailId: project.detail.id,
         goalType,
         content: formData.content,
-        cost: formData.cost,
-        saved: formData.saved,
+        baseCapital: formData.baseCapital,
+        currencyCode: formData.currencyCode,
       });
 
       setGoals([...goals, result.goal]);
-      setFormData({ content: '', cost: 0, saved: 0 });
+      setFormData({ content: '', baseCapital: 0, currencyCode: 'USD' });
       setShowCreateForm(false);
 
       // Avanzar al siguiente step
@@ -391,23 +391,19 @@ export const ProjectGoalsPage = () => {
                         )}
                       </div>
                       <p className="text-gray-900 text-lg mb-3 leading-relaxed">{goal.content}</p>
-                      {goal.cost > 0 && (
+                      {goal.baseCapital > 0 && (
                         <div className="flex items-center gap-6 text-sm bg-gray-50 rounded-lg p-3">
                           <div>
-                            <span className="text-gray-500">Cost: </span>
-                            <span className="font-bold text-gray-900">${goal.cost.toLocaleString()}</span>
+                            <span className="text-gray-500">Base Capital: </span>
+                            <span className="font-bold text-gray-900">{goal.currencyCode} ${goal.baseCapital.toLocaleString()}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Saved: </span>
-                            <span className="font-bold text-green-600">${goal.saved.toLocaleString()}</span>
+                            <span className="text-gray-500">Multiplier: </span>
+                            <span className="font-bold text-indigo-600">{goal.multiplier}x</span>
                           </div>
-                          <div className="flex-1">
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-green-500 h-2 rounded-full"
-                                style={{ width: `${(goal.saved / goal.cost) * 100}%` }}
-                              />
-                            </div>
+                          <div>
+                            <span className="text-gray-500">Target: </span>
+                            <span className="font-bold text-green-600">{goal.currencyCode} ${(goal.baseCapital * goal.multiplier).toLocaleString()}</span>
                           </div>
                         </div>
                       )}
@@ -477,32 +473,35 @@ export const ProjectGoalsPage = () => {
                 <p className="text-xs text-gray-500 mt-1">{formData.content.length}/120 characters</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cost (Optional)
+                    Base Capital (Optional)
                   </label>
                   <input
                     type="number"
-                    value={formData.cost || ''}
-                    onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
+                    value={formData.baseCapital || ''}
+                    onChange={(e) => setFormData({ ...formData, baseCapital: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="0"
                     min="0"
+                    step="0.01"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Saved (Optional)
+                    Currency Code
                   </label>
-                  <input
-                    type="number"
-                    value={formData.saved || ''}
-                    onChange={(e) => setFormData({ ...formData, saved: parseFloat(e.target.value) || 0 })}
+                  <select
+                    value={formData.currencyCode}
+                    onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="0"
-                    min="0"
-                  />
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="MXN">MXN</option>
+                  </select>
                 </div>
               </div>
 
@@ -510,7 +509,7 @@ export const ProjectGoalsPage = () => {
                 <button
                   onClick={() => {
                     setShowCreateForm(false);
-                    setFormData({ content: '', cost: 0, saved: 0 });
+                    setFormData({ content: '', baseCapital: 0, currencyCode: 'USD' });
                   }}
                   className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
                 >

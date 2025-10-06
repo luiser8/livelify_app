@@ -160,13 +160,6 @@ export const OnboardingPage = () => {
           {isAuthenticated ? 'Go to App' : 'Explore the App'}
         </button>
 
-        <button
-          onClick={handleStartAssessment}
-          className="w-full py-4 px-6 bg-transparent border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/50 transition-all text-lg backdrop-blur-sm"
-        >
-          Start My Assessment
-        </button>
-
         {/* Texto de social proof */}
         <p className="text-center text-white/80 text-sm mt-6">
           Join 10,000+ people transforming their lives

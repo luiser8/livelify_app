@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { projectService, lifeWheelService, currencyService, budgetService, type LifeWheelArea, type Currency } from '@/infrastructure/services';
+import { projectService, lifeWheelService, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 import { PageHeader } from '@/shared/components';
 
@@ -13,41 +13,60 @@ export const CreateProjectPage = () => {
   const { areaId: urlAreaId } = useParams<{ areaId?: string }>();
   
   const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(urlAreaId ? 2 : 1); // Si viene con área, ir directo a step 2
   const [selectedAreaId, setSelectedAreaId] = useState<string>(urlAreaId || '');
-  const [createdProjectId, setCreatedProjectId] = useState<string>('');
   const [creating, setCreating] = useState(false);
   
+  // Calcular fechas mínimas y máximas
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
   // Form data for project
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: getTomorrowDate(),
     endDate: '',
   });
 
-  // Form data for budget
-  const [budgetData, setBudgetData] = useState({
-    currencyCode: 'USD',
-    monthlyIncomeTarget: 0,
-    dailyIncomeTarget: 0,
-  });
+  // Estado para mensajes de validación de fechas
+  const [dateError, setDateError] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [lifeWheelData, currenciesData] = await Promise.all([
-          lifeWheelService.getMyLifeWheel(),
-          currencyService.getAllCurrencies(),
-        ]);
+        const lifeWheelData = await lifeWheelService.getMyLifeWheel();
         setLifeAreas(lifeWheelData.lifeAreas);
-        setCurrencies(currenciesData.currencies);
 
-        // Si viene con un areaId, verificar límite de proyectos
+        // Si viene con un areaId, verificar validaciones
         if (urlAreaId) {
+          const selectedArea = lifeWheelData.lifeAreas.find(a => a.id === urlAreaId);
+          
+          // Validar que el área esté evaluada (score > 0)
+          if (selectedArea && selectedArea.score === 0) {
+            console.log('Area not evaluated yet, redirecting...');
+            navigate('/home');
+            return;
+          }
+
+          // Validar que el área esté en las 3 más bajas (si todas están evaluadas)
+          const allEvaluated = lifeWheelData.lifeAreas.every(area => area.score > 0);
+          if (allEvaluated) {
+            const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
+            const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
+            
+            if (!lowestThreeIds.has(urlAreaId)) {
+              console.log('Area not in lowest 3, redirecting...');
+              navigate('/home');
+              return;
+            }
+          }
+          
           try {
             const projectsData = await projectService.getProjectsByArea(urlAreaId);
             const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
@@ -80,24 +99,108 @@ export const CreateProjectPage = () => {
     ? lifeAreas.reduce((min, area) => area.score < min.score ? area : min)
     : null;
 
+  // Verificar si todas las áreas están evaluadas
+  const allAreasEvaluated = lifeAreas.length > 0 && lifeAreas.every(area => area.score > 0);
+
+  // Obtener las 3 áreas con menor puntaje (solo si todas están evaluadas)
+  const getLowestScoringAreaIds = () => {
+    if (!allAreasEvaluated) {
+      // Si no todas están evaluadas, permitir todas las evaluadas
+      return new Set(lifeAreas.filter(area => area.score > 0).map(area => area.id));
+    }
+    
+    // Si todas están evaluadas, solo las 3 más bajas
+    const sortedAreas = [...lifeAreas].sort((a, b) => a.score - b.score);
+    const lowestThree = sortedAreas.slice(0, 3);
+    return new Set(lowestThree.map(area => area.id));
+  };
+
+  const enabledAreaIds = getLowestScoringAreaIds();
+
   const handleSelectArea = (areaId: string) => {
-    setSelectedAreaId(areaId);
-    setCurrentStep(2);
+    // Solo permitir seleccionar áreas habilitadas
+    if (enabledAreaIds.has(areaId)) {
+      setSelectedAreaId(areaId);
+      setCurrentStep(2);
+    }
+  };
+
+  // Validar duración del proyecto (3-6 meses)
+  const validateProjectDuration = (startDate: string, endDate: string): boolean => {
+    if (!startDate || !endDate) return false;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Calcular diferencia en meses
+    const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    const daysDiff = end.getDate() - start.getDate();
+    
+    // Ajustar si los días hacen que no llegue al mes completo
+    const totalMonths = daysDiff >= 0 ? monthsDiff : monthsDiff - 1;
+
+    if (totalMonths < 3) {
+      setDateError('El proyecto debe durar mínimo 3 meses');
+      return false;
+    }
+    
+    if (totalMonths > 6) {
+      setDateError('El proyecto debe durar máximo 6 meses');
+      return false;
+    }
+
+    setDateError('');
+    return true;
+  };
+
+  // Calcular fecha mínima y máxima para End Date basada en Start Date
+  const getMinEndDate = (startDate: string): string => {
+    if (!startDate) return '';
+    const start = new Date(startDate);
+    start.setMonth(start.getMonth() + 3);
+    return start.toISOString().split('T')[0];
+  };
+
+  const getMaxEndDate = (startDate: string): string => {
+    if (!startDate) return '';
+    const start = new Date(startDate);
+    start.setMonth(start.getMonth() + 6);
+    return start.toISOString().split('T')[0];
+  };
+
+  // Manejar cambio de fecha de inicio
+  const handleStartDateChange = (newStartDate: string) => {
+    setFormData({ ...formData, startDate: newStartDate, endDate: '' });
+    setDateError('');
+  };
+
+  // Manejar cambio de fecha de fin
+  const handleEndDateChange = (newEndDate: string) => {
+    setFormData({ ...formData, endDate: newEndDate });
+    validateProjectDuration(formData.startDate, newEndDate);
   };
 
   const handleCreateProject = async () => {
     if (!selectedAreaId) return;
 
+    // Validar fechas antes de crear
+    if (!validateProjectDuration(formData.startDate, formData.endDate)) {
+      return;
+    }
+
     try {
       setCreating(true);
-      const result = await projectService.createFromLifeWheelArea({
+      await projectService.createFromLifeWheelArea({
         lifeWheelAreaId: selectedAreaId,
         ...formData,
       });
 
-      // Guardar el ID del proyecto creado y pasar al step 3 (Budget)
-      setCreatedProjectId(result.project.id);
-      setCurrentStep(urlAreaId ? 3 : 4); // Step 3 si vino con área, Step 4 si no
+      // Navigate back to appropriate page after creating project
+      if (urlAreaId) {
+        navigate(`/area/${urlAreaId}/projects`);
+      } else {
+        navigate('/projects');
+      }
     } catch (error) {
       console.error('Error creating project:', error);
     } finally {
@@ -105,47 +208,6 @@ export const CreateProjectPage = () => {
     }
   };
 
-  const handleCreateBudget = async () => {
-    if (!createdProjectId) return;
-
-    try {
-      setCreating(true);
-      await budgetService.createForProject({
-        projectId: createdProjectId,
-        ...budgetData,
-      });
-
-      // Navigate back to appropriate page
-      if (urlAreaId) {
-        navigate(`/area/${urlAreaId}/projects`);
-      } else {
-        navigate('/projects');
-      }
-    } catch (error) {
-      console.error('Error creating budget:', error);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleSkipBudget = () => {
-    // Skip budget creation and navigate to projects
-    if (urlAreaId) {
-      navigate(`/area/${urlAreaId}/projects`);
-    } else {
-      navigate('/projects');
-    }
-  };
-
-  // Auto-calculate daily target when monthly changes
-  const handleMonthlyTargetChange = (value: number) => {
-    const dailyTarget = value > 0 ? parseFloat((value / 30).toFixed(2)) : 0;
-    setBudgetData({
-      ...budgetData,
-      monthlyIncomeTarget: value,
-      dailyIncomeTarget: dailyTarget,
-    });
-  };
 
   if (loading) {
     return (
@@ -174,18 +236,17 @@ export const CreateProjectPage = () => {
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
-              Step {currentStep} of {urlAreaId ? '3' : '4'}
+              Step {currentStep} of 2
             </span>
             <span className="text-sm text-gray-500">
               {currentStep === 1 && 'Choose Focus Area'}
               {currentStep === 2 && 'Project Details'}
-              {(currentStep === 3 || currentStep === 4) && 'Budget Setup'}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / (urlAreaId ? 3 : 4)) * 100}%` }}
+              style={{ width: `${(currentStep / 2) * 100}%` }}
             />
           </div>
         </div>
@@ -222,31 +283,67 @@ export const CreateProjectPage = () => {
               {lifeAreas.map((area) => {
                 const colorVariants = getAreaColorVariants(area.areaName);
                 const potentialPoints = Math.max(0, 10 - area.score);
+                const isEvaluated = area.score > 0;
+                const isEnabled = enabledAreaIds.has(area.id);
+                const isLocked = isEvaluated && !isEnabled;
                 
                 return (
                   <button
                     key={area.id}
                     onClick={() => handleSelectArea(area.id)}
-                    className="bg-white border-2 border-gray-200 rounded-2xl p-5 hover:border-indigo-500 transition-all text-left group"
+                    disabled={!isEnabled}
+                    className={`bg-white border-2 rounded-2xl p-5 transition-all text-left group ${
+                      isEnabled
+                        ? 'border-gray-200 hover:border-indigo-500 cursor-pointer' 
+                        : isLocked
+                          ? 'border-red-200 opacity-60 cursor-not-allowed'
+                          : 'border-amber-200 opacity-60 cursor-not-allowed'
+                    }`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                      <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0 ${isEnabled ? 'group-hover:scale-110' : ''} transition-transform relative`}>
                         {getAreaIcon(area.areaName)}
+                        {!isEvaluated && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {isLocked && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-gray-900 mb-1">{area.areaName}</h3>
+                        <h3 className={`font-bold mb-1 ${isEnabled ? 'text-gray-900' : isLocked ? 'text-red-700' : 'text-amber-700'}`}>
+                          {area.areaName}
+                        </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg font-bold text-gray-900">{area.score}</span>
+                          <span className="text-lg font-bold text-gray-900">{area.score === 0 ? '—' : area.score}</span>
                           <span className="text-sm text-gray-500">/10</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
-                            +{potentialPoints} potential
+                        {isEnabled ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
+                              +{potentialPoints} potential
+                            </span>
+                            {lowestArea?.id === area.id && (
+                              <span className="text-xs text-gray-600">Available</span>
+                            )}
+                          </div>
+                        ) : isLocked ? (
+                          <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">
+                            🔒 Locked - Focus on lower scoring areas
                           </span>
-                          {lowestArea?.id === area.id && (
-                            <span className="text-xs text-gray-600">Available</span>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-medium">
+                            ⓘ Assessment Required
+                          </span>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -254,8 +351,52 @@ export const CreateProjectPage = () => {
               })}
             </div>
 
+            {/* Warning for unevaluated areas */}
+            {lifeAreas.some(area => area.score === 0) && (
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-amber-900 mb-1">Assessment Required</p>
+                    <p className="text-sm text-amber-800 mb-3">
+                      Some areas are not yet evaluated. You need to complete the Life Wheel assessment for each area before you can create projects in them.
+                    </p>
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="px-4 py-2 bg-amber-600 text-white font-medium text-sm rounded-lg hover:bg-amber-700 transition-colors"
+                    >
+                      Complete Assessment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Info about locked areas (high scoring) */}
+            {allAreasEvaluated && lifeAreas.some(area => !enabledAreaIds.has(area.id)) && (
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-blue-900 mb-1">Focus on Your Lowest Areas</p>
+                    <p className="text-sm text-blue-800">
+                      You can only create projects in your <span className="font-bold">3 lowest scoring areas</span>. This strategy helps you focus on what needs the most improvement. Higher scoring areas are temporarily locked 🔒 until you improve these priority areas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* AI Recommendation */}
-            {lowestArea && (
+            {lowestArea && lowestArea.score > 0 && enabledAreaIds.has(lowestArea.id) && (
               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -337,30 +478,72 @@ export const CreateProjectPage = () => {
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Start Date *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.startDate}
-                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Start Date *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => handleStartDateChange(e.target.value)}
+                        min={getTomorrowDate()}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Must start from tomorrow onwards</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        End Date (3-6 months) *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) => handleEndDateChange(e.target.value)}
+                        min={getMinEndDate(formData.startDate)}
+                        max={getMaxEndDate(formData.startDate)}
+                        disabled={!formData.startDate}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formData.startDate 
+                          ? `Between ${getMinEndDate(formData.startDate)} and ${getMaxEndDate(formData.startDate)}`
+                          : 'Select start date first'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      End Date (90 days recommended) *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.endDate}
-                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      required
-                    />
+
+                  {/* Error de validación de fechas */}
+                  {dateError && (
+                    <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-sm text-red-700 font-medium">{dateError}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Info sobre duración */}
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <div className="text-xs text-blue-700">
+                        <p className="font-semibold mb-1">📅 Project Duration Guidelines</p>
+                        <ul className="space-y-1 list-disc list-inside">
+                          <li>Start date must be from tomorrow onwards</li>
+                          <li>Minimum duration: 3 months</li>
+                          <li>Maximum duration: 6 months</li>
+                          <li>90 days (3 months) is recommended for optimal transformation</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -375,180 +558,14 @@ export const CreateProjectPage = () => {
                   </button>
                   <button
                     onClick={handleCreateProject}
-                    disabled={creating || !formData.title || !formData.description || !formData.endDate}
+                    disabled={creating || !formData.title || !formData.description || !formData.startDate || !formData.endDate || !!dateError}
                     className="flex-1 py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {creating ? 'Creating Project...' : 'Continue to Budget'}
+                    {creating ? 'Creating Project...' : 'Create Project'}
                   </button>
                 </div>
               </>
             )}
-          </div>
-        )}
-
-        {/* Step 3/4: Budget Setup */}
-        {(currentStep === 3 || currentStep === 4) && (
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold text-gray-900">Set Your Financial Target</h2>
-                <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Optional</span>
-              </div>
-              <p className="text-sm text-gray-600 max-w-md mx-auto">
-                Define your income goals for this project. This helps track your progress and stay motivated. You can add this later.
-              </p>
-            </div>
-
-            {/* Budget Form */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200">
-              <div className="space-y-6">
-                {/* Currency Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency *
-                  </label>
-                  <select
-                    value={budgetData.currencyCode}
-                    onChange={(e) => setBudgetData({ ...budgetData, currencyCode: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    required
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency.id} value={currency.code}>
-                        {currency.symbol} {currency.name} ({currency.code})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-2">Select your preferred currency for this project</p>
-                </div>
-
-                {/* Monthly Target */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Monthly Income Target *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                      {currencies.find(c => c.code === budgetData.currencyCode)?.symbol || '$'}
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={budgetData.monthlyIncomeTarget || ''}
-                      onChange={(e) => handleMonthlyTargetChange(parseFloat(e.target.value) || 0)}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">How much do you want to earn per month from this project?</p>
-                </div>
-
-                {/* Daily Target (Auto-calculated) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Daily Income Target
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                      {currencies.find(c => c.code === budgetData.currencyCode)?.symbol || '$'}
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={budgetData.dailyIncomeTarget || ''}
-                      onChange={(e) => setBudgetData({ ...budgetData, dailyIncomeTarget: parseFloat(e.target.value) || 0 })}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Auto-calculated (Monthly ÷ 30 days). You can adjust manually.
-                  </p>
-                </div>
-
-                {/* Summary Card */}
-                {budgetData.monthlyIncomeTarget > 0 && (
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-5">
-                    <h4 className="font-bold text-gray-900 mb-3">📊 Your Financial Goals</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">Monthly Target</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {currencies.find(c => c.code === budgetData.currencyCode)?.symbol}
-                          {budgetData.monthlyIncomeTarget.toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="bg-white rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">Daily Target</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {currencies.find(c => c.code === budgetData.currencyCode)?.symbol}
-                          {budgetData.dailyIncomeTarget.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Info Box */}
-                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900 mb-1">Track Your Progress</p>
-                      <p className="text-xs text-gray-700">
-                        Your budget will help you track daily progress and stay motivated. You can adjust these targets anytime.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              {/* Primary Actions */}
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleSkipBudget}
-                  disabled={creating}
-                  className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Skip for Now
-                </button>
-                <button
-                  onClick={handleCreateBudget}
-                  disabled={creating || budgetData.monthlyIncomeTarget <= 0}
-                  className="flex-1 py-3 px-6 bg-green-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {creating ? 'Creating Budget...' : 'Complete Setup'}
-                </button>
-              </div>
-
-              {/* Back Button */}
-              <button
-                type="button"
-                onClick={() => setCurrentStep(2)}
-                disabled={creating}
-                className="w-full py-2 px-4 text-gray-600 hover:text-gray-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                ← Back to Project Details
-              </button>
-            </div>
           </div>
         )}
       </main>

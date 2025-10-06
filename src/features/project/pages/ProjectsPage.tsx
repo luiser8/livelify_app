@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav, PageHeader } from '@/shared/components';
-import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type LifeWheelArea } from '@/infrastructure/services';
+import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type ProjectStatus, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
 /**
@@ -16,6 +16,7 @@ export const ProjectsPage = () => {
   const [showActiveProjects, setShowActiveProjects] = useState(true);
   const [showSomedayProjects, setShowSomedayProjects] = useState(false);
   const [showCompletedProjects, setShowCompletedProjects] = useState(false);
+  const [showCancelledProjects, setShowCancelledProjects] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,14 +42,59 @@ export const ProjectsPage = () => {
     return lifeAreas.find(area => area.id === lifeWheelAreaId);
   };
 
+  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+    try {
+      await projectService.updateStatus(projectId, newStatus);
+      // Recargar datos
+      const projects = await projectService.getAllProjects();
+      setProjectsData(projects);
+    } catch (error) {
+      console.error('Error updating project status:', error);
+    }
+  };
+
   const activeProjects = projectsData?.projects.filter(p => p.status === 'ACTIVE') || [];
   const somedayProjects = projectsData?.projects.filter(p => p.status === 'SOMEDAY') || [];
   const completedProjects = projectsData?.projects.filter(p => p.status === 'COMPLETED') || [];
+  const cancelledProjects = projectsData?.projects.filter(p => p.status === 'CANCELLED') || [];
 
   const ProjectCard = ({ project }: { project: Project }) => {
     const area = getAreaByProjectId(project.lifeWheelAreaId);
     const colorVariants = area ? getAreaColorVariants(area.areaName) : null;
     const isExpanded = expandedProject === project.id;
+
+    // Calcular duración y tiempo restante del proyecto
+    const calculateProjectDuration = () => {
+      const start = new Date(project.detail.startDate);
+      const end = new Date(project.detail.endDate);
+      const today = new Date();
+      
+      // Resetear horas para calcular días completos
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      
+      // Total de días del proyecto
+      const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Días transcurridos
+      const elapsedDays = Math.max(0, Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+      
+      // Días restantes
+      const remainingDays = Math.max(0, Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+      
+      // Día actual del proyecto (limitado al total)
+      const currentDay = Math.min(elapsedDays, totalDays);
+      
+      return {
+        totalDays,
+        currentDay,
+        remainingDays,
+        isOverdue: today > end
+      };
+    };
+
+    const duration = calculateProjectDuration();
 
     return (
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-4">
@@ -93,9 +139,52 @@ export const ProjectsPage = () => {
               style={{ width: `${project.detail.progressPercentage}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            May 25 of 60 • <span className="text-gray-700">30 days remaining</span>
-          </p>
+          
+          {/* Información de duración destacada */}
+          <div className={`mt-3 p-3 rounded-lg ${
+            duration.isOverdue 
+              ? 'bg-red-50 border border-red-200' 
+              : duration.remainingDays <= 7 
+                ? 'bg-amber-50 border border-amber-200' 
+                : 'bg-indigo-50 border border-indigo-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className={`w-4 h-4 ${
+                  duration.isOverdue 
+                    ? 'text-red-600' 
+                    : duration.remainingDays <= 7 
+                      ? 'text-amber-600' 
+                      : 'text-indigo-600'
+                }`} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <p className={`text-sm font-bold ${
+                  duration.isOverdue 
+                    ? 'text-red-900' 
+                    : duration.remainingDays <= 7 
+                      ? 'text-amber-900' 
+                      : 'text-indigo-900'
+                }`}>
+                  Day <span className="text-base">{duration.currentDay}</span> of <span className="text-base">{duration.totalDays}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-gray-500">•</span>
+                <p className={`text-sm font-semibold ${
+                  duration.isOverdue 
+                    ? 'text-red-700' 
+                    : duration.remainingDays <= 7 
+                      ? 'text-amber-700' 
+                      : 'text-indigo-700'
+                }`}>
+                  {duration.isOverdue 
+                    ? 'Overdue' 
+                    : `${duration.remainingDays} ${duration.remainingDays === 1 ? 'day' : 'days'} remaining`}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Acciones completadas */}
@@ -120,24 +209,42 @@ export const ProjectsPage = () => {
           </div>
         </div>
 
-        {/* Contenido expandido */}
-        {isExpanded && (
-          <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
-            {/* Linked Competencies */}
-            <div className="bg-purple-50 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-purple-900">Linked Competencies</p>
-                  <button className="text-sm text-purple-600 hover:text-purple-700 mt-1">View</button>
+        {/* Budget Information */}
+        {project.budget && (
+          <div className="bg-green-50 rounded-xl p-4 mb-4 border border-green-200">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-green-900 mb-2">Income Target</p>
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-700">
+                    To achieve this project, you need to generate{' '}
+                    <span className="font-bold text-green-700">
+                      {project.budget.currencySymbol}{project.budget.dailyIncomeTarget.toFixed(2)} per day
+                    </span>
+                    {' '}or{' '}
+                    <span className="font-bold text-green-700">
+                      {project.budget.currencySymbol}{project.budget.monthlyIncomeTarget.toFixed(2)} per month
+                    </span>
+                    {' '}in{' '}
+                    <span className="font-semibold">{project.budget.currencyCode}</span>.
+                  </p>
+                  <p className="text-xs text-green-800 mt-2 italic">
+                    💡 This calculation helps you understand the financial commitment needed for your transformation journey.
+                  </p>
                 </div>
               </div>
             </div>
+          </div>
+        )}
 
+        {/* Contenido expandido */}
+        {isExpanded && (
+          <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
             {/* Next Action */}
             <div className="bg-yellow-50 rounded-xl p-4">
               <p className="text-sm font-bold text-gray-900 mb-2">Next Action</p>
@@ -163,19 +270,28 @@ export const ProjectsPage = () => {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <button 
                 onClick={() => navigate(`/projects/${project.id}/goals`)}
-                className="flex-1 py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
+                className="py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
               >
                 📝 Goals
               </button>
-              <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
-                Edit
-              </button>
-              <button className={`flex-1 py-2 px-4 ${colorVariants?.bg || 'bg-indigo-500'} text-white font-medium rounded-xl hover:opacity-90 transition-all`}>
-                Complete
-              </button>
+              
+              {/* Selector de status */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Change Status</label>
+                <select
+                  value={project.status}
+                  onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
+                  className="w-full py-2 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-medium"
+                >
+                  <option value="ACTIVE">🟢 Active</option>
+                  <option value="SOMEDAY">📅 Someday</option>
+                  <option value="COMPLETED">✅ Completed</option>
+                  <option value="CANCELLED">❌ Cancelled</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -312,6 +428,36 @@ export const ProjectsPage = () => {
           {showCompletedProjects && completedProjects.length > 0 && (
             <div>
               {completedProjects.map(project => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Cancelled */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowCancelledProjects(!showCancelledProjects)}
+            className="w-full flex items-center justify-between mb-4"
+          >
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-3 h-3 bg-red-400 rounded-full"></span>
+              Cancelled
+              <span className="text-sm font-normal text-gray-500">{cancelledProjects.length}</span>
+            </h2>
+            <svg 
+              className={`w-5 h-5 text-gray-400 transition-transform ${showCancelledProjects ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showCancelledProjects && cancelledProjects.length > 0 && (
+            <div>
+              {cancelledProjects.map(project => (
                 <ProjectCard key={project.id} project={project} />
               ))}
             </div>

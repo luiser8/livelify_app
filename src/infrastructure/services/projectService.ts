@@ -31,6 +31,22 @@ export interface ProjectDetail {
 }
 
 /**
+ * Interfaz para el presupuesto del proyecto
+ */
+export interface ProjectBudget {
+  id: string;
+  monthlyIncomeTarget: number;
+  dailyIncomeTarget: number;
+  currencyCode: string;
+  currencySymbol: string;
+}
+
+/**
+ * Tipo para los estados del proyecto
+ */
+export type ProjectStatus = 'ACTIVE' | 'SOMEDAY' | 'COMPLETED' | 'CANCELLED';
+
+/**
  * Interfaz para un proyecto
  */
 export interface Project {
@@ -38,10 +54,11 @@ export interface Project {
   lifeWheelAreaId: string;
   title: string;
   description: string;
-  status: 'ACTIVE' | 'SOMEDAY' | 'COMPLETED';
+  status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
   detail: ProjectDetail;
+  budget?: ProjectBudget;
 }
 
 /**
@@ -120,6 +137,18 @@ export const projectService = {
    */
   getAllProjects: async (): Promise<GetAllProjectsResponse> => {
     return apiClient.get<GetAllProjectsResponse>('/projects/me');
+  },
+
+  /**
+   * Cambia el status de un proyecto
+   * Endpoint: PUT /projects/{projectId}/status
+   *
+   * @param projectId - ID del proyecto
+   * @param status - Nuevo status del proyecto (ACTIVE, SOMEDAY, COMPLETED, CANCELLED)
+   * @returns Proyecto actualizado
+   */
+  updateStatus: async (projectId: string, status: ProjectStatus): Promise<{ success: boolean; project: Project }> => {
+    return apiClient.put<{ success: boolean; project: Project }>(`/projects/${projectId}/status`, { status });
   },
 };
 

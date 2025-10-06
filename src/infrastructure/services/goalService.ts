@@ -13,6 +13,9 @@ export interface Goal {
   projectDetailId: string;
   goalType: GoalType;
   content: string;
+  baseCapital: number;
+  multiplier: number;
+  currencyCode: string;
   cost: number;
   saved: number;
   progress: number;
@@ -28,8 +31,8 @@ export interface CreateGoalRequest {
   projectDetailId: string;
   goalType: GoalType;
   content: string;
-  cost: number;
-  saved: number;
+  baseCapital: number;
+  currencyCode: string;
 }
 
 /**
@@ -81,7 +84,7 @@ export const goalService = {
    * Crear un nuevo Goal
    */
   async createGoal(data: CreateGoalRequest): Promise<CreateGoalResponse> {
-    const response = await apiClient.post<CreateGoalResponse>('/goals', data);
+    const response = await apiClient.post<CreateGoalResponse>('/goals/add', data);
     return response;
   },
 

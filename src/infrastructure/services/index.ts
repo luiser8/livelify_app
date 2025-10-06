@@ -47,7 +47,9 @@ export type {
   CreateProjectFromAreaRequest,
   CreateProjectResponse,
   Project,
+  ProjectStatus,
   ProjectDetail,
+  ProjectBudget,
   GetProjectsByAreaResponse,
   GetAllProjectsResponse
 } from './projectService';

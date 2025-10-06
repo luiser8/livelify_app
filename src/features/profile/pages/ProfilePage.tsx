@@ -43,7 +43,9 @@ export const ProfilePage = () => {
 
     try {
       setCreating(true);
-      const newContext = await contextService.addContext({ name: newContextName });
+      // Asegurar que siempre tenga el @ al principio
+      const contextNameWithAt = newContextName.startsWith('@') ? newContextName : `@${newContextName}`;
+      const newContext = await contextService.addContext({ name: contextNameWithAt });
       setContexts([...contexts, newContext]);
       setNewContextName('');
       setShowCreateForm(false);
@@ -65,8 +67,8 @@ export const ProfilePage = () => {
       />
 
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* User Info Card */}
+        <div className="space-y-6">
+          {/* User Info Card - Full Width */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -83,7 +85,9 @@ export const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Subscription Section */}
+          {/* Grid Layout for Subscription and Contexts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Subscription Section */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -155,8 +159,8 @@ export const ProfilePage = () => {
             )}
           </div>
 
-          {/* Contexts Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            {/* Contexts Section */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">My Contexts</h3>
@@ -177,15 +181,18 @@ export const ProfilePage = () => {
                   Context Name
                 </label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newContextName}
-                    onChange={(e) => setNewContextName(e.target.value)}
-                    placeholder="e.g., @home, @work, @gym"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    disabled={creating}
-                    required
-                  />
+                  <div className="flex-1 flex items-center border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
+                    <span className="pl-4 text-gray-700 font-medium text-base select-none">@</span>
+                    <input
+                      type="text"
+                      value={newContextName}
+                      onChange={(e) => setNewContextName(e.target.value)}
+                      placeholder="home, work, gym"
+                      className="flex-1 px-2 py-2 border-0 outline-none bg-transparent"
+                      disabled={creating}
+                      required
+                    />
+                  </div>
                   <button
                     type="submit"
                     disabled={creating || !newContextName.trim()}
@@ -195,7 +202,7 @@ export const ProfilePage = () => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  💡 Use @ prefix for better organization (e.g., @home, @work)
+                  💡 The @ prefix is automatically added to your context
                 </p>
               </form>
             )}
@@ -241,9 +248,10 @@ export const ProfilePage = () => {
                 ))}
               </div>
             )}
+            </div>
           </div>
 
-          {/* Logout Button */}
+          {/* Logout Button - Full Width */}
           <button
             onClick={logout}
             className="w-full py-3 px-4 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors"

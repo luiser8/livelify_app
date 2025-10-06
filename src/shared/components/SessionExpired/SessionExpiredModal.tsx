@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { env } from '@/config/env';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface SessionExpiredModalProps {
  * Modal que se muestra cuando la sesión del usuario expira
  */
 export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen }) => {
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(env.SESSION_EXPIRE_SECONDS);
 
   // Función para redirigir al login
   const handleLogin = () => {
@@ -20,7 +21,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
   // Resetear countdown cuando aparece el modal
   useEffect(() => {
     if (isOpen) {
-      setCountdown(10);
+      setCountdown(env.SESSION_EXPIRE_SECONDS);
     }
   }, [isOpen]);
 

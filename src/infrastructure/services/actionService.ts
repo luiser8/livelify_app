@@ -103,10 +103,18 @@ export const actionService = {
   },
 
   /**
-   * Marcar Action como completada
+   * Marcar Action como completada (toggle)
    */
   async toggleActionCompletion(actionId: string): Promise<CreateActionResponse> {
     const response = await apiClient.patch<CreateActionResponse>(`/actions/${actionId}/toggle`, {});
+    return response;
+  },
+
+  /**
+   * Completar una Action (marca como completada de forma definitiva)
+   */
+  async completeAction(actionId: string): Promise<CreateActionResponse> {
+    const response = await apiClient.put<CreateActionResponse>(`/actions/${actionId}/complete`, {});
     return response;
   },
 };

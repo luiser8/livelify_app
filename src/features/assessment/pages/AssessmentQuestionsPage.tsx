@@ -112,11 +112,6 @@ export const AssessmentQuestionsPage: React.FC = () => {
     }
   };
 
-  // Get recently answered questions (last 3)
-  const answeredQuestions = questions
-    .filter(q => answers[q.id] !== undefined)
-    .slice(-3)
-    .reverse();
 
   if (loading) {
     return (
@@ -160,12 +155,6 @@ export const AssessmentQuestionsPage: React.FC = () => {
                 <p className="text-sm sm:text-base text-gray-500">Area 2 of 6</p>
               </div>
             </div>
-            <button
-              onClick={handleSkipArea}
-              className="text-blue-600 hover:text-blue-700 text-sm sm:text-base font-medium px-3 py-1.5 sm:px-4 sm:py-2 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              Skip Area
-            </button>
           </div>
 
           {/* Overall Progress */}
