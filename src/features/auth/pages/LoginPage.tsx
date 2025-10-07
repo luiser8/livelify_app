@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { LoginForm } from '../components';
 import { useAuth } from '@/features/auth/context';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
+import { LanguageSelector } from '@/shared/components';
 
 /**
  * Página de inicio de sesión
  */
 export const LoginPage = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +42,7 @@ export const LoginPage = () => {
       } else if (typeof error === 'object' && error !== null && 'message' in error) {
         setError(String(error.message));
       } else {
-        setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
+        setError(t('auth.errors.loginFailed'));
       }
     } finally {
       setIsLoading(false);
@@ -65,14 +68,17 @@ export const LoginPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          {t('common.back')}
         </button>
-        <button
-          onClick={handleSignUp}
-          className="text-white/90 hover:text-white transition-colors text-sm font-medium"
-        >
-          Create account
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageSelector />
+          <button
+            onClick={handleSignUp}
+            className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+          >
+            {t('auth.login.createAccount')}
+          </button>
+        </div>
       </div>
 
       {/* Contenido principal */}
@@ -90,8 +96,8 @@ export const LoginPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-lg md:text-xl text-white/90">Sign in to continue your journey</p>
+          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('auth.login.title')}</h1>
+          <p className="text-lg md:text-xl text-white/90">{t('auth.login.subtitle')}</p>
         </div>
 
         {/* Formulario de login */}
@@ -104,7 +110,7 @@ export const LoginPage = () => {
         {/* Divider */}
         <div className="w-full max-w-md flex items-center gap-4">
           <div className="flex-1 h-px bg-white/20"></div>
-          <span className="text-white/60 text-sm">or</span>
+          <span className="text-white/60 text-sm">{t('auth.login.orContinueWith')}</span>
           <div className="flex-1 h-px bg-white/20"></div>
         </div>
 
@@ -132,12 +138,12 @@ export const LoginPage = () => {
       {/* Footer */}
       <div className="w-full max-w-md">
         <p className="text-center text-white/80 text-sm">
-          Don't have an account?{' '}
+          {t('auth.login.noAccount')}{' '}
           <button
             onClick={handleSignUp}
             className="text-white font-semibold hover:underline"
           >
-            Sign up for free
+            {t('auth.login.signUpFree')}
           </button>
         </p>
       </div>

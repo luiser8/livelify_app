@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader } from '@/shared/components';
 import { subscriptionService, type Subscription, type UserSubscription } from '@/infrastructure/services';
 
@@ -8,6 +9,7 @@ import { subscriptionService, type Subscription, type UserSubscription } from '@
  */
 export const SubscriptionPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [plans, setPlans] = useState<Subscription[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,15 +109,8 @@ export const SubscriptionPage = () => {
   };
 
   const getFeatureName = (feature: string) => {
-    const featureMap: Record<string, string> = {
-      'actions': 'Acciones Diarias',
-      'projects': 'Proyectos Activos',
-      'analytics': 'Analytics & Insights',
-      'team': 'Colaboración en Equipo',
-      'priority': 'Soporte Prioritario',
-      'custom': 'Personalización Avanzada',
-    };
-    return featureMap[feature] || feature;
+    const featureKey = `subscription.features.${feature}`;
+    return t(featureKey);
   };
 
   const formatFeatures = (features: string[]) => {
@@ -128,7 +123,7 @@ export const SubscriptionPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading subscription plans...</p>
+          <p className="text-gray-600">{t('subscription.loading')}</p>
         </div>
       </div>
     );
@@ -140,8 +135,8 @@ export const SubscriptionPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       <PageHeader 
-        title="Subscription Plans"
-        subtitle={hasSubscription ? "Manage your subscription" : "Choose your transformation journey"}
+        title={t('subscription.title')}
+        subtitle={hasSubscription ? t('subscription.subtitle') : t('subscription.chooseJourney')}
         showBackButton={true}
         showSearch={false}
         showFilter={false}
@@ -153,11 +148,10 @@ export const SubscriptionPage = () => {
           <div className="mb-8 text-center">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Transform Your Life with the Right Plan
+                {t('subscription.transformTitle')}
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Choose a plan that fits your transformation goals. All plans include access to your Life Wheel, 
-                assessments, and core features to help you achieve your objectives.
+                {t('subscription.transformDescription')}
               </p>
             </div>
           </div>
@@ -172,9 +166,9 @@ export const SubscriptionPage = () => {
                   <span className="text-4xl">{getPlanIcon(currentSubscription.planName)}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-2xl font-bold">Your Current Plan: {currentSubscription.plan.name}</h3>
+                      <h3 className="text-2xl font-bold">{t('subscription.currentPlan')} {currentSubscription.plan.name}</h3>
                       <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-semibold">
-                        {currentSubscription.active ? '✓ Active' : 'Inactive'}
+                        {currentSubscription.active ? `✓ ${t('subscription.active')}` : t('subscription.inactive')}
                       </span>
                     </div>
                     <p className="text-white/90">{currentSubscription.plan.description}</p>
@@ -183,9 +177,9 @@ export const SubscriptionPage = () => {
               </div>
               <div className="text-right">
                 <div className="text-4xl font-bold">${currentSubscription.price}</div>
-                <div className="text-white/90">per month</div>
+                <div className="text-white/90">{t('subscription.perMonth')}</div>
                 <div className="text-xs text-white/70 mt-1">
-                  Renews: {new Date(currentSubscription.renewalDate).toLocaleDateString()}
+                  {t('subscription.renews')} {new Date(currentSubscription.renewalDate).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -210,7 +204,7 @@ export const SubscriptionPage = () => {
                 {isRecommended && !hasSubscription && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="px-4 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg">
-                      ⭐ Recommended
+                      {t('subscription.recommended')}
                     </span>
                   </div>
                 )}
@@ -219,7 +213,7 @@ export const SubscriptionPage = () => {
                 {isCurrentPlan && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className={`px-4 py-1 ${colors.badge} text-white text-sm font-bold rounded-full shadow-lg`}>
-                      ✓ Current Plan
+                      {t('subscription.currentPlanBadge')}
                     </span>
                   </div>
                 )}
@@ -239,7 +233,7 @@ export const SubscriptionPage = () => {
                     <div className="text-5xl font-bold text-gray-900 mb-1">
                       ${plan.price}
                     </div>
-                    <div className="text-gray-500">per month</div>
+                    <div className="text-gray-500">{t('subscription.perMonth')}</div>
                   </div>
 
                   {/* Features */}
@@ -262,7 +256,7 @@ export const SubscriptionPage = () => {
                       disabled
                       className="w-full py-3 px-6 bg-gray-100 text-gray-500 font-semibold rounded-xl cursor-not-allowed"
                     >
-                      ✓ Current Plan
+                      {t('subscription.currentPlanBadge')}
                     </button>
                   ) : (
                     <button
@@ -270,7 +264,7 @@ export const SubscriptionPage = () => {
                       disabled={subscribing}
                       className={`w-full py-3 px-6 ${colors.button} text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {subscribing ? 'Processing...' : hasSubscription ? 'Change Plan' : 'Get Started'}
+                      {subscribing ? t('subscription.processing') : hasSubscription ? t('subscription.changePlan') : t('subscription.getStarted')}
                     </button>
                   )}
                 </div>
@@ -281,59 +275,32 @@ export const SubscriptionPage = () => {
 
         {/* FAQ Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-4">{t('subscription.faq.title')}</h3>
           
           <div className="space-y-4">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Can I change plans at any time?</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('subscription.faq.q1')}</h4>
               <p className="text-gray-600 text-sm">
-                Yes! You can upgrade or downgrade your plan at any time. Changes will affect your next billing cycle.
+                {t('subscription.faq.a1')}
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">What happens if I cancel my subscription?</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('subscription.faq.q2')}</h4>
               <p className="text-gray-600 text-sm">
-                Your data is always yours. If you cancel, you'll retain access until the end of your billing period, 
-                and your data will be safely stored if you decide to return.
+                {t('subscription.faq.a2')}
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Is there a free trial?</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('subscription.faq.q3')}</h4>
               <p className="text-gray-600 text-sm">
-                The BASICO plan gives you access to core features to get started. You can upgrade anytime as your needs grow.
+                {t('subscription.faq.a3')}
               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Trust badges */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Secure Payment</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-              </svg>
-              <span>24/7 Support</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-              </svg>
-              <span>Instant Activation</span>
             </div>
           </div>
         </div>
       </main>
-
       <BottomNav />
     </div>
   );

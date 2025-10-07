@@ -1,8 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   id: string;
-  label: string;
+  labelKey: string;
   path: string;
   icon: (isActive: boolean) => React.ReactNode;
   matchPaths?: string[]; // Rutas adicionales que también activan este item
@@ -15,11 +16,12 @@ interface NavItem {
 export const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const navItems: NavItem[] = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      labelKey: 'nav.dashboard',
       path: '/dashboard',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,7 +36,7 @@ export const BottomNav = () => {
     },
     {
       id: 'wheel',
-      label: 'Wheel',
+      labelKey: 'nav.wheel',
       path: '/home',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +52,7 @@ export const BottomNav = () => {
     },
     {
       id: 'projects',
-      label: 'Projects',
+      labelKey: 'nav.projects',
       path: '/projects',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +68,7 @@ export const BottomNav = () => {
     },
     {
       id: 'actions',
-      label: 'Actions',
+      labelKey: 'nav.actions',
       path: '/actions',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +83,7 @@ export const BottomNav = () => {
     },
     {
       id: 'profile',
-      label: 'Profile',
+      labelKey: 'nav.profile',
       path: '/profile',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +132,7 @@ export const BottomNav = () => {
                       : 'text-gray-500'
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </button>
             );

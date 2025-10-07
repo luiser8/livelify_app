@@ -93,9 +93,37 @@ export const LIFE_AREA_ICONS: Record<string, string> = {
 
 /**
  * Convierte el nombre de área de la API a español
+ * @deprecated Use getAreaTranslationKey with i18n instead
  */
 export const getAreaDisplayName = (areaName: string): string => {
   return AREA_NAME_MAP[areaName] || areaName;
+};
+
+/**
+ * Retorna la translation key para usar con i18n
+ * Uso: t(getAreaTranslationKey(areaName))
+ * 
+ * Maneja 3 casos:
+ * 1. Si es una key de API (ej: "PERSONAL_DEVELOPMENT") → retorna "lifeAreas.PERSONAL_DEVELOPMENT"
+ * 2. Si es un nombre en español (ej: "Desarrollo Personal") → busca la key y retorna "lifeAreas.PERSONAL_DEVELOPMENT"
+ * 3. Si no encuentra nada → retorna el string original (fallback)
+ */
+export const getAreaTranslationKey = (areaName: string): string => {
+  // Caso 1: Ya es una key de API válida (viene de area.areaId del backend)
+  if (areaName in AREA_NAME_MAP) {
+    return `lifeAreas.${areaName}`;
+  }
+  
+  // Caso 2: Es el nombre en español (viene de area.areaName del backend)
+  const entry = Object.entries(AREA_NAME_MAP).find(([, name]) => name === areaName);
+  const apiKey = entry?.[0];
+  if (apiKey) {
+    return `lifeAreas.${apiKey}`;
+  }
+  
+  // Caso 3: Fallback - retornar el nombre original
+  console.warn(`Translation key not found for area: "${areaName}"`);
+  return areaName;
 };
 
 /**

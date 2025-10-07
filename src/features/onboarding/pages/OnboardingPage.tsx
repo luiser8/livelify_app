@@ -1,36 +1,38 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CarouselDots } from '../components';
 import { useCarousel } from '../hooks';
 import { useAuth } from '@/features/auth/context';
-
-/**
- * Datos de las diapositivas del onboarding
- */
-const slides = [
-  {
-    title: 'Transform Your Life in 90 Days',
-    subtitle: 'Stop surviving. Start thriving.',
-  },
-  {
-    title: 'Discover Your Path to Wellness',
-    subtitle: 'Personalized guidance for your journey.',
-  },
-  {
-    title: 'Track Your Progress Daily',
-    subtitle: 'Small steps lead to big changes.',
-  },
-  {
-    title: 'Join a Thriving Community',
-    subtitle: 'You\'re not alone in this journey.',
-  },
-];
+import { LanguageSelector } from '@/shared/components';
 
 /**
  * Página de Onboarding/Landing
  */
 export const OnboardingPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { isAuthenticated, logout, user } = useAuth();
+  
+  // Slides dinámicos desde traducciones
+  const slides = [
+    {
+      title: t('onboarding.slide1.title'),
+      subtitle: t('onboarding.slide1.subtitle'),
+    },
+    {
+      title: t('onboarding.slide2.title'),
+      subtitle: t('onboarding.slide2.subtitle'),
+    },
+    {
+      title: t('onboarding.slide3.title'),
+      subtitle: t('onboarding.slide3.subtitle'),
+    },
+    {
+      title: t('onboarding.slide4.title'),
+      subtitle: t('onboarding.slide4.subtitle'),
+    },
+  ];
+  
   const { currentSlide, goToSlide, setIsPaused } = useCarousel({
     totalSlides: slides.length,
     autoPlayInterval: 5000,
@@ -77,32 +79,36 @@ export const OnboardingPage = () => {
           // Si está autenticado, mostrar info del usuario y logout
           <div className="flex justify-between items-center">
             <div className="text-white/90 text-sm">
-              Bienvenido, <span className="font-semibold">{user?.firstName}</span>
+              {t('onboarding.welcome')}, <span className="font-semibold">{user?.firstName}</span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="text-white/90 hover:text-white transition-colors text-sm font-medium flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Cerrar sesión
-            </button>
+            <div className="flex items-center gap-4">
+              <LanguageSelector />
+              <button
+                onClick={handleLogout}
+                className="text-white/90 hover:text-white transition-colors text-sm font-medium flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                {t('onboarding.logout')}
+              </button>
+            </div>
           </div>
         ) : (
           // Si NO está autenticado, mostrar botones de login/register
           <div className="flex justify-end gap-4">
+            <LanguageSelector />
             <button
               onClick={handleLogin}
               className="text-white/90 hover:text-white transition-colors text-sm font-medium"
             >
-              I have an account
+              {t('onboarding.haveAccount')}
             </button>
             <button
               onClick={handleRegister}
               className="text-white/90 hover:text-white transition-colors text-sm font-medium px-4 py-2 border border-white/30 rounded-lg hover:bg-white/10"
             >
-              Sign up
+              {t('onboarding.signUp')}
             </button>
           </div>
         )}
@@ -123,8 +129,8 @@ export const OnboardingPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">Livelify</h1>
-          <p className="text-lg md:text-xl text-white/90">From Surviving to Thriving</p>
+          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('onboarding.title')}</h1>
+          <p className="text-lg md:text-xl text-white/90">{t('onboarding.tagline')}</p>
         </div>
 
         {/* Contenido del slide actual con animación */}
@@ -157,13 +163,9 @@ export const OnboardingPage = () => {
           onClick={handleExplore}
           className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg"
         >
-          {isAuthenticated ? 'Go to App' : 'Explore the App'}
+          {isAuthenticated ? t('onboarding.goToApp') : t('onboarding.exploreApp')}
         </button>
 
-        {/* Texto de social proof */}
-        <p className="text-center text-white/80 text-sm mt-6">
-          Join 10,000+ people transforming their lives
-        </p>
       </div>
     </div>
   );

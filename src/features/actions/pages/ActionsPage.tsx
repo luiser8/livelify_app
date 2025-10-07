@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader } from '@/shared/components';
 import {
   actionService,
@@ -18,6 +19,7 @@ import {
  */
 export const ActionsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [actions, setActions] = useState<Action[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -209,7 +211,7 @@ export const ActionsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading actions...</p>
+          <p className="text-gray-500 mt-4">{t('actions.loading')}</p>
         </div>
       </div>
     );
@@ -218,8 +220,8 @@ export const ActionsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       <PageHeader 
-        title="Actions"
-        subtitle="Organize by context"
+        title={t('actions.title')}
+        subtitle={t('actions.subtitle')}
         showBackButton={true}
         showSearch={false}
         showFilter={false}
@@ -230,19 +232,19 @@ export const ActionsPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-2xl font-bold text-gray-900">{stats.totalActions}</div>
-            <div className="text-sm text-gray-500">Total Actions</div>
+            <div className="text-sm text-gray-500">{t('actions.totalActions')}</div>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-2xl font-bold text-blue-600">{stats.pendingActions}</div>
-            <div className="text-sm text-gray-500">Pending</div>
+            <div className="text-sm text-gray-500">{t('actions.pending')}</div>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-2xl font-bold text-green-600">{stats.completedActions}</div>
-            <div className="text-sm text-gray-500">Completed</div>
+            <div className="text-sm text-gray-500">{t('actions.completed')}</div>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-2xl font-bold text-red-600">{stats.overdueActions}</div>
-            <div className="text-sm text-gray-500">Overdue</div>
+            <div className="text-sm text-gray-500">{t('actions.overdue')}</div>
           </div>
         </div>
 
@@ -257,7 +259,7 @@ export const ActionsPage = () => {
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              All Contexts
+              {t('actions.allContexts')}
             </button>
             {contexts.map(context => (
               <button
@@ -281,7 +283,7 @@ export const ActionsPage = () => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            New Action
+            {t('actions.newAction')}
           </button>
         </div>
 
@@ -289,7 +291,7 @@ export const ActionsPage = () => {
         {showCreateForm && (
           <div className="bg-white rounded-2xl border-2 border-indigo-200 p-6 mb-6 shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Create New Action</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('actions.createNewAction')}</h3>
               <button
                 onClick={() => {
                   setShowCreateForm(false);
@@ -316,7 +318,7 @@ export const ActionsPage = () => {
               {/* Paso 1: Seleccionar Proyecto */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Step 1: Select Project *
+                  {t('actions.step1')}
                 </label>
                 <select
                   value={selectedProjectId}
@@ -324,14 +326,14 @@ export const ActionsPage = () => {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="">Choose a project first</option>
+                  <option value="">{t('actions.chooseProject')}</option>
                   {projects.filter(p => p.status === 'ACTIVE').map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.title}
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">💡 Select the project first to see its goals</p>
+                <p className="text-xs text-gray-500 mt-1">{t('actions.selectProjectHint')}</p>
               </div>
 
               {/* Paso 2: Seleccionar Goal (solo visible si hay proyecto seleccionado) */}
@@ -348,7 +350,7 @@ export const ActionsPage = () => {
                   
                   <div>
                     <label className="block text-sm font-medium text-indigo-700 mb-2">
-                      Step 2: Select Goal from this project *
+                      {t('actions.step2')}
                     </label>
                     <select
                       value={formData.goalId}
@@ -356,7 +358,7 @@ export const ActionsPage = () => {
                       required
                       className="w-full px-3 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                     >
-                      <option value="">Choose a goal</option>
+                      <option value="">{t('actions.chooseGoal')}</option>
                       {filteredGoals.length > 0 ? (
                         filteredGoals.map((goal) => (
                           <option key={goal.id} value={goal.id}>
@@ -364,11 +366,11 @@ export const ActionsPage = () => {
                           </option>
                         ))
                       ) : (
-                        <option value="" disabled>No goals available for this project</option>
+                        <option value="" disabled>{t('actions.noGoalsAvailable')}</option>
                       )}
                     </select>
                     <p className="text-xs text-indigo-600 mt-1">
-                      {filteredGoals.length} {filteredGoals.length === 1 ? 'goal' : 'goals'} available
+                      {filteredGoals.length} {filteredGoals.length === 1 ? t('actions.goal') : t('actions.goals')} {t('actions.available')}
                     </p>
                   </div>
                 </div>
@@ -376,14 +378,14 @@ export const ActionsPage = () => {
 
               {/* Context */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Context *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.context')}</label>
                 <select
                   value={formData.contextId}
                   onChange={(e) => setFormData({ ...formData, contextId: e.target.value })}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="">Select a context</option>
+                  <option value="">{t('actions.selectContext')}</option>
                   {contexts.map((context) => (
                     <option key={context.id} value={context.id}>{context.name}</option>
                   ))}
@@ -391,44 +393,44 @@ export const ActionsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.actionTitle')}</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
-                  placeholder="e.g., Review project proposal"
+                  placeholder={t('actions.titlePlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={2}
-                  placeholder="Details about this action"
+                  placeholder={t('actions.descriptionPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Energy</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.energy')}</label>
                   <select
                     value={formData.energy}
                     onChange={(e) => setFormData({ ...formData, energy: e.target.value as EnergyLevel })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="LOW">🟢 Low</option>
-                    <option value="MEDIUM">🟡 Medium</option>
-                    <option value="HIGH">🔴 High</option>
+                    <option value="LOW">🟢 {t('actions.low')}</option>
+                    <option value="MEDIUM">🟡 {t('actions.medium')}</option>
+                    <option value="HIGH">🔴 {t('actions.high')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Time (min)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.time')}</label>
                   <input
                     type="number"
                     value={formData.timeEstimate}
@@ -439,7 +441,7 @@ export const ActionsPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Due Date *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.dueDate')}</label>
                   <input
                     type="datetime-local"
                     value={formData.dueDate}
@@ -456,14 +458,14 @@ export const ActionsPage = () => {
                   onClick={() => setShowCreateForm(false)}
                   className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
                   className="flex-1 py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
                 >
-                  {creating ? 'Creating...' : 'Create Action'}
+                  {creating ? t('actions.creating') : t('actions.createAction')}
                 </button>
               </div>
             </form>
@@ -477,13 +479,13 @@ export const ActionsPage = () => {
               <svg className="w-16 h-16 text-amber-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              <h3 className="text-xl font-semibold text-amber-900 mb-2">No contexts found</h3>
-              <p className="text-amber-800 mb-4">You need to create contexts first in your profile.</p>
+              <h3 className="text-xl font-semibold text-amber-900 mb-2">{t('actions.noContexts')}</h3>
+              <p className="text-amber-800 mb-4">{t('actions.needContexts')}</p>
               <button
                 onClick={() => navigate('/profile')}
                 className="py-2 px-4 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-all"
               >
-                Go to Profile →
+                {t('actions.goToProfile')}
               </button>
             </div>
           ) : (
@@ -511,15 +513,15 @@ export const ActionsPage = () => {
                             <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
                               <span className="flex items-center gap-1">
                                 <span className="font-medium text-blue-600">{activeCount}</span>
-                                <span>active</span>
+                                <span>{t('actions.active')}</span>
                               </span>
                               <span className="flex items-center gap-1">
                                 <span className="font-medium text-green-600">{completedCount}</span>
-                                <span>completed</span>
+                                <span>{t('actions.completed')}</span>
                               </span>
                               <span className="flex items-center gap-1">
                                 <span className="font-medium text-gray-900">{contextActions.length}</span>
-                                <span>total</span>
+                                <span>{t('actions.total')}</span>
                               </span>
                             </div>
                           </div>
@@ -571,7 +573,7 @@ export const ActionsPage = () => {
                                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                           </svg>
-                                          Complete
+                                          {t('actions.complete')}
                                         </button>
                                       )}
                                     </div>
@@ -589,7 +591,7 @@ export const ActionsPage = () => {
                                               <span className={`px-2 py-0.5 rounded text-xs font-bold ${getGoalTypeBadge(goal.goalType)}`}>
                                                 {goal.goalType}
                                               </span>
-                                              <span className="text-xs font-medium text-gray-700">Goal:</span>
+                                              <span className="text-xs font-medium text-gray-700">{t('actions.goalLabel')}</span>
                                             </div>
                                             <p className="text-sm text-gray-900 font-medium mb-1">{goal.content}</p>
                                             {project && (
@@ -597,7 +599,7 @@ export const ActionsPage = () => {
                                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                   <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                                                 </svg>
-                                                <span className="font-medium">Project:</span>
+                                                <span className="font-medium">{t('actions.projectLabel')}</span>
                                                 <span>{project.title}</span>
                                               </div>
                                             )}
@@ -611,13 +613,13 @@ export const ActionsPage = () => {
                                         {getEnergyIcon(action.energy)} {action.energy}
                                       </span>
                                       <span className="px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
-                                        ⏱️ {action.timeEstimate}min
+                                        ⏱️ {action.timeEstimate}{t('actions.min')}
                                       </span>
                                       <span className={`px-2 py-1 rounded-full font-medium ${
                                         action.isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                                       }`}>
                                         📅 {new Date(action.dueDate).toLocaleDateString()}
-                                        {action.isOverdue && ` (${Math.abs(action.daysUntilDue)}d overdue)`}
+                                        {action.isOverdue && ` (${Math.abs(action.daysUntilDue)}${t('actions.daysOverdue')})`}
                                       </span>
                                     </div>
                                   </div>
@@ -628,8 +630,8 @@ export const ActionsPage = () => {
                         </div>
                       ) : (
                         <div className="text-center py-8 text-gray-500 bg-white rounded-lg">
-                          <p className="mb-2">No actions in this context</p>
-                          <p className="text-sm">Create a new action above</p>
+                          <p className="mb-2">{t('actions.noActionsInContext')}</p>
+                          <p className="text-sm">{t('actions.createActionAbove')}</p>
                         </div>
                       )}
                     </div>

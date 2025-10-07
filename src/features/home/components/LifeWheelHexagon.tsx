@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type LifeWheelArea } from '@/infrastructure/services';
-import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
 
 interface LifeWheelHexagonProps {
   lifeAreas: LifeWheelArea[];
@@ -13,6 +14,7 @@ interface LifeWheelHexagonProps {
  * Muestra las 6 áreas de vida en un hexágono con gráficos dinámicos
  */
 export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: LifeWheelHexagonProps) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const orderedAreas = lifeAreas.filter((area): area is LifeWheelArea => area !== undefined);
@@ -180,6 +182,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
     }
   }, [orderedAreas]);
 
+  // Determinar si hay evaluaciones completadas (usado para mostrar/ocultar contenido central)
   const hasScores = orderedAreas.length > 0 && orderedAreas.some(area => area.score > 0);
 
   return (
@@ -214,10 +217,10 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                   }`}
                   title={
                     isEnabled 
-                      ? `Click to manage ${area.areaName}` 
+                      ? `${t('lifeAreas.clickToManage')} ${t(getAreaTranslationKey(area.areaName))}` 
                       : area.score === 0 
-                        ? `${area.areaName} - Complete the assessment to unlock`
-                        : `${area.areaName} - Focus on lower scoring areas first`
+                        ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
+                        : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.focusOnLowerAreas')}`
                   }
                   disabled={!isEnabled}
                 >
@@ -234,10 +237,10 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                         : 'bg-red-600'
                   } text-white px-3 py-1.5 rounded-lg shadow-lg text-xs sm:text-sm font-medium whitespace-nowrap`}>
                     {isEnabled 
-                      ? area.areaName 
+                      ? t(getAreaTranslationKey(area.areaName))
                       : area.score === 0 
-                        ? `${area.areaName} - Complete assessment first`
-                        : `${area.areaName} - Locked`}
+                        ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
+                        : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.locked')}`}
                     <div className={`absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 ${
                       isEnabled 
                         ? 'bg-gray-900' 
@@ -289,37 +292,26 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
         })}
       </div>
 
-      {/* Contenido central */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center px-6 py-4 max-w-[140px] sm:max-w-[180px]">
-              {hasScores ? (
-                <>
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-1 leading-tight">
-                    Life Wheel
-                  </h2>
-                  <p className="text-xs text-gray-500 leading-tight">
-                    Your journey
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="mb-2">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </div>
-                    <h2 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">
-                      Start Your Assessment
-                    </h2>
-                  </div>
-                  <p className="text-xs text-gray-500 leading-tight">
-                    Click an area above
-                  </p>
-                </>
-              )}
+      {/* Contenido central - Solo mostrar cuando NO hay evaluaciones */}
+      {!hasScores && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center px-6 py-4 max-w-[140px] sm:max-w-[180px]">
+            <div className="mb-2">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+              <h2 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">
+                {t('lifeAreas.startAssessment')}
+              </h2>
             </div>
+            <p className="text-xs text-gray-500 leading-tight">
+              {t('lifeAreas.clickButtonBelow')}
+            </p>
           </div>
+        </div>
+      )}
     </div>
   );
 };

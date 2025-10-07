@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
-import { getAreaColor, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaColor, getAreaIcon, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
 import { BottomNav, PageHeader } from '@/shared/components';
 
 /**
@@ -9,6 +10,7 @@ import { BottomNav, PageHeader } from '@/shared/components';
  */
 export const AssessmentIntroPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [lifeWheel, setLifeWheel] = useState<LifeWheelResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -135,7 +137,7 @@ export const AssessmentIntroPage = () => {
                       {getAreaIcon(area.areaName)}
                     </div>
                     <p className={`text-sm sm:text-base font-medium ${isCompleted ? 'text-gray-600' : 'text-gray-900'}`}>
-                      {area.areaName}
+                      {t(getAreaTranslationKey(area.areaName))}
                     </p>
                     <p className={`text-xs sm:text-sm mt-1 ${isCompleted ? 'text-green-600 font-semibold' : 'text-gray-500'}`}>
                       {isCompleted ? `✓ Completado: ${area.score}/10` : `Puntaje actual: ${area.score}/10`}

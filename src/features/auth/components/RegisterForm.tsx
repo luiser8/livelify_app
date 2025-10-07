@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components';
 
 export interface RegisterFormData {
@@ -22,6 +23,7 @@ interface RegisterFormProps {
  * Formulario de registro
  */
 export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: RegisterFormProps) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -40,45 +42,45 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
     // Email
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('auth.validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = t('auth.validation.emailInvalid');
     }
 
     // Password
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('auth.validation.passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('auth.validation.passwordMinLength');
     }
 
     // Confirm Password
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = t('auth.validation.confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('auth.validation.passwordsNotMatch');
     }
 
     // First Name
     if (!formData.firstName) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = t('auth.validation.firstNameRequired');
     }
 
     // Last Name
     if (!formData.lastName) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = t('auth.validation.lastNameRequired');
     }
 
     // Phone
     if (!formData.phone) {
-      newErrors.phone = 'Phone is required';
+      newErrors.phone = t('auth.validation.phoneRequired');
     } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Invalid phone format';
+      newErrors.phone = t('auth.validation.phoneInvalid');
     }
 
     // Address
     if (!formData.address) {
-      newErrors.address = 'Address is required';
+      newErrors.address = t('auth.validation.addressRequired');
     }
 
     setErrors(newErrors);
@@ -120,8 +122,8 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       <div className="grid grid-cols-2 gap-4">
         <Input
           type="text"
-          label="First Name"
-          placeholder="John"
+          label={t('auth.register.firstName')}
+          placeholder={t('auth.register.firstNamePlaceholder')}
           value={formData.firstName}
           onChange={handleChange('firstName')}
           error={errors.firstName}
@@ -129,8 +131,8 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         />
         <Input
           type="text"
-          label="Last Name"
-          placeholder="Doe"
+          label={t('auth.register.lastName')}
+          placeholder={t('auth.register.lastNamePlaceholder')}
           value={formData.lastName}
           onChange={handleChange('lastName')}
           error={errors.lastName}
@@ -140,8 +142,8 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
       <Input
         type="email"
-        label="Email"
-        placeholder="your@email.com"
+        label={t('auth.register.email')}
+        placeholder={t('auth.register.emailPlaceholder')}
         value={formData.email}
         onChange={handleChange('email')}
         error={errors.email}
@@ -151,8 +153,8 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
       <Input
         type="tel"
-        label="Phone"
-        placeholder="+1234567890"
+        label={t('auth.register.phone')}
+        placeholder={t('auth.register.phonePlaceholder')}
         value={formData.phone}
         onChange={handleChange('phone')}
         error={errors.phone}
@@ -162,29 +164,34 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
       <Input
         type="text"
-        label="Address"
-        placeholder="123 Main St, City, Country"
+        label={t('auth.register.address')}
+        placeholder={t('auth.register.addressPlaceholder')}
         value={formData.address}
         onChange={handleChange('address')}
         error={errors.address}
         disabled={isLoading}
       />
 
-      <Input
-        type="password"
-        label="Password"
-        placeholder="••••••••"
-        value={formData.password}
-        onChange={handleChange('password')}
-        error={errors.password}
-        autoComplete="new-password"
-        disabled={isLoading}
-      />
+      <div>
+        <Input
+          type="password"
+          label={t('auth.register.password')}
+          placeholder={t('auth.register.passwordPlaceholder')}
+          value={formData.password}
+          onChange={handleChange('password')}
+          error={errors.password}
+          autoComplete="new-password"
+          disabled={isLoading}
+        />
+        <p className="text-xs text-white/70 mt-1 ml-1">
+          {t('auth.register.passwordHint')}
+        </p>
+      </div>
 
       <Input
         type="password"
-        label="Confirm Password"
-        placeholder="••••••••"
+        label={t('auth.register.confirmPassword')}
+        placeholder={t('auth.register.confirmPasswordPlaceholder')}
         value={formData.confirmPassword}
         onChange={handleChange('confirmPassword')}
         error={errors.confirmPassword}
@@ -207,7 +214,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         disabled={isLoading}
         className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        {isLoading ? 'Creating account...' : 'Create Account'}
+        {isLoading ? t('auth.register.signingUp') : t('auth.register.signUp')}
       </button>
     </form>
   );

@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
 import { useAuth } from '@/features/auth/context';
 import { registerUseCase } from '@/core/usecases/auth/registerUseCase';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
+import { LanguageSelector } from '@/shared/components';
 
 /**
  * Página de registro
  */
 export const RegisterPage = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +68,7 @@ export const RegisterPage = () => {
       } else if (typeof error === 'object' && error !== null && 'message' in error) {
         setError(String(error.message));
       } else {
-        setError('Error al crear la cuenta. Por favor, intenta de nuevo.');
+        setError(t('auth.errors.registerFailed'));
       }
     } finally {
       setIsLoading(false);
@@ -91,14 +94,17 @@ export const RegisterPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          {t('common.back')}
         </button>
-        <button
-          onClick={handleSignIn}
-          className="text-white/90 hover:text-white transition-colors text-sm font-medium"
-        >
-          Sign in
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageSelector />
+          <button
+            onClick={handleSignIn}
+            className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+          >
+            {t('auth.register.signIn')}
+          </button>
+        </div>
       </div>
 
       {/* Contenido principal */}
@@ -116,8 +122,8 @@ export const RegisterPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">Join Livelify</h1>
-          <p className="text-lg md:text-xl text-white/90">Create your account and start your journey</p>
+          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('auth.register.title')}</h1>
+          <p className="text-lg md:text-xl text-white/90">{t('auth.register.subtitle')}</p>
         </div>
 
         {/* Formulario de registro */}
@@ -130,7 +136,7 @@ export const RegisterPage = () => {
         {/* Divider */}
         <div className="w-full max-w-md flex items-center gap-4">
           <div className="flex-1 h-px bg-white/20"></div>
-          <span className="text-white/60 text-sm">or</span>
+          <span className="text-white/60 text-sm">{t('auth.login.orContinueWith')}</span>
           <div className="flex-1 h-px bg-white/20"></div>
         </div>
 
@@ -158,12 +164,12 @@ export const RegisterPage = () => {
       {/* Footer */}
       <div className="w-full max-w-md">
         <p className="text-center text-white/80 text-sm">
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <button
             onClick={handleSignIn}
             className="text-white font-semibold hover:underline"
           >
-            Sign in
+            {t('auth.register.signIn')}
           </button>
         </p>
       </div>

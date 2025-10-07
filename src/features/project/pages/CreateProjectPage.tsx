@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type LifeWheelArea } from '@/infrastructure/services';
-import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
 import { PageHeader } from '@/shared/components';
 
 /**
@@ -10,6 +11,7 @@ import { PageHeader } from '@/shared/components';
  */
 export const CreateProjectPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { areaId: urlAreaId } = useParams<{ areaId?: string }>();
   
   const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
@@ -140,12 +142,12 @@ export const CreateProjectPage = () => {
     const totalMonths = daysDiff >= 0 ? monthsDiff : monthsDiff - 1;
 
     if (totalMonths < 3) {
-      setDateError('El proyecto debe durar mínimo 3 meses');
+      setDateError(t('projects.create.dateErrorMin'));
       return false;
     }
     
     if (totalMonths > 6) {
-      setDateError('El proyecto debe durar máximo 6 meses');
+      setDateError(t('projects.create.dateErrorMax'));
       return false;
     }
 
@@ -214,7 +216,7 @@ export const CreateProjectPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading...</p>
+          <p className="text-gray-500 mt-4">{t('projects.loading')}</p>
         </div>
       </div>
     );
@@ -224,8 +226,8 @@ export const CreateProjectPage = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <PageHeader 
-        title="Create Project"
-        subtitle="90-Day Transformation"
+        title={t('projects.create.title')}
+        subtitle={t('projects.create.subtitle')}
         backPath={urlAreaId ? `/area/${urlAreaId}/projects` : '/projects'}
         showSearch={false}
         showFilter={false}
@@ -236,11 +238,11 @@ export const CreateProjectPage = () => {
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
-              Step {currentStep} of 2
+              {t('projects.create.step')} {currentStep} {t('projects.create.of')} 2
             </span>
             <span className="text-sm text-gray-500">
-              {currentStep === 1 && 'Choose Focus Area'}
-              {currentStep === 2 && 'Project Details'}
+              {currentStep === 1 && t('projects.create.step1Title')}
+              {currentStep === 2 && t('projects.create.step2Title')}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -263,19 +265,19 @@ export const CreateProjectPage = () => {
                   <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Focus Area</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('projects.create.step1Title')}</h2>
               <p className="text-sm text-gray-600 max-w-md mx-auto">
-                Select the life area you want to transform over the next 90 days. Focus on one area for maximum impact.
+                {t('projects.create.step1Description')}
               </p>
             </div>
 
             {/* Life Wheel visualization */}
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 mb-2">
-                <span className="text-sm text-gray-600">Your Life Wheel</span>
-                <span className="text-sm font-bold text-gray-900">Avg: {averageScore}/10</span>
+                <span className="text-sm text-gray-600">{t('projects.create.yourLifeWheel')}</span>
+                <span className="text-sm font-bold text-gray-900">{t('projects.create.avg')}: {averageScore}/10</span>
               </div>
-              <p className="text-xs text-gray-500">We recommend starting with your lowest scoring area</p>
+              <p className="text-xs text-gray-500">{t('projects.create.recommendation')}</p>
             </div>
 
             {/* Areas grid */}
@@ -320,7 +322,7 @@ export const CreateProjectPage = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className={`font-bold mb-1 ${isEnabled ? 'text-gray-900' : isLocked ? 'text-red-700' : 'text-amber-700'}`}>
-                          {area.areaName}
+                          {t(getAreaTranslationKey(area.areaName))}
                         </h3>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg font-bold text-gray-900">{area.score === 0 ? '—' : area.score}</span>
@@ -329,19 +331,19 @@ export const CreateProjectPage = () => {
                         {isEnabled ? (
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
-                              +{potentialPoints} potential
+                              +{potentialPoints} {t('projects.create.potential')}
                             </span>
                             {lowestArea?.id === area.id && (
-                              <span className="text-xs text-gray-600">Available</span>
+                              <span className="text-xs text-gray-600">{t('projects.create.available')}</span>
                             )}
                           </div>
                         ) : isLocked ? (
                           <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">
-                            🔒 Locked - Focus on lower scoring areas
+                            🔒 {t('projects.create.locked')}
                           </span>
                         ) : (
                           <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-medium">
-                            ⓘ Assessment Required
+                            ⓘ {t('projects.create.assessmentRequired')}
                           </span>
                         )}
                       </div>
@@ -361,15 +363,15 @@ export const CreateProjectPage = () => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-amber-900 mb-1">Assessment Required</p>
+                    <p className="font-bold text-amber-900 mb-1">{t('projects.create.assessmentRequired')}</p>
                     <p className="text-sm text-amber-800 mb-3">
-                      Some areas are not yet evaluated. You need to complete the Life Wheel assessment for each area before you can create projects in them.
+                      {t('projects.create.assessmentRequiredMessage')}
                     </p>
                     <button
                       onClick={() => navigate('/home')}
                       className="px-4 py-2 bg-amber-600 text-white font-medium text-sm rounded-lg hover:bg-amber-700 transition-colors"
                     >
-                      Complete Assessment
+                      {t('projects.create.completeAssessment')}
                     </button>
                   </div>
                 </div>
@@ -386,9 +388,9 @@ export const CreateProjectPage = () => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-blue-900 mb-1">Focus on Your Lowest Areas</p>
+                    <p className="font-bold text-blue-900 mb-1">{t('projects.create.focusLowestTitle')}</p>
                     <p className="text-sm text-blue-800">
-                      You can only create projects in your <span className="font-bold">3 lowest scoring areas</span>. This strategy helps you focus on what needs the most improvement. Higher scoring areas are temporarily locked 🔒 until you improve these priority areas.
+                      {t('projects.create.focusLowestMessage')}
                     </p>
                   </div>
                 </div>
@@ -405,9 +407,9 @@ export const CreateProjectPage = () => {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-gray-900 mb-1">AI Recommendation</p>
+                    <p className="font-bold text-gray-900 mb-1">{t('projects.create.aiRecommendation')}</p>
                     <p className="text-sm text-gray-700">
-                      Based on your Life Wheel assessment, <span className="font-semibold">{lowestArea.areaName}</span> has the lowest score ({lowestArea.score}/10) and highest improvement potential! Starting here could improve your overall life score by 15%.
+                      {t('projects.create.aiRecommendationMessage', { areaName: lowestArea.areaName, score: lowestArea.score })}
                     </p>
                   </div>
                 </div>
@@ -420,7 +422,7 @@ export const CreateProjectPage = () => {
                 onClick={() => navigate('/home')}
                 className="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
               >
-                View All Areas Details
+                {t('projects.create.viewAllAreas')}
               </button>
             </div>
           </div>
@@ -440,8 +442,8 @@ export const CreateProjectPage = () => {
                         {getAreaIcon(selectedArea.areaName)}
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Selected Area</p>
-                        <p className="font-bold text-gray-900">{selectedArea.areaName}</p>
+                        <p className="text-sm text-gray-600">{t('projects.create.selectedArea')}</p>
+                        <p className="font-bold text-gray-900">{t(getAreaTranslationKey(selectedArea.areaName))}</p>
                       </div>
                     </div>
                   ) : null;
@@ -450,14 +452,14 @@ export const CreateProjectPage = () => {
                 {/* Title */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Title *
+                    {t('projects.create.projectTitle')} *
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="e.g., Improve Physical Fitness"
+                    placeholder={t('projects.create.projectTitlePlaceholder')}
                     required
                   />
                 </div>
@@ -465,14 +467,14 @@ export const CreateProjectPage = () => {
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
+                    {t('projects.create.description')} *
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Describe your transformation goals and action plan..."
+                    placeholder={t('projects.create.descriptionPlaceholder')}
                     required
                   />
                 </div>
@@ -482,7 +484,7 @@ export const CreateProjectPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Start Date *
+                        {t('projects.create.startDate')} *
                       </label>
                       <input
                         type="date"
@@ -492,11 +494,11 @@ export const CreateProjectPage = () => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
-                      <p className="text-xs text-gray-500 mt-1">Must start from tomorrow onwards</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('projects.create.startDateHelp')}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        End Date (3-6 months) *
+                        {t('projects.create.endDate')} *
                       </label>
                       <input
                         type="date"
@@ -510,8 +512,8 @@ export const CreateProjectPage = () => {
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         {formData.startDate 
-                          ? `Between ${getMinEndDate(formData.startDate)} and ${getMaxEndDate(formData.startDate)}`
-                          : 'Select start date first'}
+                          ? `${t('projects.create.between')} ${getMinEndDate(formData.startDate)} ${t('projects.create.and')} ${getMaxEndDate(formData.startDate)}`
+                          : t('projects.create.selectStartFirst')}
                       </p>
                     </div>
                   </div>
@@ -535,12 +537,12 @@ export const CreateProjectPage = () => {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                       <div className="text-xs text-blue-700">
-                        <p className="font-semibold mb-1">📅 Project Duration Guidelines</p>
+                        <p className="font-semibold mb-1">{t('projects.create.durationGuidelines')}</p>
                         <ul className="space-y-1 list-disc list-inside">
-                          <li>Start date must be from tomorrow onwards</li>
-                          <li>Minimum duration: 3 months</li>
-                          <li>Maximum duration: 6 months</li>
-                          <li>90 days (3 months) is recommended for optimal transformation</li>
+                          <li>{t('projects.create.guidelineStart')}</li>
+                          <li>{t('projects.create.guidelineMin')}</li>
+                          <li>{t('projects.create.guidelineMax')}</li>
+                          <li>{t('projects.create.guidelineRecommended')}</li>
                         </ul>
                       </div>
                     </div>
@@ -554,14 +556,14 @@ export const CreateProjectPage = () => {
                     onClick={() => setCurrentStep(1)}
                     className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                   >
-                    Back
+                    {t('projects.create.back')}
                   </button>
                   <button
                     onClick={handleCreateProject}
                     disabled={creating || !formData.title || !formData.description || !formData.startDate || !formData.endDate || !!dateError}
                     className="flex-1 py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {creating ? 'Creating Project...' : 'Create Project'}
+                    {creating ? t('projects.create.creating') : t('projects.create.createProject')}
                   </button>
                 </div>
               </>

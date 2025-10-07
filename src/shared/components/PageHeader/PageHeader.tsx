@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { LanguageSelectorCompact } from '../LanguageSelector';
 
 interface PageHeaderProps {
   /**
@@ -71,7 +72,7 @@ export const PageHeader = ({
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           {/* Botón de volver atrás y título */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {showBackButton && (
@@ -93,6 +94,10 @@ export const PageHeader = ({
             </div>
           </div>
 
+          {/* Selector de idioma en la esquina superior derecha */}
+          <div className="flex-shrink-0">
+            <LanguageSelectorCompact />
+          </div>
         </div>
 
         {/* Contenido adicional */}

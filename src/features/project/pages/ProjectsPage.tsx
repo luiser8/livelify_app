@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader } from '@/shared/components';
 import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type ProjectStatus, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
@@ -9,6 +10,7 @@ import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelper
  */
 export const ProjectsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [projectsData, setProjectsData] = useState<GetAllProjectsResponse | null>(null);
   const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +132,7 @@ export const ProjectsPage = () => {
         {/* Barra de progreso */}
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Progress</span>
+            <span className="text-sm text-gray-600">{t('projects.progress')}</span>
             <span className="text-sm font-bold text-gray-900">{project.detail.progressPercentage}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -166,7 +168,7 @@ export const ProjectsPage = () => {
                       ? 'text-amber-900' 
                       : 'text-indigo-900'
                 }`}>
-                  Day <span className="text-base">{duration.currentDay}</span> of <span className="text-base">{duration.totalDays}</span>
+                  {t('projects.day')} <span className="text-base">{duration.currentDay}</span> {t('projects.of')} <span className="text-base">{duration.totalDays}</span>
                 </p>
               </div>
               <div className="flex items-center gap-1">
@@ -179,8 +181,8 @@ export const ProjectsPage = () => {
                       : 'text-indigo-700'
                 }`}>
                   {duration.isOverdue 
-                    ? 'Overdue' 
-                    : `${duration.remainingDays} ${duration.remainingDays === 1 ? 'day' : 'days'} remaining`}
+                    ? t('projects.overdue')
+                    : `${duration.remainingDays} ${duration.remainingDays === 1 ? t('projects.day') : t('projects.days')} ${t('projects.remaining')}`}
                 </p>
               </div>
             </div>
@@ -197,10 +199,10 @@ export const ProjectsPage = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">
-                {project.detail.completedActions} of {project.detail.totalActions} actions complete
+                {project.detail.completedActions} {t('projects.of')} {project.detail.totalActions} {t('projects.actionsComplete')}
               </p>
               <p className="text-xs text-gray-600">
-                {project.detail.totalActions - project.detail.completedActions} more
+                {project.detail.totalActions - project.detail.completedActions} {t('projects.more')}
               </p>
             </div>
             <span className="ml-auto text-lg font-bold text-blue-600">
@@ -219,22 +221,22 @@ export const ProjectsPage = () => {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold text-green-900 mb-2">Income Target</p>
+                <p className="text-sm font-bold text-green-900 mb-2">{t('projects.incomeTarget')}</p>
                 <div className="space-y-1">
                   <p className="text-xs text-gray-700">
-                    To achieve this project, you need to generate{' '}
+                    {t('projects.incomeMessage')}{' '}
                     <span className="font-bold text-green-700">
-                      {project.budget.currencySymbol}{project.budget.dailyIncomeTarget.toFixed(2)} per day
+                      {project.budget.currencySymbol}{project.budget.dailyIncomeTarget.toFixed(2)} {t('projects.perDay')}
                     </span>
-                    {' '}or{' '}
+                    {' '}{t('projects.or')}{' '}
                     <span className="font-bold text-green-700">
-                      {project.budget.currencySymbol}{project.budget.monthlyIncomeTarget.toFixed(2)} per month
+                      {project.budget.currencySymbol}{project.budget.monthlyIncomeTarget.toFixed(2)} {t('projects.perMonth')}
                     </span>
-                    {' '}in{' '}
+                    {' '}{t('projects.in')}{' '}
                     <span className="font-semibold">{project.budget.currencyCode}</span>.
                   </p>
                   <p className="text-xs text-green-800 mt-2 italic">
-                    💡 This calculation helps you understand the financial commitment needed for your transformation journey.
+                    {t('projects.incomeNote')}
                   </p>
                 </div>
               </div>
@@ -247,7 +249,7 @@ export const ProjectsPage = () => {
           <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
             {/* Next Action */}
             <div className="bg-yellow-50 rounded-xl p-4">
-              <p className="text-sm font-bold text-gray-900 mb-2">Next Action</p>
+              <p className="text-sm font-bold text-gray-900 mb-2">{t('projects.nextAction')}</p>
               <p className="text-sm text-gray-700 mb-2">Complete morning meditation session (15 min)</p>
               <p className="text-xs text-gray-600">
                 <span className="text-yellow-700 font-medium">@Home • Due in 2 hours</span>
@@ -275,21 +277,21 @@ export const ProjectsPage = () => {
                 onClick={() => navigate(`/projects/${project.id}/goals`)}
                 className="py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
               >
-                📝 Goals
+                {t('projects.viewGoals')}
               </button>
               
               {/* Selector de status */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Change Status</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t('projects.changeStatus')}</label>
                 <select
                   value={project.status}
                   onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
                   className="w-full py-2 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-medium"
                 >
-                  <option value="ACTIVE">🟢 Active</option>
-                  <option value="SOMEDAY">📅 Someday</option>
-                  <option value="COMPLETED">✅ Completed</option>
-                  <option value="CANCELLED">❌ Cancelled</option>
+                  <option value="ACTIVE">🟢 {t('projects.active')}</option>
+                  <option value="SOMEDAY">📅 {t('projects.someday')}</option>
+                  <option value="COMPLETED">✅ {t('projects.completed')}</option>
+                  <option value="CANCELLED">❌ {t('projects.cancelled')}</option>
                 </select>
               </div>
             </div>
@@ -304,7 +306,7 @@ export const ProjectsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading projects...</p>
+          <p className="text-gray-500 mt-4">{t('projects.loadingProjects')}</p>
         </div>
       </div>
     );
@@ -314,8 +316,8 @@ export const ProjectsPage = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       {/* Header */}
       <PageHeader 
-        title="Projects"
-        subtitle="Manage your transformation goals"
+        title={t('projects.title')}
+        subtitle={t('projects.myProjects')}
         showBackButton={true}
         showSearch={true}
         showFilter={true}
@@ -327,15 +329,15 @@ export const ProjectsPage = () => {
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{activeProjects.length}</div>
-              <div className="text-xs text-gray-500">Active</div>
+              <div className="text-xs text-gray-500">{t('projects.active')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{somedayProjects.length}</div>
-              <div className="text-xs text-gray-500">Someday</div>
+              <div className="text-xs text-gray-500">{t('projects.someday')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{completedProjects.length}</div>
-              <div className="text-xs text-gray-500">Completed</div>
+              <div className="text-xs text-gray-500">{t('projects.completed')}</div>
             </div>
           </div>
         </div>
@@ -351,11 +353,11 @@ export const ProjectsPage = () => {
           >
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-              Active Projects
+              {t('projects.activeProjects')}
               <span className="text-sm font-normal text-gray-500">{activeProjects.length}</span>
             </h2>
             <button className="text-indigo-600 text-sm font-medium hover:text-indigo-700">
-              {showActiveProjects ? 'Hide' : 'View All'}
+              {showActiveProjects ? t('projects.hide') : t('projects.viewAll')}
             </button>
           </button>
 
@@ -363,7 +365,7 @@ export const ProjectsPage = () => {
             <div>
               {activeProjects.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center">
-                  <p className="text-gray-500">No active projects</p>
+                  <p className="text-gray-500">{t('projects.noActiveProjects')}</p>
                 </div>
               ) : (
                 activeProjects.map(project => (
@@ -382,7 +384,7 @@ export const ProjectsPage = () => {
           >
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-              Someday/Maybe
+              {t('projects.somedayMaybe')}
               <span className="text-sm font-normal text-gray-500">{somedayProjects.length}</span>
             </h2>
             <svg 
@@ -412,7 +414,7 @@ export const ProjectsPage = () => {
           >
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-3 h-3 bg-gray-400 rounded-full"></span>
-              Completed
+              {t('projects.completed')}
               <span className="text-sm font-normal text-gray-500">{completedProjects.length}</span>
             </h2>
             <svg 
@@ -442,7 +444,7 @@ export const ProjectsPage = () => {
           >
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="w-3 h-3 bg-red-400 rounded-full"></span>
-              Cancelled
+              {t('projects.cancelled')}
               <span className="text-sm font-normal text-gray-500">{cancelledProjects.length}</span>
             </h2>
             <svg 

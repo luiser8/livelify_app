@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { goalService, projectService, actionService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
 import { PageHeader, BottomNav } from '@/shared/components';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
@@ -9,6 +10,7 @@ import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelper
  */
 export const ProjectGoalsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   
   const [project, setProject] = useState<Project | null>(null);
@@ -112,17 +114,17 @@ export const ProjectGoalsPage = () => {
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 'BE': return 'Who will you become in 90 days?';
-      case 'DO': return 'What will you DO in 90 days?';
-      case 'HAVE': return 'What will you HAVE in 90 days?';
+      case 'BE': return t('projects.goals.beTitle');
+      case 'DO': return t('projects.goals.doTitle');
+      case 'HAVE': return t('projects.goals.haveTitle');
     }
   };
 
   const getStepSubtitle = () => {
     switch (currentStep) {
-      case 'BE': return 'Define the person you want to be in your transformation. Focus on identity, character traits, and mindset shifts.';
-      case 'DO': return 'Define the actions and habits you will complete. Focus on consistent behaviors and daily practices.';
-      case 'HAVE': return 'Define the tangible results and achievements. Focus on measurable outcomes and milestones.';
+      case 'BE': return t('projects.goals.beDescription');
+      case 'DO': return t('projects.goals.doDescription');
+      case 'HAVE': return t('projects.goals.haveDescription');
     }
   };
 
@@ -165,7 +167,7 @@ export const ProjectGoalsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading goals...</p>
+          <p className="text-gray-500 mt-4">{t('projects.goals.loading')}</p>
         </div>
       </div>
     );
@@ -175,9 +177,9 @@ export const ProjectGoalsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">Project not found</p>
+          <p className="text-gray-500">{t('projects.goals.projectNotFound')}</p>
           <button onClick={() => navigate('/projects')} className="mt-4 text-indigo-600 hover:text-indigo-700">
-            Go back to projects
+            {t('projects.goals.backToProjects')}
           </button>
         </div>
       </div>
@@ -193,7 +195,7 @@ export const ProjectGoalsPage = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       <PageHeader 
         title={project.title}
-        subtitle="Manage Your Goals"
+        subtitle={t('projects.goals.subtitle')}
         backPath="/projects"
         showSearch={false}
         showFilter={false}
@@ -205,7 +207,7 @@ export const ProjectGoalsPage = () => {
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{goals.length}</div>
-              <div className="text-xs text-gray-500">Total Goals</div>
+              <div className="text-xs text-gray-500">{t('projects.goals.totalGoals')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{beGoals.length}</div>
@@ -236,7 +238,7 @@ export const ProjectGoalsPage = () => {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>🎯 BE Goals</span>
+                <span>🎯 {t('projects.goals.beGoals')}</span>
                 <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{beGoals.length}</span>
               </div>
             </button>
@@ -249,7 +251,7 @@ export const ProjectGoalsPage = () => {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>⚡ DO Goals</span>
+                <span>⚡ {t('projects.goals.doGoals')}</span>
                 <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{doGoals.length}</span>
               </div>
             </button>
@@ -262,7 +264,7 @@ export const ProjectGoalsPage = () => {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>🏆 HAVE Goals</span>
+                <span>🏆 {t('projects.goals.haveGoals')}</span>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{haveGoals.length}</span>
               </div>
             </button>
@@ -281,21 +283,21 @@ export const ProjectGoalsPage = () => {
 
         {/* Tips */}
         <div className="bg-white rounded-xl p-5 mb-6 border border-gray-200">
-          <h3 className="font-bold text-gray-900 mb-3">💡 {currentStep} Goal Writing Tips</h3>
+          <h3 className="font-bold text-gray-900 mb-3">💡 {t('projects.goals.writingTips', { type: currentStep })}</h3>
           <div className="space-y-2">
             {currentStep === 'BE' && (
               <>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Start with "I am someone who..." - This frames your goal as an identity statement</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.beTip1')}</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Focus on character traits - What kind of person do you want to be?</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.beTip2')}</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Think mindset shifts - How will your thinking about this area change?</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.beTip3')}</p>
                 </div>
               </>
             )}
@@ -303,11 +305,11 @@ export const ProjectGoalsPage = () => {
               <>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Be specific about actions - What exactly will you do?</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.doTip1')}</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Include frequency - How often will you do this?</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.doTip2')}</p>
                 </div>
               </>
             )}
@@ -315,11 +317,11 @@ export const ProjectGoalsPage = () => {
               <>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Make it measurable - Use numbers when possible</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.haveTip1')}</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <p className="text-sm text-gray-700">Focus on outcomes - What tangible results will you achieve?</p>
+                  <p className="text-sm text-gray-700">{t('projects.goals.haveTip2')}</p>
                 </div>
               </>
             )}
@@ -329,7 +331,7 @@ export const ProjectGoalsPage = () => {
         {/* Current Goals */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-900">Your {currentStep} Goals</h3>
+            <h3 className="text-xl font-bold text-gray-900">{t('projects.goals.yourGoals', { type: currentStep })}</h3>
             {currentGoals.length < 3 && (
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
@@ -339,7 +341,7 @@ export const ProjectGoalsPage = () => {
                   'bg-blue-600 hover:bg-blue-700'
                 } text-white`}
               >
-                + Add {currentStep} Goal
+                + {t('projects.goals.addGoal', { type: currentStep })}
               </button>
             )}
           </div>
@@ -347,7 +349,7 @@ export const ProjectGoalsPage = () => {
           {currentGoals.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-gray-300">
               <div className="text-6xl mb-4">{getStepIcon()}</div>
-              <p className="text-gray-500 text-lg mb-6">No {currentStep} goals yet</p>
+              <p className="text-gray-500 text-lg mb-6">{t('projects.goals.noGoals', { type: currentStep })}</p>
               <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">{getStepSubtitle()}</p>
               <button
                 onClick={() => setShowCreateForm(true)}
@@ -357,7 +359,7 @@ export const ProjectGoalsPage = () => {
                   'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                Create Your First {currentStep} Goal
+                {t('projects.goals.createFirst', { type: currentStep })}
               </button>
             </div>
           ) : (
@@ -394,15 +396,15 @@ export const ProjectGoalsPage = () => {
                       {goal.baseCapital > 0 && (
                         <div className="flex items-center gap-6 text-sm bg-gray-50 rounded-lg p-3">
                           <div>
-                            <span className="text-gray-500">Base Capital: </span>
+                            <span className="text-gray-500">{t('projects.goals.baseCapital')}: </span>
                             <span className="font-bold text-gray-900">{goal.currencyCode} ${goal.baseCapital.toLocaleString()}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Multiplier: </span>
+                            <span className="text-gray-500">{t('projects.goals.multiplier')}: </span>
                             <span className="font-bold text-indigo-600">{goal.multiplier}x</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Target: </span>
+                            <span className="text-gray-500">{t('projects.goals.target')}: </span>
                             <span className="font-bold text-green-600">{goal.currencyCode} ${(goal.baseCapital * goal.multiplier).toLocaleString()}</span>
                           </div>
                         </div>
@@ -411,7 +413,7 @@ export const ProjectGoalsPage = () => {
                     <button
                       onClick={() => handleDeleteGoal(goal.id)}
                       className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors flex-shrink-0"
-                      title="Delete goal"
+                      title={t('projects.goals.deleteGoal')}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -432,7 +434,7 @@ export const ProjectGoalsPage = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                       </svg>
-                      <span>View Actions</span>
+                      <span>{t('projects.goals.viewActions')}</span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                         currentStep === 'BE' ? 'bg-red-100 text-red-700' :
                         currentStep === 'DO' ? 'bg-purple-100 text-purple-700' :
@@ -455,12 +457,12 @@ export const ProjectGoalsPage = () => {
             currentStep === 'DO' ? 'bg-purple-50 border-purple-200' :
             'bg-blue-50 border-blue-200'
           }`}>
-            <h4 className="font-bold text-gray-900 text-xl mb-4">✨ Create New {currentStep} Goal</h4>
+            <h4 className="font-bold text-gray-900 text-xl mb-4">✨ {t('projects.goals.createNew', { type: currentStep })}</h4>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Goal Description *
+                  {t('projects.goals.goalDescription')} *
                 </label>
                 <textarea
                   value={formData.content}
@@ -476,7 +478,7 @@ export const ProjectGoalsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Base Capital (Optional)
+                    {t('projects.goals.baseCapital')} ({t('projects.goals.optional')})
                   </label>
                   <input
                     type="number"
@@ -490,7 +492,7 @@ export const ProjectGoalsPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency Code
+                    {t('projects.goals.currencyCode')}
                   </label>
                   <select
                     value={formData.currencyCode}
@@ -513,7 +515,7 @@ export const ProjectGoalsPage = () => {
                   }}
                   className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
                 >
-                  Cancel
+                  {t('projects.goals.cancel')}
                 </button>
                 <button
                   onClick={() => handleCreateGoal(currentStep)}
@@ -524,7 +526,7 @@ export const ProjectGoalsPage = () => {
                     'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
-                  {creating ? 'Creating...' : `✓ Add ${currentStep} Goal`}
+                  {creating ? t('projects.goals.creating') : `✓ ${t('projects.goals.addGoal', { type: currentStep })}`}
                 </button>
               </div>
             </div>
@@ -543,7 +545,7 @@ export const ProjectGoalsPage = () => {
               currentStep === 'DO' ? 'text-purple-900' :
               'text-blue-900'
             }`}>
-              💡 {currentStep} Goal Examples
+              💡 {t('projects.goals.examples', { type: currentStep })}
             </h4>
             <div className="space-y-3">
               {goalExamples[currentStep].map((example, index) => (

@@ -8,4 +8,5 @@ export { PageHeader } from './PageHeader';
 export { ErrorBoundary } from './ErrorBoundary/ErrorBoundary';
 export { NotFoundPage } from './NotFound/NotFoundPage';
 export { SessionExpiredModal } from './SessionExpired/SessionExpiredModal';
+export { LanguageSelector, LanguageSelectorCompact } from './LanguageSelector';
 

@@ -7,7 +7,7 @@ import {
   type AssessmentQuestion 
 } from '@/infrastructure/services';
 import { getAreaColor, getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav } from '@/shared/components';
+import { BottomNav, LanguageSelectorCompact } from '@/shared/components';
 
 /**
  * Página de preguntas del Assessment para un área específica
@@ -145,8 +145,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto w-full px-6 py-6">
         {/* Header with Area Info */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-start justify-between mb-4 sm:mb-6">
-            <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-start justify-between gap-4 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1">
               <div className={`w-12 h-12 sm:w-14 sm:h-14 ${getAreaColor(areaName)} rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm`}>
                 {getAreaIcon(areaName)}
               </div>
@@ -154,6 +154,9 @@ export const AssessmentQuestionsPage: React.FC = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{areaName}</h1>
                 <p className="text-sm sm:text-base text-gray-500">Area 2 of 6</p>
               </div>
+            </div>
+            <div className="flex-shrink-0">
+              <LanguageSelectorCompact />
             </div>
           </div>
 

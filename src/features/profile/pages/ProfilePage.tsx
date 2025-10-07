@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader } from '@/shared/components';
 import { useAuth } from '@/features/auth/context';
 import { contextService, subscriptionService, type Context, type UserSubscription } from '@/infrastructure/services';
@@ -9,6 +10,7 @@ import { contextService, subscriptionService, type Context, type UserSubscriptio
  */
 export const ProfilePage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [contexts, setContexts] = useState<Context[]>([]);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
@@ -59,8 +61,8 @@ export const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
       <PageHeader 
-        title="Profile"
-        subtitle="Manage your account settings"
+        title={t('profile.title')}
+        subtitle={t('profile.subtitle')}
         showBackButton={true}
         showSearch={false}
         showFilter={false}
@@ -70,18 +72,27 @@ export const ProfilePage = () => {
         <div className="space-y-6">
           {/* User Info Card - Full Width */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-indigo-600">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </span>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <span className="text-2xl font-bold text-indigo-600">
+                    {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {user?.firstName} {user?.lastName}
+                  </h2>
+                  <p className="text-gray-500">{user?.email}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {user?.firstName} {user?.lastName}
-                </h2>
-                <p className="text-gray-500">{user?.email}</p>
-              </div>
+              {/* Logout Button - Small */}
+              <button
+                onClick={logout}
+                className="px-4 py-2 text-sm bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors"
+              >
+                {t('profile.actions.logout')}
+              </button>
             </div>
           </div>
 
@@ -91,14 +102,14 @@ export const ProfilePage = () => {
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Subscription</h3>
-                <p className="text-sm text-gray-500">Manage your plan</p>
+                <h3 className="text-lg font-bold text-gray-900">{t('profile.subscription.title')}</h3>
+                <p className="text-sm text-gray-500">{t('profile.subtitle')}</p>
               </div>
               <button
                 onClick={() => navigate('/subscription')}
                 className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
               >
-                View Plans
+                {t('profile.subscription.upgradePlan')}
               </button>
             </div>
 
@@ -114,25 +125,25 @@ export const ProfilePage = () => {
                       {subscription.planName === 'BASICO' ? '🌱' : subscription.planName === 'INTERMEDIO' ? '⚡' : '👑'}
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">{subscription.plan.name} Plan</p>
+                      <p className="font-bold text-gray-900">{subscription.plan.name} {t('profile.subscription.plan')}</p>
                       <p className="text-sm text-gray-600">{subscription.plan.description}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gray-900">${subscription.price}</p>
-                    <p className="text-xs text-gray-500">per month</p>
+                    <p className="text-xs text-gray-500">{t('profile.subscription.perMonth')}</p>
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t border-purple-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
+                    <span className="text-sm text-gray-600">{t('profile.subscription.status')}</span>
                     <span className={`px-3 py-1 ${subscription.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} text-xs font-semibold rounded-full`}>
-                      {subscription.active ? '✓ Active' : 'Inactive'}
+                      {subscription.active ? `✓ ${t('profile.subscription.active')}` : t('profile.subscription.inactive')}
                     </span>
                   </div>
                   {subscription.renewalDate && (
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm text-gray-600">Renews</span>
+                      <span className="text-sm text-gray-600">{t('profile.subscription.renews')}</span>
                       <span className="text-xs text-gray-500">
                         {new Date(subscription.renewalDate).toLocaleDateString()}
                       </span>
@@ -147,13 +158,13 @@ export const ProfilePage = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <p className="text-gray-600 font-medium mb-2">No Active Subscription</p>
-                <p className="text-sm text-gray-500 mb-4">Choose a plan to unlock all features</p>
+                <p className="text-gray-600 font-medium mb-2">{t('profile.subscription.noActiveSubscription')}</p>
+                <p className="text-sm text-gray-500 mb-4">{t('profile.subscription.unlockFeatures')}</p>
                 <button
                   onClick={() => navigate('/subscription')}
                   className="px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
                 >
-                  Choose a Plan
+                  {t('profile.subscription.chooseAPlan')}
                 </button>
               </div>
             )}
@@ -163,14 +174,14 @@ export const ProfilePage = () => {
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">My Contexts</h3>
-                <p className="text-sm text-gray-500">Manage your work contexts</p>
+                <h3 className="text-lg font-bold text-gray-900">{t('profile.contexts.title')}</h3>
+                <p className="text-sm text-gray-500">{t('profile.contexts.description')}</p>
               </div>
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
                 className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
               >
-                {showCreateForm ? 'Cancel' : '+ Add Context'}
+                {showCreateForm ? t('profile.contexts.cancel') : t('profile.contexts.addContext')}
               </button>
             </div>
 
@@ -178,7 +189,7 @@ export const ProfilePage = () => {
             {showCreateForm && (
               <form onSubmit={handleCreateContext} className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Context Name
+                  {t('profile.contexts.contextName')}
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 flex items-center border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
@@ -187,7 +198,7 @@ export const ProfilePage = () => {
                       type="text"
                       value={newContextName}
                       onChange={(e) => setNewContextName(e.target.value)}
-                      placeholder="home, work, gym"
+                      placeholder={t('profile.contexts.placeholder')}
                       className="flex-1 px-2 py-2 border-0 outline-none bg-transparent"
                       disabled={creating}
                       required
@@ -198,11 +209,11 @@ export const ProfilePage = () => {
                     disabled={creating || !newContextName.trim()}
                     className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {creating ? 'Creating...' : 'Create'}
+                    {creating ? t('profile.contexts.creating') : t('profile.contexts.create')}
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  💡 The @ prefix is automatically added to your context
+                  {t('profile.contexts.prefixNote')}
                 </p>
               </form>
             )}
@@ -211,15 +222,15 @@ export const ProfilePage = () => {
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                <p className="text-gray-500 text-sm mt-2">Loading contexts...</p>
+                <p className="text-gray-500 text-sm mt-2">{t('profile.contexts.loading')}</p>
               </div>
             ) : contexts.length === 0 ? (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                <p className="text-gray-500 mb-2">No contexts yet</p>
-                <p className="text-sm text-gray-400">Create your first context to get started</p>
+                <p className="text-gray-500 mb-2">{t('profile.contexts.noContexts')}</p>
+                <p className="text-sm text-gray-400">{t('profile.contexts.getStarted')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -237,12 +248,12 @@ export const ProfilePage = () => {
                       <div>
                         <p className="font-semibold text-gray-900">{context.name}</p>
                         <p className="text-xs text-gray-500">
-                          Created {new Date(context.createdAt).toLocaleDateString()}
+                          {t('profile.contexts.created')} {new Date(context.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     <span className="text-xs text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
-                      Active
+                      {t('profile.contexts.active')}
                     </span>
                   </div>
                 ))}
@@ -250,14 +261,6 @@ export const ProfilePage = () => {
             )}
             </div>
           </div>
-
-          {/* Logout Button - Full Width */}
-          <button
-            onClick={logout}
-            className="w-full py-3 px-4 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors"
-          >
-            Cerrar Sesión
-          </button>
         </div>
       </main>
 

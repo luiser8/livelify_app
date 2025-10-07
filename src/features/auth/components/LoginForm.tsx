@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components';
 
 interface LoginFormProps {
@@ -11,6 +12,7 @@ interface LoginFormProps {
  * Formulario de inicio de sesión
  */
 export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFormProps) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -19,15 +21,15 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
     const newErrors: { email?: string; password?: string } = {};
 
     if (!email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('auth.validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = t('auth.validation.emailInvalid');
     }
 
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('auth.validation.passwordRequired');
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('auth.validation.passwordMinLength');
     }
 
     setErrors(newErrors);
@@ -57,8 +59,8 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
       
       <Input
         type="email"
-        label="Email"
-        placeholder="your@email.com"
+        label={t('auth.login.email')}
+        placeholder={t('auth.login.emailPlaceholder')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         error={errors.email}
@@ -68,8 +70,8 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
 
       <Input
         type="password"
-        label="Password"
-        placeholder="••••••••"
+        label={t('auth.login.password')}
+        placeholder={t('auth.login.passwordPlaceholder')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
@@ -83,13 +85,13 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
             type="checkbox"
             className="mr-2 rounded border-white/30 bg-white/10 text-primary-500 focus:ring-white/50"
           />
-          Remember me
+          {t('auth.login.rememberMe')}
         </label>
         <button
           type="button"
           className="text-white/80 hover:text-white transition-colors"
         >
-          Forgot password?
+          {t('auth.login.forgotPassword')}
         </button>
       </div>
 
@@ -98,7 +100,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
         disabled={isLoading}
         className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? t('auth.login.signingIn') : t('auth.login.signIn')}
       </button>
     </form>
   );
