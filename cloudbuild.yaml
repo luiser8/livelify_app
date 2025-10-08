@@ -7,7 +7,7 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/react-apps/${_SERVICE_NAME}:$COMMIT_SHA'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
     - '.'
 
   # ===================================================================
@@ -15,7 +15,7 @@ steps:
   # ===================================================================
 - name: 'gcr.io/cloud-builders/docker'
   id: Push
-  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/react-apps/${_SERVICE_NAME}:$COMMIT_SHA']
+  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA']
   waitFor:
     - Build
 
@@ -30,7 +30,7 @@ steps:
     - 'deploy'
     - '${_SERVICE_NAME}'
     - '--image'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/react-apps/${_SERVICE_NAME}:$COMMIT_SHA'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
     - '--region'
     - 'us-central1'
     - '--platform'
