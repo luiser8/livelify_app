@@ -23,8 +23,6 @@ RUN pnpm install --unsafe-perm
 COPY . .
 
 # Se ejecuta el script de build para generar los archivos estáticos de producción.
-# CAMBIO: Se ejecuta 'vite build' directamente para saltar la comprobación de tipos de 'tsc -b'.
-# Esto es una solución temporal. Lo ideal es corregir los errores de TypeScript en el código.
 RUN pnpm exec vite build
 
 
@@ -32,11 +30,17 @@ RUN pnpm exec vite build
 # Se utiliza una imagen ligera de Nginx para servir los archivos estáticos.
 FROM nginx:1.27-alpine
 
-# CAMBIO: Se corrige la ruta de origen a '/app/dist', que es la carpeta que genera Vite.
+# Se copia la configuración personalizada de Nginx. Este archivo le dirá a Nginx
+# que escuche en el puerto que Cloud Run le asigne.
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# Se copian los archivos generados en la etapa de 'build' al directorio de Nginx.
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Se expone el puerto 80, que es el puerto por defecto de Nginx.
-EXPOSE 80
+# Se expone el puerto 8080, que es el que Cloud Run utiliza por defecto.
+EXPOSE 8080
 
-# El comando por defecto de la imagen de Nginx iniciará el servidor web.
-CMD ["nginx", "-g", "daemon off;"]
+# El comando de inicio ahora primero procesa la plantilla de configuración para
+# inyectar la variable de entorno PORT y luego inicia Nginx.
+CMD ["/bin/sh", "-c", "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+
