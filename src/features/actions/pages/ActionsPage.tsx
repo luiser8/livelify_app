@@ -7,7 +7,7 @@ import {
   goalService,
   contextService,
   projectService,
-  type Action,
+  type ActionItem as Action,
   type EnergyLevel,
   type Goal,
   type Context,
@@ -185,15 +185,6 @@ export const ActionsPage = () => {
       case 'MEDIUM': return '🟡';
       case 'HIGH': return '🔴';
       default: return '⚪';
-    }
-  };
-
-  const getGoalTypeColor = (goalType: string) => {
-    switch (goalType) {
-      case 'BE': return 'bg-red-50 border-red-200 text-red-700';
-      case 'DO': return 'bg-purple-50 border-purple-200 text-purple-700';
-      case 'HAVE': return 'bg-blue-50 border-blue-200 text-blue-700';
-      default: return 'bg-gray-50 border-gray-200 text-gray-700';
     }
   };
 

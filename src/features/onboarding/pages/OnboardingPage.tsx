@@ -48,11 +48,6 @@ export const OnboardingPage = () => {
     }
   };
 
-  const handleStartAssessment = () => {
-    // TODO: Navegar a la página de assessment
-    console.log('Start Assessment');
-  };
-
   const handleLogin = () => {
     navigate('/login');
   };

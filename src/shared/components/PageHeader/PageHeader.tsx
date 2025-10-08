@@ -53,10 +53,10 @@ export const PageHeader = ({
   subtitle,
   showBackButton = true,
   backPath,
-  showSearch = false,
-  showFilter = false,
-  onSearchClick,
-  onFilterClick,
+  // showSearch = false,
+  // showFilter = false,
+  // onSearchClick,
+  // onFilterClick,
   children,
 }: PageHeaderProps) => {
   const navigate = useNavigate();

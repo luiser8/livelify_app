@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader } from '@/shared/components';
 import { subscriptionService, type Subscription, type UserSubscription } from '@/infrastructure/services';
@@ -8,7 +7,6 @@ import { subscriptionService, type Subscription, type UserSubscription } from '@
  * Página de Suscripción y Planes
  */
 export const SubscriptionPage = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [plans, setPlans] = useState<Subscription[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
@@ -111,11 +109,6 @@ export const SubscriptionPage = () => {
   const getFeatureName = (feature: string) => {
     const featureKey = `subscription.features.${feature}`;
     return t(featureKey);
-  };
-
-  const formatFeatures = (features: string[]) => {
-    // Las features vienen como array de strings
-    return features.map(f => getFeatureName(f));
   };
 
   if (loading) {

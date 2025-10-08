@@ -9,7 +9,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies using pnpm
-RUN pnpm install
+RUN pnpm install --unsafe-perm
 
 # Copy the rest of the application code
 COPY . .

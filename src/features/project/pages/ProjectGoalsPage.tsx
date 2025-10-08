@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { goalService, projectService, actionService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
 import { PageHeader, BottomNav } from '@/shared/components';
-import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
 /**
  * Página de gestión de Goals (BE, DO, HAVE) de un proyecto
