@@ -37,7 +37,7 @@ steps:
     - 'managed'
     - '--allow-unauthenticated' # Permite que el servicio sea accesible públicamente
     - '--project'
-    - '${PROJECT_ID}'
+    - '${_PROJECT_ID}'
     # Descomenta y ajusta la siguiente línea para añadir variables de entorno
     # - '--set-env-vars=REACT_APP_API_URL=https://api.tu-servicio.com'
   waitFor:
@@ -46,6 +46,9 @@ steps:
 # Variables que puedes cambiar desde la configuración del Trigger.
 substitutions:
   _SERVICE_NAME: 'livelify-webapp'
+  # Este es el único lugar donde se define el Project ID.
+  # Confirma que 'livelifydev' es el ID correcto de tu proyecto.
+  _PROJECT_ID: 'livelifydev'
 
 # Opciones de registro.
 options:
