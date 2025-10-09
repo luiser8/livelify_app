@@ -17,13 +17,14 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml* ./
 
 # Se instalan las dependencias del proyecto usando pnpm.
-RUN pnpm install --unsafe-perm
+RUN pnpm install
+#--unsafe-perm
 
 # Se copia el resto del código fuente.
 COPY . .
 
 # Se ejecuta el script de build para generar los archivos estáticos de producción.
-RUN pnpm exec vite build
+RUN pnpm build
 
 
 # ---- Etapa 2: Serve ----
