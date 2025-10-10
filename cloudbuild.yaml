@@ -1,38 +1,24 @@
 steps:
-  # ===================================================================
-  # PASO 1: Construir la imagen de Docker para React
-  # ===================================================================
   - name: 'gcr.io/cloud-builders/docker'
-    id: Build
     args:
       - 'build'
       - '--build-arg'
-      - 'VITE_API_URL=https://livelify-api-abcdef-uc.a.run.app'  # ← REEMPLAZA con tu API real
+      - 'VITE_API_URL=https://livelify-api-abcdef-uc.a.run.app'
       - '-t'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/livelify-webapp:$COMMIT_SHA'
       - '.'
 
-  # ===================================================================
-  # PASO 2: Subir la imagen a Artifact Registry
-  # ===================================================================
   - name: 'gcr.io/cloud-builders/docker'
-    id: Push
-    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA']
-    waitFor:
-      - Build
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/livelify-webapp:$COMMIT_SHA']
 
-  # ===================================================================
-  # PASO 3: Desplegar en Cloud Run
-  # ===================================================================
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: Deploy
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - '${_SERVICE_NAME}'
+      - 'livelify-webapp'
       - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/livelify-webapp:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -40,15 +26,6 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
-      - '--memory'
-      - '512Mi'
-      - '--cpu'
-      - '1'
-      - '--max-instances'
-      - '5'
-
-substitutions:
-  _SERVICE_NAME: 'livelify-webapp'
 
 options:
   logging: CLOUD_LOGGING_ONLY
