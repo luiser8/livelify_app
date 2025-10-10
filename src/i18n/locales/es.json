@@ -455,6 +455,9 @@
     "daysOverdue": "d vencidos",
     "noActionsInContext": "No hay acciones en este contexto",
     "createActionAbove": "Crea una nueva acción arriba"
+  },
+  "footer": {
+    "createdBy": "Creado por"
   }
 }
 

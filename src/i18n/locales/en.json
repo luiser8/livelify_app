@@ -455,6 +455,9 @@
     "daysOverdue": "d overdue",
     "noActionsInContext": "No actions in this context",
     "createActionAbove": "Create a new action above"
+  },
+  "footer": {
+    "createdBy": "Created by"
   }
 }
 

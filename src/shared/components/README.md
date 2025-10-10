@@ -22,6 +22,24 @@ import { Button } from '@/shared/components';
 - `isLoading`: boolean
 - Todos los props nativos de HTMLButtonElement
 
+### Footer
+Footer simple que muestra información del creador del sitio. Se utiliza únicamente en la página de onboarding (landing page).
+
+**Uso:**
+```tsx
+import { Footer } from '@/shared/components';
+
+<Footer />
+```
+
+**Características:**
+- Diseño limpio y minimalista
+- Se integra naturalmente en el flujo del documento (no fijo)
+- Texto con transparencia para adaptarse al fondo
+- Muestra "Creado por flowpartners" (traducido automáticamente)
+- Soporta internacionalización (i18n) - EN: "Created by", ES: "Creado por"
+- Solo visible en la ruta raíz (/)
+
 ## Agregar Nuevos Componentes
 
 1. Crear carpeta con el nombre del componente

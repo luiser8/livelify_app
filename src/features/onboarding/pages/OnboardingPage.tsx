@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CarouselDots } from '../components';
 import { useCarousel } from '../hooks';
 import { useAuth } from '@/features/auth/context';
-import { LanguageSelector } from '@/shared/components';
+import { LanguageSelector, Footer } from '@/shared/components';
 
 /**
  * Página de Onboarding/Landing
@@ -153,15 +153,17 @@ export const OnboardingPage = () => {
       </div>
 
       {/* Botones de acción */}
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-md space-y-4 mb-4">
         <button
           onClick={handleExplore}
           className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg"
         >
           {isAuthenticated ? t('onboarding.goToApp') : t('onboarding.exploreApp')}
         </button>
-
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
