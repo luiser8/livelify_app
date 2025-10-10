@@ -152,18 +152,18 @@ export const OnboardingPage = () => {
         />
       </div>
 
-      {/* Botones de acción */}
-      <div className="w-full max-w-md space-y-4 mb-4">
+      {/* Botones de acción y Footer */}
+      <div className="w-full max-w-md space-y-8">
         <button
           onClick={handleExplore}
           className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg"
         >
           {isAuthenticated ? t('onboarding.goToApp') : t('onboarding.exploreApp')}
         </button>
+        
+        {/* Footer */}
+        <Footer />
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };
