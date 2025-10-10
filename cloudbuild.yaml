@@ -1,56 +1,54 @@
 steps:
   # ===================================================================
-  # PASO 1: Construir la imagen de Docker para la aplicación React
+  # PASO 1: Construir la imagen de Docker para React
   # ===================================================================
-- name: 'gcr.io/cloud-builders/docker'
-  id: Build
-  args:
-    - 'build'
-    - '-t'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
-    - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Build
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_API_URL=https://livelify-api-abcdef-uc.a.run.app'  # ← REEMPLAZA con tu API real
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
+      - '.'
 
   # ===================================================================
   # PASO 2: Subir la imagen a Artifact Registry
   # ===================================================================
-- name: 'gcr.io/cloud-builders/docker'
-  id: Push
-  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA']
-  waitFor:
-    - Build
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Push
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA']
+    waitFor:
+      - Build
 
   # ===================================================================
-  # PASO 3: Desplegar la imagen en Cloud Run como un servicio web
+  # PASO 3: Desplegar en Cloud Run
   # ===================================================================
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: Deploy
-  entrypoint: gcloud
-  args:
-    - 'run'
-    - 'deploy'
-    - '${_SERVICE_NAME}'
-    - '--image'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
-    - '--region'
-    - 'us-central1'
-    - '--platform'
-    - 'managed'
-    - '--allow-unauthenticated' # Permite que el servicio sea accesible públicamente
-    - '--project'
-    - '${_PROJECT_ID}'
-    # Descomenta y ajusta la siguiente línea para añadir variables de entorno
-    # - '--set-env-vars=REACT_APP_API_URL=https://api.tu-servicio.com'
-  waitFor:
-    - Push
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: Deploy
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-webapp/${_SERVICE_NAME}:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '5'
 
-# Variables que puedes cambiar desde la configuración del Trigger.
 substitutions:
   _SERVICE_NAME: 'livelify-webapp'
-  # Este es el único lugar donde se define el Project ID.
-  # Confirma que 'livelifydev' es el ID correcto de tu proyecto.
-  _PROJECT_ID: 'livelifydev'
 
-# Opciones de registro.
 options:
   logging: CLOUD_LOGGING_ONLY
-
