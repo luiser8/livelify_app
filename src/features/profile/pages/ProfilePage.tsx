@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { BottomNav, PageHeader, ConfirmModal } from '@/shared/components';
 import { useAuth } from '@/features/auth/context';
 import { contextService, subscriptionService, type Context, type UserSubscription } from '@/infrastructure/services';
 
@@ -16,8 +16,11 @@ export const ProfilePage = () => {
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newContextName, setNewContextName] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contextToDelete, setContextToDelete] = useState<Context | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +58,38 @@ export const ProfilePage = () => {
       console.error('Error creating context:', error);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleOpenDeleteModal = (context: Context) => {
+    if (!context.canDelete) {
+      return; // No abrir modal si no se puede eliminar
+    }
+    setContextToDelete(context);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (!deleting) {
+      setShowDeleteModal(false);
+      setContextToDelete(null);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!contextToDelete) return;
+
+    try {
+      setDeleting(true);
+      await contextService.deleteContext(contextToDelete.id);
+      setContexts(contexts.filter(ctx => ctx.id !== contextToDelete.id));
+      setShowDeleteModal(false);
+      setContextToDelete(null);
+    } catch (error) {
+      console.error('Error deleting context:', error);
+      alert(t('profile.contexts.deleteError'));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -247,14 +282,44 @@ export const ProfilePage = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{context.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {t('profile.contexts.created')} {new Date(context.createdAt).toLocaleDateString()}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-gray-500">
+                            {t('profile.contexts.created')} {new Date(context.createdAt).toLocaleDateString()}
+                          </p>
+                          {context.actionsCount > 0 && (
+                            <span className="text-xs text-gray-500">•</span>
+                          )}
+                          {context.actionsCount > 0 && (
+                            <p className="text-xs text-indigo-600 font-medium">
+                              {t('profile.contexts.actionsCount', { count: context.actionsCount })}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <span className="text-xs text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
-                      {t('profile.contexts.active')}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
+                        {t('profile.contexts.active')}
+                      </span>
+                      <button
+                        onClick={() => handleOpenDeleteModal(context)}
+                        disabled={!context.canDelete}
+                        className={`p-2 rounded-lg transition-colors ${
+                          context.canDelete 
+                            ? 'text-red-600 hover:bg-red-50 cursor-pointer' 
+                            : 'text-gray-300 cursor-not-allowed'
+                        }`}
+                        title={
+                          context.canDelete 
+                            ? t('profile.contexts.delete') 
+                            : t('profile.contexts.cannotDelete', { count: context.actionsCount })
+                        }
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -265,6 +330,18 @@ export const ProfilePage = () => {
       </main>
 
       <BottomNav />
+
+      {/* Modal de confirmación para eliminar contexto */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title={t('profile.contexts.deleteModalTitle')}
+        message={t('profile.contexts.deleteModalMessage', { name: contextToDelete?.name || '' })}
+        confirmText={t('profile.contexts.deleteConfirm')}
+        cancelText={t('profile.contexts.deleteCancel')}
+        isLoading={deleting}
+      />
     </div>
   );
 };

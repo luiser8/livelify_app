@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { goalService, projectService, actionService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
+import { goalService, projectService, actionService, lifeWheelService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
 import { PageHeader, BottomNav } from '@/shared/components';
 
 /**
@@ -34,14 +34,41 @@ export const ProjectGoalsPage = () => {
       try {
         setLoading(true);
         
-        const [allProjects, allGoals, allActions] = await Promise.all([
+        const [allProjects, allGoals, allActions, lifeWheelData] = await Promise.all([
           projectService.getAllProjects(),
           goalService.getMyGoals(),
           actionService.getMyActions(),
+          lifeWheelService.getMyLifeWheel(),
         ]);
 
         const currentProject = allProjects.projects.find(p => p.id === projectId);
         setProject(currentProject || null);
+
+        // Validar que el proyecto existe
+        if (!currentProject) {
+          navigate('/home');
+          return;
+        }
+
+        // Validar que TODAS las áreas estén completadas
+        const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
+          lifeWheelData.lifeAreas.every(area => area.score > 0);
+        
+        if (!allAreasAnswered) {
+          // Si no todas las áreas están respondidas, redirigir al assessment
+          navigate('/assessment/intro');
+          return;
+        }
+
+        // Verificar que el área del proyecto esté entre las 3 más bajas
+        const projectAreaId = currentProject.lifeWheelAreaId;
+        const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
+        const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
+        
+        if (!lowestThreeIds.has(projectAreaId)) {
+          navigate('/home');
+          return;
+        }
 
         if (currentProject && allGoals && allGoals.goals) {
           // Filtrar goals por el projectDetailId del proyecto actual
@@ -68,7 +95,7 @@ export const ProjectGoalsPage = () => {
     };
 
     fetchData();
-  }, [projectId]);
+  }, [projectId, navigate]);
 
   const handleCreateGoal = async (goalType: GoalType) => {
     if (!project || !formData.content.trim()) return;

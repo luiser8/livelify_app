@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BottomNav, LanguageSelectorCompact } from '@/shared/components';
 import { userService, type UserMeResponse } from '@/infrastructure/services';
-import { getAreaTranslationKey, getAreaColorVariants, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaTranslationKey, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
 
 /**
  * Página de Dashboard
@@ -55,6 +55,13 @@ export const DashboardPage = () => {
   const pendingGoals = summary.totalGoals - summary.completedGoals;
   const pendingActions = summary.totalActions - summary.completedActions;
   
+  // Get score color based on value
+  const getScoreColor = (score: number) => {
+    if (score < 5) return 'text-red-600';
+    if (score < 8) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+  
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -85,7 +92,9 @@ export const DashboardPage = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {/* Life Score */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className="text-4xl font-bold text-indigo-600 mb-2">{lifeWheel.globalScore.toFixed(1)}</div>
+            <div className={`text-4xl font-bold ${getScoreColor(lifeWheel.globalScore)} mb-2`}>
+              {lifeWheel.globalScore.toFixed(1)}<span className="text-2xl text-gray-400 font-normal">/10</span>
+            </div>
             <div className="text-sm text-gray-600">{t('dashboard.stats.lifeScore')}</div>
           </div>
 
@@ -140,7 +149,6 @@ export const DashboardPage = () => {
           </div>
           <div className="space-y-3">
           {lifeWheel.lifeAreas.map((area) => {
-            const colors = getAreaColorVariants(area.areaName);
             const translationKey = getAreaTranslationKey(area.areaName);
             const icon = getAreaIcon(area.areaName);
             const totalProjects = area.projects?.length || 0;
@@ -151,7 +159,7 @@ export const DashboardPage = () => {
                 onClick={() => navigate(`/area/${area.id}/projects`)}
                 className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <div className={`w-12 h-12 ${colors.bg} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}>
+                <div className="flex items-center justify-center text-4xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                   {icon}
                 </div>
                 <div className="flex-1">
@@ -165,53 +173,6 @@ export const DashboardPage = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Quick Navigation */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.quickActions.title')}</h3>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <button 
-              onClick={() => navigate('/projects')}
-              className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
-            >
-              <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-2xl mb-3">
-                📁
-              </div>
-              <span className="font-semibold text-gray-900 text-sm">{t('dashboard.quickActions.projects')}</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/actions')}
-              className="flex flex-col items-center justify-center p-6 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"
-            >
-              <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl mb-3">
-                ✓
-              </div>
-              <span className="font-semibold text-gray-900 text-sm">{t('dashboard.quickActions.actions')}</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/home')}
-              className="flex flex-col items-center justify-center p-6 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
-            >
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl mb-3">
-                🎯
-              </div>
-              <span className="font-semibold text-gray-900 text-sm">{t('dashboard.quickActions.lifeWheel')}</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/profile')}
-              className="flex flex-col items-center justify-center p-6 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors"
-            >
-              <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white text-2xl mb-3">
-                ⚙️
-              </div>
-              <span className="font-semibold text-gray-900 text-sm">{t('dashboard.quickActions.profile')}</span>
-            </button>
           </div>
         </div>
       </main>

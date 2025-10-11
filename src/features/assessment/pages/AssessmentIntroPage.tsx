@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
-import { getAreaColor, getAreaIcon, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaIcon, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
 import { BottomNav, PageHeader } from '@/shared/components';
 
 /**
@@ -29,11 +29,6 @@ export const AssessmentIntroPage = () => {
     fetchLifeWheel();
   }, []);
 
-  const handleStartAssessment = () => {
-    // TODO: Navegar a la página de preguntas del assessment
-    console.log('Starting assessment...');
-  };
-
   const handleAreaClick = (areaId: string, hasScore: boolean) => {
     // Si el área ya tiene score, no permitir responder de nuevo
     if (hasScore) {
@@ -42,12 +37,16 @@ export const AssessmentIntroPage = () => {
     navigate(`/assessment/area/${areaId}`);
   };
 
+  // Verificar si todas las áreas están completadas
+  const allAreasCompleted = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.length > 0 && 
+    lifeWheel.lifeAreas.every(area => area.score > 0);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <PageHeader 
-        title="Assessment"
-        subtitle="Life Wheel Assessment"
+        title={t('assessment.intro.title')}
+        subtitle={t('assessment.intro.title')}
         backPath="/home"
         showSearch={false}
         showFilter={false}
@@ -62,56 +61,100 @@ export const AssessmentIntroPage = () => {
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Life Wheel Assessment</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{t('assessment.intro.title')}</h1>
           <p className="text-base sm:text-lg text-gray-600">
-            60 Questions. 10 Minutes. Your Starting Point.
+            {t('assessment.intro.subtitle')}
           </p>
         </div>
 
-        {/* Advertencia permanente */}
-        <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-base sm:text-lg text-red-900 mb-1">
-                This assessment is permanent and cannot be retaken
-              </h3>
-              <p className="text-sm sm:text-base text-red-800">
-                Your results become your baseline for all future transformations.
-              </p>
+        {/* Mensaje de éxito y botón al home - Mostrar si TODAS están completadas */}
+        {allAreasCompleted ? (
+          <div className="mb-6 sm:mb-8">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-6 sm:p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl font-bold text-green-900 mb-2">
+                    🎉 {t('assessment.intro.allCompleted')}
+                  </h3>
+                  <p className="text-base sm:text-lg text-green-800 leading-relaxed">
+                    {t('assessment.intro.allCompletedDesc')}
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => navigate('/home')}
+                className="w-full py-4 sm:py-5 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg transform hover:scale-105"
+              >
+                {t('assessment.intro.viewLifeWheel')} →
+              </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Advertencia permanente - Solo mostrar si NO todas están completadas */}
+            <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-base sm:text-lg text-red-900 mb-1">
+                    {t('assessment.intro.permanentWarningTitle')}
+                  </h3>
+                  <p className="text-sm sm:text-base text-red-800">
+                    {t('assessment.intro.permanentWarningDesc')}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-        {/* Mensaje motivacional */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="font-semibold text-base sm:text-lg text-gray-900 mb-2 sm:mb-3">
-            Answer honestly - this is just your baseline. You'll improve from here.
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-            This assessment creates your starting point across 6 life areas. There are no wrong answers - 
-            we're measuring where you are now, not where you should be. Your transformation journey begins 
-            with this honest snapshot.
-          </p>
-        </div>
+            {/* Mensaje motivacional */}
+            <div className="mb-6 sm:mb-8">
+              <h2 className="font-semibold text-base sm:text-lg text-gray-900 mb-2 sm:mb-3">
+                {t('assessment.intro.answerHonestlyTitle')}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                {t('assessment.intro.answerHonestlyDesc')}
+              </p>
+            </div>
+          </>
+        )}
 
         {/* 6 Life Areas */}
-        <div className="mb-6 sm:mb-8">
-          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">6 Life Areas You'll Assess</h3>
+        <div id="life-areas-section" className="mb-6 sm:mb-8">
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">{t('assessment.intro.areasTitle')}</h3>
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-              <p className="text-gray-500 text-sm mt-2">Loading areas...</p>
+              <p className="text-gray-500 text-sm mt-2">{t('assessment.intro.loadingAreas')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {lifeWheel?.lifeAreas.map((area) => {
+              {lifeWheel?.lifeAreas
+                .slice()
+                .sort((a, b) => {
+                  // Ordenar: completadas primero (score > 0), luego no completadas
+                  const aCompleted = a.score > 0;
+                  const bCompleted = b.score > 0;
+                  if (aCompleted && !bCompleted) return -1;
+                  if (!aCompleted && bCompleted) return 1;
+                  return 0;
+                })
+                .map((area, index, sortedAreas) => {
                 const hasScore = area.score > 0;
                 const isCompleted = hasScore;
+                
+                // Encontrar la primera área no completada (la siguiente sugerida)
+                const firstIncompleteIndex = sortedAreas.findIndex(a => a.score === 0);
+                const isSuggested = !isCompleted && index === firstIncompleteIndex;
                 
                 return (
                   <button
@@ -121,7 +164,9 @@ export const AssessmentIntroPage = () => {
                     className={`bg-white border rounded-lg sm:rounded-xl p-4 sm:p-5 transition-all text-left relative ${
                       isCompleted 
                         ? 'border-green-300 bg-green-50 cursor-not-allowed opacity-75' 
-                        : 'border-gray-200 hover:shadow-lg hover:border-gray-300 hover:scale-105 cursor-pointer'
+                        : isSuggested
+                          ? 'border-primary-500 shadow-lg scale-105 cursor-pointer ring-2 ring-primary-300 hover:shadow-xl hover:scale-110'
+                          : 'border-gray-200 hover:shadow-lg hover:border-gray-300 hover:scale-105 cursor-pointer'
                     }`}
                   >
                     {/* Badge de completado */}
@@ -133,17 +178,24 @@ export const AssessmentIntroPage = () => {
                       </div>
                     )}
                     
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getAreaColor(area.areaName)} rounded-lg flex items-center justify-center text-2xl sm:text-3xl mb-2 sm:mb-3 ${isCompleted ? 'opacity-60' : ''}`}>
+                    {/* Badge de sugerido */}
+                    {isSuggested && (
+                      <div className="absolute top-2 right-2 bg-primary-600 text-white rounded-full px-2 py-1 text-xs font-semibold shadow-lg animate-pulse">
+                        ⭐ {t('assessment.intro.next')}
+                      </div>
+                    )}
+                    
+                    <div className={`flex items-center justify-center text-3xl sm:text-4xl mb-2 sm:mb-3 ${isCompleted ? 'opacity-60' : ''}`} style={{ filter: isCompleted ? 'grayscale(50%)' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                       {getAreaIcon(area.areaName)}
                     </div>
                     <p className={`text-sm sm:text-base font-medium ${isCompleted ? 'text-gray-600' : 'text-gray-900'}`}>
                       {t(getAreaTranslationKey(area.areaName))}
                     </p>
                     <p className={`text-xs sm:text-sm mt-1 ${isCompleted ? 'text-green-600 font-semibold' : 'text-gray-500'}`}>
-                      {isCompleted ? `✓ Completado: ${area.score}/10` : `Puntaje actual: ${area.score}/10`}
+                      {isCompleted ? `✓ ${t('assessment.intro.completedScore', { score: area.score })}` : t('assessment.intro.currentScore', { score: area.score })}
                     </p>
                     <p className={`text-xs sm:text-sm mt-2 font-medium ${isCompleted ? 'text-gray-500' : 'text-primary-600'}`}>
-                      {isCompleted ? 'Ya evaluado' : 'Click para evaluar →'}
+                      {isCompleted ? t('assessment.intro.alreadyEvaluated') : t('assessment.intro.clickToEvaluate')}
                     </p>
                   </button>
                 );
@@ -159,8 +211,8 @@ export const AssessmentIntroPage = () => {
               <span className="text-white text-xs sm:text-sm font-bold">?</span>
             </div>
             <div>
-              <h4 className="text-sm sm:text-base font-semibold text-purple-900">10 questions per area</h4>
-              <p className="text-xs sm:text-sm text-purple-800">Simple YES/NO format for honest answers</p>
+              <h4 className="text-sm sm:text-base font-semibold text-purple-900">{t('assessment.intro.questionsPerArea')}</h4>
+              <p className="text-xs sm:text-sm text-purple-800">{t('assessment.intro.yesNoFormat')}</p>
             </div>
           </div>
 
@@ -171,8 +223,8 @@ export const AssessmentIntroPage = () => {
               </svg>
             </div>
             <div>
-              <h4 className="text-sm sm:text-base font-semibold text-green-900">Instant scoring</h4>
-              <p className="text-xs sm:text-sm text-green-800">Each area gets a score from 0-10 based on your responses</p>
+              <h4 className="text-sm sm:text-base font-semibold text-green-900">{t('assessment.intro.instantScoring')}</h4>
+              <p className="text-xs sm:text-sm text-green-800">{t('assessment.intro.instantScoringDesc')}</p>
             </div>
           </div>
 
@@ -183,15 +235,15 @@ export const AssessmentIntroPage = () => {
               </svg>
             </div>
             <div>
-              <h4 className="text-sm sm:text-base font-semibold text-pink-900">Identifies focus area</h4>
-              <p className="text-xs sm:text-sm text-pink-800">Your lowest scoring area becomes your first transformation priority</p>
+              <h4 className="text-sm sm:text-base font-semibold text-pink-900">{t('assessment.intro.identifiesFocus')}</h4>
+              <p className="text-xs sm:text-sm text-pink-800">{t('assessment.intro.identifiesFocusDesc')}</p>
             </div>
           </div>
         </div>
 
         {/* Before you begin */}
         <div className="mb-6 sm:mb-8">
-          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">Before you begin:</h3>
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">{t('assessment.intro.beforeYouBegin')}</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -200,8 +252,8 @@ export const AssessmentIntroPage = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Be completely honest</h4>
-                <p className="text-xs text-gray-600">Your authentic answers create the most effective transformation plan</p>
+                <h4 className="text-sm font-semibold text-gray-900">{t('assessment.intro.beHonestTitle')}</h4>
+                <p className="text-xs text-gray-600">{t('assessment.intro.beHonestDesc')}</p>
               </div>
             </div>
 
@@ -212,8 +264,8 @@ export const AssessmentIntroPage = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">Think about recent months</h4>
-                <p className="text-xs text-gray-600">Base answers on your last 3-6 months, not your best or worst days</p>
+                <h4 className="text-sm font-semibold text-gray-900">{t('assessment.intro.thinkRecentTitle')}</h4>
+                <p className="text-xs text-gray-600">{t('assessment.intro.thinkRecentDesc')}</p>
               </div>
             </div>
 
@@ -224,8 +276,8 @@ export const AssessmentIntroPage = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">No judgment zone</h4>
-                <p className="text-xs text-gray-600">Low scores aren't failures - they're opportunities for growth</p>
+                <h4 className="text-sm font-semibold text-gray-900">{t('assessment.intro.noJudgmentTitle')}</h4>
+                <p className="text-xs text-gray-600">{t('assessment.intro.noJudgmentDesc')}</p>
               </div>
             </div>
 
@@ -236,8 +288,8 @@ export const AssessmentIntroPage = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-gray-900">This is your starting line</h4>
-                <p className="text-xs text-gray-600">Every transformation journey needs a clear beginning point</p>
+                <h4 className="text-sm font-semibold text-gray-900">{t('assessment.intro.startingLineTitle')}</h4>
+                <p className="text-xs text-gray-600">{t('assessment.intro.startingLineDesc')}</p>
               </div>
             </div>
           </div>
@@ -245,96 +297,52 @@ export const AssessmentIntroPage = () => {
 
         {/* What happens after */}
         <div className="mb-6 sm:mb-8">
-          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">What happens after assessment:</h3>
+          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-4 sm:mb-6">{t('assessment.intro.whatHappensAfter')}</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-purple-600 font-bold text-sm">1</span>
               </div>
-              <p className="text-sm text-gray-700 mt-1">Your personalized Life Wheel is generated</p>
+              <p className="text-sm text-gray-700 mt-1">{t('assessment.intro.step1')}</p>
             </div>
 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-purple-600 font-bold text-sm">2</span>
               </div>
-              <p className="text-sm text-gray-700 mt-1">We identify your priority area for transformation</p>
+              <p className="text-sm text-gray-700 mt-1">{t('assessment.intro.step2')}</p>
             </div>
 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-purple-600 font-bold text-sm">3</span>
               </div>
-              <p className="text-sm text-gray-700 mt-1">You can create your first 90-day Oonograma</p>
+              <p className="text-sm text-gray-700 mt-1">{t('assessment.intro.step3')}</p>
             </div>
 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-purple-600 font-bold text-sm">4</span>
               </div>
-              <p className="text-sm text-gray-700 mt-1">Your daily transformation journey begins</p>
+              <p className="text-sm text-gray-700 mt-1">{t('assessment.intro.step4')}</p>
             </div>
           </div>
         </div>
 
-        {/* Time investment */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-          <div className="flex items-start gap-3">
-            <div className="text-2xl">⏱️</div>
-            <div>
-              <h4 className="text-sm font-semibold text-yellow-900 mb-1">Time Investment</h4>
-              <p className="text-sm text-yellow-800">
-                Most people complete this assessment in 8-12 minutes. Take your time - there's no rush.
-              </p>
+        {/* Time investment - Solo mostrar si NO todas están completadas */}
+        {!allAreasCompleted && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">⏱️</div>
+              <div>
+                <h4 className="text-sm font-semibold text-yellow-900 mb-1">{t('assessment.intro.timeInvestmentTitle')}</h4>
+                <p className="text-sm text-yellow-800">
+                  {t('assessment.intro.timeInvestmentDesc')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Botón de inicio */}
-        <button
-          onClick={handleStartAssessment}
-          className="w-full py-4 sm:py-5 px-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg"
-        >
-          I'm Ready to Begin
-        </button>
-
-        {/* Advertencia final */}
-        <div className="mt-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-            <p className="text-sm font-medium">You cannot go back once started</p>
-          </div>
-          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
-            This assessment is designed to capture an honest moment in time. 
-            When you begin, commit to completing it and move forward. 
-            You&#39;ll be able to retake or reassess past this first baseline.
-          </p>
-        </div>
-
-        {/* Footer links */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-            <button className="hover:text-purple-600">Assessment</button>
-            <span>•</span>
-            <button className="hover:text-purple-600">Question Bank</button>
-            <span>•</span>
-            <button className="hover:text-purple-600">Results</button>
-            <span>•</span>
-            <button className="hover:text-purple-600">Dashboard</button>
-          </div>
-          <p className="text-center text-xs text-gray-400 mt-4">Need Refresh?</p>
-        </div>
-
-        {/* Pagination dots */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-        </div>
+        )}
       </main>
 
       <BottomNav />

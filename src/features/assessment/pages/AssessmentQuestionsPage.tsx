@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   assessmentService, 
   answerService,
@@ -14,6 +15,7 @@ import { BottomNav, LanguageSelectorCompact } from '@/shared/components';
  */
 export const AssessmentQuestionsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { areaId } = useParams<{ areaId: string }>();
   
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
@@ -118,7 +120,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading questions...</p>
+          <p className="text-gray-500 mt-4">{t('assessment.questions.loadingQuestions')}</p>
         </div>
       </div>
     );
@@ -128,12 +130,12 @@ export const AssessmentQuestionsPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">No questions available</p>
+          <p className="text-gray-500">{t('assessment.questions.noQuestions')}</p>
           <button
             onClick={handleSkipArea}
             className="mt-4 text-primary-600 hover:text-primary-700"
           >
-            Go back
+            {t('assessment.questions.goBack')}
           </button>
         </div>
       </div>
@@ -152,7 +154,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{areaName}</h1>
-                <p className="text-sm sm:text-base text-gray-500">Area 2 of 6</p>
+                <p className="text-sm sm:text-base text-gray-500">{t('assessment.questions.areaOf', { current: 2, total: 6 })}</p>
               </div>
             </div>
             <div className="flex-shrink-0">
@@ -163,8 +165,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
           {/* Overall Progress */}
           <div className="mb-4 sm:mb-5">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm sm:text-base text-gray-600">Overall Progress</span>
-              <span className="text-sm sm:text-base font-medium text-gray-900">{totalAnswered} of 60 questions</span>
+              <span className="text-sm sm:text-base text-gray-600">{t('assessment.questions.overallProgress')}</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">{t('assessment.questions.questionsProgress', { current: totalAnswered, total: 60 })}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
               <div
@@ -176,7 +178,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
           {/* Question Progress Dots */}
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-sm sm:text-base font-medium text-gray-900">Question {currentQuestionIndex + 1} of {questions.length}</span>
+            <span className="text-sm sm:text-base font-medium text-gray-900">{t('assessment.questions.questionOf', { current: currentQuestionIndex + 1, total: questions.length })}</span>
             <div className="flex gap-1.5">
               {questions.map((q) => (
                 <div
@@ -209,7 +211,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
             {/* Subtitle */}
             <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-md mx-auto px-2">
-              Think about your typical week. Are you able to disconnect from work and enjoy personal time without stress?
+              {t('assessment.questions.thinkTypicalWeek')}
             </p>
 
             {/* Work-Life Balance Visual */}
@@ -220,7 +222,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="text-white text-xs font-medium">Work</span>
+                <span className="text-white text-xs font-medium">{t('assessment.questions.work')}</span>
               </div>
               <div className="w-16 h-0.5 bg-white/30"></div>
 
@@ -230,7 +232,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                 </div>
-                <span className="text-white text-xs font-medium">Life</span>
+                <span className="text-white text-xs font-medium">{t('assessment.questions.life')}</span>
               </div>
             </div>
           </div>
@@ -265,13 +267,12 @@ export const AssessmentQuestionsPage: React.FC = () => {
                 </svg>
               </div>
               <div className="text-left flex-1">
-                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">YES</div>
+                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">{t('assessment.questions.yes')}</div>
                 <div className={`text-xs sm:text-sm font-medium ${
                   !currentQuestion || submitting
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === true ? 'text-white/90' : 'text-green-600'
                 }`}>
-                  I maintain good balance
                 </div>
               </div>
             </div>
@@ -304,21 +305,35 @@ export const AssessmentQuestionsPage: React.FC = () => {
                 </svg>
               </div>
               <div className="text-left flex-1">
-                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">NO</div>
+                <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">{t('assessment.questions.no')}</div>
                 <div className={`text-xs sm:text-sm font-medium ${
                   !currentQuestion || submitting
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === false ? 'text-white/90' : 'text-red-600'
                 }`}>
-                  Work dominates my life
                 </div>
               </div>
             </div>
           </button>
         </div>
 
+        {/* Submit Button */}
+        {allQuestionsAnswered && (
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className={`w-full py-4 sm:py-5 mb-6 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all shadow-lg ${
+              submitting
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : `${areaColors.bg} text-white hover:opacity-90`
+            }`}
+          >
+            {submitting ? t('assessment.questions.submitting') : t('assessment.questions.completeAssessment')}
+          </button>
+        )}
+
         {/* Consider these aspects */}
-        <div className={`${areaColors.bgLighter} rounded-2xl p-5 sm:p-6 lg:p-8 mb-6 border ${areaColors.border}`}>
+        <div className={`${areaColors.bgLighter} rounded-2xl p-5 py-4 sm:p-6 lg:p-8 mb-6 border ${areaColors.border}`}>
           <div className="flex items-start gap-3">
             <div className={`w-10 h-10 ${areaColors.bgLight} rounded-full flex items-center justify-center flex-shrink-0`}>
               <svg className={`w-5 h-5 ${areaColors.text}`} fill="currentColor" viewBox="0 0 20 20">
@@ -326,23 +341,23 @@ export const AssessmentQuestionsPage: React.FC = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-900 mb-3">Consider these aspects:</h3>
+              <h3 className="font-bold text-gray-900 mb-3">{t('assessment.questions.considerAspects')}</h3>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className={`${areaColors.text} font-bold`}>•</span>
-                  <span>Can you disconnect from work emails/calls after hours?</span>
+                  <span>{t('assessment.questions.aspect1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className={`${areaColors.text} font-bold`}>•</span>
-                  <span>Do you have time for hobbies and relationships?</span>
+                  <span>{t('assessment.questions.aspect2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className={`${areaColors.text} font-bold`}>•</span>
-                  <span>Do you feel stressed about work during personal time?</span>
+                  <span>{t('assessment.questions.aspect3')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className={`${areaColors.text} font-bold`}>•</span>
-                  <span>Are you able to take breaks and vacations?</span>
+                  <span>{t('assessment.questions.aspect4')}</span>
                 </li>
               </ul>
             </div>
@@ -351,15 +366,15 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
         {/* Professional Activity Progress */}
         <div className="bg-white rounded-2xl p-5 sm:p-6 lg:p-8 mb-6 shadow-sm">
-          <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-4 sm:mb-5">Professional Activity Progress</h3>
+          <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-4 sm:mb-5">{t('assessment.questions.areaProgress', { area: areaName })}</h3>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 sm:p-5 text-center">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-600 mb-1">{yesCount}</div>
-              <div className="text-xs sm:text-sm text-green-700 font-medium">Yes answers</div>
+              <div className="text-xs sm:text-sm text-green-700 font-medium">{t('assessment.questions.yesAnswers')}</div>
             </div>
             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 sm:p-5 text-center">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-600 mb-1">{noCount}</div>
-              <div className="text-xs sm:text-sm text-red-700 font-medium">No answers</div>
+              <div className="text-xs sm:text-sm text-red-700 font-medium">{t('assessment.questions.noAnswers')}</div>
             </div>
           </div>
         </div>
@@ -373,7 +388,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Assessment Tips</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('assessment.questions.assessmentTips')}</h3>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
                   <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -381,7 +396,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Answer based on your current situation, not where you want to be</span>
+                  <span>{t('assessment.questions.tip1')}</span>
                 </li>
                 <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
                   <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -389,7 +404,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Think about the last 3 months when answering</span>
+                  <span>{t('assessment.questions.tip2')}</span>
                 </li>
                 <li className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700">
                   <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -397,7 +412,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <span>Be honest - this creates your baseline for improvement</span>
+                  <span>{t('assessment.questions.tip3')}</span>
                 </li>
               </ul>
             </div>
@@ -406,7 +421,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
         {/* Choose your answer to continue */}
         <div className="text-center mb-6">
-          <p className="text-sm sm:text-base text-gray-500 mb-4">Choose your answer to continue</p>
+          <p className="text-sm sm:text-base text-gray-500 mb-4">{t('assessment.questions.chooseAnswer')}</p>
           <div className="flex justify-center">
             <div className="bg-gray-200 rounded-full px-4 py-2">
               <div className="flex gap-2">
@@ -422,21 +437,6 @@ export const AssessmentQuestionsPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Submit Button */}
-        {allQuestionsAnswered && (
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className={`w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all shadow-lg ${
-              submitting
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : `${areaColors.bg} text-white hover:opacity-90`
-            }`}
-          >
-            {submitting ? 'Submitting...' : 'Complete Area Assessment'}
-          </button>
-        )}
       </div>
 
       <BottomNav />

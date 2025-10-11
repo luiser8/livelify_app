@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type LifeWheelArea } from '@/infrastructure/services';
-import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaColorVariants, getAreaTranslationKey, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
 
 interface LifeWheelHexagonProps {
   lifeAreas: LifeWheelArea[];
@@ -100,7 +100,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
 
     // Draw score polygon if we have scores
     const hasScores = orderedAreas.some(area => area.score > 0);
-    
+
     if (hasScores) {
       const scorePoints = orderedAreas.map((area, i) => {
         const angle = (Math.PI / 3) * i - Math.PI / 2;
@@ -197,7 +197,6 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
       <div className="absolute inset-0 z-10">
         {orderedAreas.map((area, index) => {
           const position = getIconPosition(index);
-          const colorVariants = getAreaColorVariants(area.areaName);
           const isEnabled = !enabledAreaIds || enabledAreaIds.size === 0 || enabledAreaIds.has(area.id);
           
           return (
@@ -210,11 +209,17 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                 {/* Icono del área */}
                 <button
                   onClick={() => isEnabled && onAreaClick?.(area.id)}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 ${colorVariants.bg} rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-lg border-4 border-white transition-all duration-200 ${
+                  className={`flex items-center justify-center text-4xl sm:text-5xl transition-all duration-300 ${
                     isEnabled 
-                      ? 'hover:scale-110 hover:shadow-xl cursor-pointer' 
-                      : 'cursor-not-allowed opacity-60'
+                      ? 'hover:scale-125 cursor-pointer' 
+                      : 'cursor-not-allowed opacity-50'
                   }`}
+                  style={{
+                    filter: isEnabled 
+                      ? 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))' 
+                      : 'grayscale(60%) opacity(0.6)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                   title={
                     isEnabled 
                       ? `${t('lifeAreas.clickToManage')} ${t(getAreaTranslationKey(area.areaName))}` 
@@ -223,12 +228,22 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                         : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.focusOnLowerAreas')}`
                   }
                   disabled={!isEnabled}
+                  onMouseEnter={(e) => {
+                    if (isEnabled) {
+                      e.currentTarget.style.filter = 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.25))';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isEnabled) {
+                      e.currentTarget.style.filter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))';
+                    }
+                  }}
                 >
                   {getAreaIcon(area.areaName)}
                 </button>
                 
                 {/* Tooltip con el nombre del área */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-12 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                <div className="absolute left-1/2 -translate-x-1/2 -top-16 sm:-top-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
                   <div className={`${
                     isEnabled 
                       ? 'bg-gray-900' 
@@ -252,14 +267,14 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                 </div>
                 
                 {/* Badge con el score */}
-                <div className={`absolute -bottom-8 sm:-bottom-9 left-1/2 -translate-x-1/2 bg-white px-2.5 py-1 rounded-full shadow-md border ${
+                <div className={`absolute -bottom-10 sm:-bottom-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-md border ${
                   isEnabled 
                     ? 'border-gray-200' 
                     : area.score === 0 
                       ? 'border-amber-300 bg-amber-50' 
                       : 'border-red-200 bg-red-50'
                 }`}>
-                  <span className={`text-xs sm:text-sm font-bold ${
+                  <span className={`text-sm sm:text-base font-bold ${
                     isEnabled 
                       ? 'text-gray-900' 
                       : area.score === 0 

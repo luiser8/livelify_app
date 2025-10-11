@@ -104,7 +104,7 @@ export const ProjectsPage = () => {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3 flex-1">
             {area && colorVariants && (
-              <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0`}>
+              <div className="flex items-center justify-center text-3xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                 {getAreaIcon(area.areaName)}
               </div>
             )}
@@ -319,13 +319,14 @@ export const ProjectsPage = () => {
         title={t('projects.title')}
         subtitle={t('projects.myProjects')}
         showBackButton={true}
-        showSearch={true}
-        showFilter={true}
-        onSearchClick={() => console.log('Search clicked')}
-        onFilterClick={() => console.log('Filter clicked')}
-      >
-        <div className="mt-4">
-          {/* Estadísticas */}
+        showSearch={false}
+        showFilter={false}
+      />
+
+      {/* Contenido principal */}
+      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+        {/* Estadísticas */}
+        <div className="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{activeProjects.length}</div>
@@ -341,10 +342,7 @@ export const ProjectsPage = () => {
             </div>
           </div>
         </div>
-      </PageHeader>
 
-      {/* Contenido principal */}
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
         {/* Active Projects */}
         <div className="mb-6">
           <button

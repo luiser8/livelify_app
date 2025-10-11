@@ -35,6 +35,17 @@ export const HomePage = () => {
   };
 
   const handleAreaClick = (areaId: string) => {
+    // No permitir acceso a ninguna área hasta que todas estén completadas
+    if (!allAreasAnswered) {
+      navigate('/assessment/intro');
+      return;
+    }
+    
+    // Verificar si el área está habilitada (entre las 3 más bajas)
+    if (!enabledAreaIds.has(areaId)) {
+      return; // No hacer nada si el área no está habilitada
+    }
+    
     navigate(`/area/${areaId}/projects`);
   };
 
@@ -71,6 +82,7 @@ export const HomePage = () => {
       <PageHeader 
         title={t('home.title')}
         subtitle={t('home.subtitle')}
+        showBackButton={true}
         backPath="/"
         showSearch={false}
         showFilter={false}
@@ -103,7 +115,7 @@ export const HomePage = () => {
                 onClick={handleStartAssessment}
                 className="w-full py-4 sm:py-5 px-6 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg"
               >
-                {t('home.startAssessment')}
+                {hasScores ? t('home.continueAssessment') : t('home.startAssessment')}
               </button>
 
               {/* Advertencia */}
@@ -210,14 +222,13 @@ export const HomePage = () => {
                               : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
                         }`}
                       >
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 relative ${
-                          isEnabled 
-                            ? 'bg-gradient-to-br from-green-500 to-green-600 shadow-md' 
-                            : area.score === 0
-                              ? 'bg-gradient-to-br from-amber-500 to-amber-600 shadow-md'
-                              : 'bg-gradient-to-br from-gray-400 to-gray-500 shadow-md'
-                        }`}>
-                          <span className="filter drop-shadow-sm">{getAreaIcon(area.areaName)}</span>
+                        <div className="flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 relative" 
+                             style={{ 
+                               filter: isEnabled 
+                                 ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' 
+                                 : 'grayscale(50%)' 
+                             }}>
+                          {getAreaIcon(area.areaName)}
                           {!isEnabled && area.score === 0 && (
                             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-600 rounded-full flex items-center justify-center shadow-lg">
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">

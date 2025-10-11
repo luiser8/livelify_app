@@ -3,6 +3,8 @@ import { apiClient } from '../api/client';
 export interface Context {
   id: string;
   name: string;
+  canDelete: boolean;
+  actionsCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +25,10 @@ export const contextService = {
 
   getMyContexts: async (): Promise<GetMyContextsResponse> => {
     return apiClient.get<GetMyContextsResponse>('/users/my-contexts');
+  },
+
+  deleteContext: async (contextId: string): Promise<void> => {
+    return apiClient.delete(`/users/delete-context/${contextId}`);
   },
 };
 

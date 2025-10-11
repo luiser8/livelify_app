@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type Project, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 import { BottomNav, PageHeader } from '@/shared/components';
@@ -10,6 +11,7 @@ import { BottomNav, PageHeader } from '@/shared/components';
 export const AreaProjectsPage = () => {
   const { areaId } = useParams<{ areaId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [area, setArea] = useState<LifeWheelArea | null>(null);
   const [projectsData, setProjectsData] = useState<{ projects: Project[]; totalProjects: number; activeProjects: number; completedProjects: number } | null>(null);
@@ -28,6 +30,27 @@ export const AreaProjectsPage = () => {
         const currentArea = lifeWheelData.lifeAreas.find(a => a.id === areaId);
         setArea(currentArea || null);
         
+        // Validar que TODAS las áreas estén completadas
+        const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
+          lifeWheelData.lifeAreas.every(area => area.score > 0);
+        
+        if (!allAreasAnswered) {
+          // Si no todas las áreas están respondidas, redirigir al assessment
+          navigate('/assessment/intro');
+          return;
+        }
+        
+        // Si todas están completadas, verificar que el área actual esté entre las 3 más bajas
+        const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
+        const lowestThree = sortedAreas.slice(0, 3);
+        const enabledAreaIds = new Set(lowestThree.map(area => area.id));
+        
+        if (!enabledAreaIds.has(areaId)) {
+          // Si el área no está entre las 3 más bajas, redirigir al home
+          navigate('/home');
+          return;
+        }
+        
         // Fetch projects for this area
         const areaProjectsData = await projectService.getProjectsByArea(areaId);
         setProjectsData(areaProjectsData);
@@ -39,14 +62,14 @@ export const AreaProjectsPage = () => {
     };
 
     fetchData();
-  }, [areaId]);
+  }, [areaId, navigate]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading...</p>
+          <p className="text-gray-500 mt-4">{t('areaProjects.loading')}</p>
         </div>
       </div>
     );
@@ -56,9 +79,9 @@ export const AreaProjectsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">Area not found</p>
+          <p className="text-gray-500">{t('areaProjects.areaNotFound')}</p>
           <button onClick={() => navigate('/home')} className="mt-4 text-indigo-600 hover:text-indigo-700">
-            Go back
+            {t('areaProjects.goBack')}
           </button>
         </div>
       </div>
@@ -82,7 +105,7 @@ export const AreaProjectsPage = () => {
       {/* Header */}
       <PageHeader 
         title={area.areaName}
-        subtitle={`Score: ${area.score}/10`}
+        subtitle={`${t('areaProjects.score')}: ${area.score}/10`}
         backPath="/home"
         showSearch={false}
         showFilter={false}
@@ -93,12 +116,12 @@ export const AreaProjectsPage = () => {
         {/* Header del área */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-16 h-16 ${colorVariants.bg} rounded-2xl flex items-center justify-center text-3xl shadow-lg border-4 border-white`}>
+            <div className="flex items-center justify-center text-5xl" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))' }}>
               {getAreaIcon(area.areaName)}
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{area.areaName}</h1>
-              <p className="text-gray-500">Score: {area.score}/10</p>
+              <p className="text-gray-500">{t('areaProjects.score')}: {area.score}/10</p>
             </div>
           </div>
 
@@ -113,7 +136,7 @@ export const AreaProjectsPage = () => {
                   : `${colorVariants.bg} text-white hover:opacity-90`
               }`}
             >
-              + Create New Project
+              {t('areaProjects.createNewProject')}
             </button>
             
             {/* Mensaje de área no evaluada */}
@@ -124,15 +147,15 @@ export const AreaProjectsPage = () => {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1">
-                    <p className="font-bold text-red-900 mb-1">Assessment Required</p>
+                    <p className="font-bold text-red-900 mb-1">{t('areaProjects.assessmentRequired')}</p>
                     <p className="text-sm text-red-800 mb-3">
-                      You need to complete the Life Wheel assessment for this area before creating projects. This helps establish your baseline score and transformation goals.
+                      {t('areaProjects.assessmentRequiredDesc')}
                     </p>
                     <button
                       onClick={() => navigate('/home')}
                       className="px-4 py-2 bg-red-600 text-white font-medium text-sm rounded-lg hover:bg-red-700 transition-colors"
                     >
-                      Complete Assessment
+                      {t('areaProjects.completeAssessment')}
                     </button>
                   </div>
                 </div>
@@ -147,8 +170,8 @@ export const AreaProjectsPage = () => {
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <div className="text-sm text-amber-800">
-                    <p className="font-semibold">Maximum projects reached</p>
-                    <p className="mt-1">You can only have up to 2 active projects per area. Complete or archive an existing project to create a new one.</p>
+                    <p className="font-semibold">{t('areaProjects.maxProjectsReached')}</p>
+                    <p className="mt-1">{t('areaProjects.maxProjectsReachedDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -161,32 +184,32 @@ export const AreaProjectsPage = () => {
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="bg-white rounded-xl p-4 text-center border border-gray-200">
               <div className="text-2xl font-bold text-gray-900">{projectsData.totalProjects}</div>
-              <div className="text-xs text-gray-500">Total</div>
+              <div className="text-xs text-gray-500">{t('areaProjects.stats.total')}</div>
             </div>
             <div className="bg-white rounded-xl p-4 text-center border border-gray-200">
               <div className="text-2xl font-bold text-green-600">{projectsData.activeProjects}</div>
-              <div className="text-xs text-gray-500">Active</div>
+              <div className="text-xs text-gray-500">{t('areaProjects.stats.active')}</div>
             </div>
             <div className="bg-white rounded-xl p-4 text-center border border-gray-200">
               <div className="text-2xl font-bold text-gray-400">{projectsData.completedProjects}</div>
-              <div className="text-xs text-gray-500">Completed</div>
+              <div className="text-xs text-gray-500">{t('areaProjects.stats.completed')}</div>
             </div>
           </div>
         )}
 
         {/* Lista de proyectos */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-gray-900">Projects in this Area</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t('areaProjects.projectsInArea')}</h2>
           
           {!projectsData || projectsData.projects.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center">
-              <p className="text-gray-500 mb-4">No projects yet in this area</p>
+              <p className="text-gray-500 mb-4">{t('areaProjects.noProjects')}</p>
               {canCreateProject && (
                 <button
                   onClick={() => navigate(`/area/${areaId}/projects/create`)}
                   className="text-indigo-600 hover:text-indigo-700 font-medium"
                 >
-                  Create your first project
+                  {t('areaProjects.createFirstProject')}
                 </button>
               )}
             </div>
@@ -198,7 +221,7 @@ export const AreaProjectsPage = () => {
                   {/* Header del proyecto */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-start gap-3 flex-1">
-                      <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0`}>
+                      <div className="flex items-center justify-center text-3xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                         {getAreaIcon(area.areaName)}
                       </div>
                       <div className="flex-1">
@@ -224,7 +247,7 @@ export const AreaProjectsPage = () => {
                   {/* Barra de progreso */}
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">Progress</span>
+                      <span className="text-sm text-gray-600">{t('areaProjects.progress')}</span>
                       <span className="text-sm font-bold text-gray-900">{project.detail.progressPercentage}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -245,10 +268,15 @@ export const AreaProjectsPage = () => {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-900">
-                          {project.detail.completedActions} of {project.detail.totalActions} actions complete
+                          {t('areaProjects.actionsComplete', { 
+                            completed: project.detail.completedActions, 
+                            total: project.detail.totalActions 
+                          })}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {project.detail.totalActions - project.detail.completedActions} more
+                          {t('areaProjects.actionsMore', { 
+                            remaining: project.detail.totalActions - project.detail.completedActions 
+                          })}
                         </p>
                       </div>
                       <span className="ml-auto text-lg font-bold text-blue-600">
@@ -267,7 +295,7 @@ export const AreaProjectsPage = () => {
                           project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}>
-                          {project.status}
+                          {t(`areaProjects.status.${project.status}`)}
                         </span>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                           project.detail.status === 'PLANNING' ? 'bg-blue-100 text-blue-700' :
@@ -275,7 +303,7 @@ export const AreaProjectsPage = () => {
                           project.detail.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                           'bg-gray-100 text-gray-700'
                         }`}>
-                          {project.detail.status}
+                          {t(`areaProjects.status.${project.detail.status}`)}
                         </span>
                       </div>
 
@@ -285,11 +313,11 @@ export const AreaProjectsPage = () => {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span>Start: {new Date(project.detail.startDate).toLocaleDateString()}</span>
+                          <span>{t('areaProjects.startDate')}: {new Date(project.detail.startDate).toLocaleDateString()}</span>
                         </div>
                         <span>→</span>
                         <div className="flex items-center gap-2">
-                          <span>End: {new Date(project.detail.endDate).toLocaleDateString()}</span>
+                          <span>{t('areaProjects.endDate')}: {new Date(project.detail.endDate).toLocaleDateString()}</span>
                         </div>
                       </div>
 
@@ -299,13 +327,13 @@ export const AreaProjectsPage = () => {
                           onClick={() => navigate(`/projects/${project.id}/goals`)}
                           className="flex-1 py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
                         >
-                          📝 Goals
+                          {t('areaProjects.buttons.goals')}
                         </button>
                         <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
-                          Edit
+                          {t('areaProjects.buttons.edit')}
                         </button>
                         <button className={`flex-1 py-2 px-4 ${colorVariants.bg} text-white font-medium rounded-xl hover:opacity-90 transition-all`}>
-                          View Details
+                          {t('areaProjects.buttons.viewDetails')}
                         </button>
                       </div>
                     </div>

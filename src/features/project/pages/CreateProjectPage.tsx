@@ -45,28 +45,34 @@ export const CreateProjectPage = () => {
         const lifeWheelData = await lifeWheelService.getMyLifeWheel();
         setLifeAreas(lifeWheelData.lifeAreas);
 
+        // Validar que TODAS las áreas estén completadas antes de permitir crear proyectos
+        const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
+          lifeWheelData.lifeAreas.every(area => area.score > 0);
+        
+        if (!allAreasAnswered) {
+          // Si no todas las áreas están respondidas, redirigir al assessment
+          navigate('/assessment/intro');
+          return;
+        }
+
         // Si viene con un areaId, verificar validaciones
         if (urlAreaId) {
           const selectedArea = lifeWheelData.lifeAreas.find(a => a.id === urlAreaId);
           
-          // Validar que el área esté evaluada (score > 0)
-          if (selectedArea && selectedArea.score === 0) {
-            console.log('Area not evaluated yet, redirecting...');
+          // Validar que el área exista
+          if (!selectedArea) {
             navigate('/home');
             return;
           }
 
-          // Validar que el área esté en las 3 más bajas (si todas están evaluadas)
-          const allEvaluated = lifeWheelData.lifeAreas.every(area => area.score > 0);
-          if (allEvaluated) {
-            const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
-            const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
-            
-            if (!lowestThreeIds.has(urlAreaId)) {
-              console.log('Area not in lowest 3, redirecting...');
-              navigate('/home');
-              return;
-            }
+          // Validar que el área esté en las 3 más bajas
+          const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
+          const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
+          
+          if (!lowestThreeIds.has(urlAreaId)) {
+            console.log('Area not in lowest 3, redirecting...');
+            navigate('/home');
+            return;
           }
           
           try {
@@ -283,7 +289,6 @@ export const CreateProjectPage = () => {
             {/* Areas grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {lifeAreas.map((area) => {
-                const colorVariants = getAreaColorVariants(area.areaName);
                 const potentialPoints = Math.max(0, 10 - area.score);
                 const isEvaluated = area.score > 0;
                 const isEnabled = enabledAreaIds.has(area.id);
@@ -303,7 +308,7 @@ export const CreateProjectPage = () => {
                     }`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0 ${isEnabled ? 'group-hover:scale-110' : ''} transition-transform relative`}>
+                      <div className={`flex items-center justify-center text-3xl flex-shrink-0 ${isEnabled ? 'group-hover:scale-110' : ''} transition-transform relative`} style={{ filter: isEnabled ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' : 'grayscale(50%)' }}>
                         {getAreaIcon(area.areaName)}
                         {!isEvaluated && (
                           <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
@@ -438,7 +443,7 @@ export const CreateProjectPage = () => {
                   const colorVariants = selectedArea ? getAreaColorVariants(selectedArea.areaName) : null;
                   return selectedArea && colorVariants ? (
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                      <div className={`w-12 h-12 ${colorVariants.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm`}>
+                      <div className="flex items-center justify-center text-3xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                         {getAreaIcon(selectedArea.areaName)}
                       </div>
                       <div>

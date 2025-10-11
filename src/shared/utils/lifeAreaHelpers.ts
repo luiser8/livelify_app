@@ -83,11 +83,11 @@ export const LIFE_AREA_COLOR_VARIANTS: Record<string, {
 
 // Mapeo de nombres en español a iconos
 export const LIFE_AREA_ICONS: Record<string, string> = {
-  'Desarrollo Personal': '🔥',
+  'Desarrollo Personal': '🧠',
   'Actividad Profesional': '💼',
-  'Salud y Nutrición': '💚',
+  'Salud y Nutrición': '🍎',
   'Dinero y Finanzas': '💰',
-  'Relaciones Sociales': '👨‍👩‍👧',
+  'Relaciones Sociales': '🤝',
   'Pareja e Intimidad': '❤️',
 };
 
@@ -154,6 +154,8 @@ export const getAreaColorVariants = (areaName: string) => {
  */
 export const getAreaIcon = (areaName: string): string => {
   const displayName = getAreaDisplayName(areaName);
-  return LIFE_AREA_ICONS[displayName] || '⭐';
+  const icon = LIFE_AREA_ICONS[displayName] || '⭐';
+
+  return icon;
 };
 
