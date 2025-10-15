@@ -78,6 +78,7 @@ const useStorage = () => {
     window.localStorage.removeItem('phone');
     window.localStorage.removeItem('access_token');
     window.localStorage.removeItem('refresh_token');
+    window.localStorage.removeItem('userAreaSelection');
   };
 
   /**

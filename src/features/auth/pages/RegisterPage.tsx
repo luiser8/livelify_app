@@ -5,7 +5,7 @@ import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
 import { useAuth } from '@/features/auth/context';
 import { registerUseCase } from '@/core/usecases/auth/registerUseCase';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
-import { LanguageSelector } from '@/shared/components';
+import { LanguageSelector, Copyright } from '@/shared/components';
 
 /**
  * Página de registro
@@ -22,12 +22,6 @@ export const RegisterPage = () => {
     setError('');
 
     try {
-      console.log('Intentando registro con:', {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      });
-
       // Preparar datos para el backend (sin confirmPassword)
       const registerData = {
         email: formData.email,
@@ -37,28 +31,20 @@ export const RegisterPage = () => {
         address: formData.address,
         phone: formData.phone,
         avatarUrl: formData.avatarUrl || 'https://example.com/avatar.jpg',
+        acceptTermsAndPolicies: formData.acceptedTermsAndPolicies,
       };
 
-      // Paso 1: Registrar usuario en el backend
       const registerResult = await registerUseCase(registerData);
 
-      console.log('Registro exitoso:', registerResult);
+      if (registerResult.success) {
+        const loginResult = await loginUseCase({
+          email: formData.email,
+          password: formData.password,
+        });
 
-      // Paso 2: Hacer login automático con las credenciales
-      console.log('Iniciando sesión automáticamente...');
-
-      const loginResult = await loginUseCase({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Paso 3: Guardar usuario en el contexto (automáticamente guarda en localStorage)
-      login(loginResult.user);
-
-      console.log('Login automático exitoso:', loginResult.user);
-
-      // Paso 4: Redirigir al home
-      navigate('/login');
+        login(loginResult.user);
+        navigate('/login');
+      }
     } catch (error) {
       console.error('Error de registro:', error);
 
@@ -110,7 +96,7 @@ export const RegisterPage = () => {
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8 py-8">
         {/* Logo */}
-        <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
           <svg
             className="w-12 h-12 text-white"
             fill="currentColor"
@@ -122,7 +108,7 @@ export const RegisterPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('auth.register.title')}</h1>
+          <h1 className="text-5xl md:text-5xl font-bold mb-0">{t('auth.register.title')}</h1>
           <p className="text-lg md:text-xl text-white/90">{t('auth.register.subtitle')}</p>
         </div>
 
@@ -162,7 +148,7 @@ export const RegisterPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md pb-4">
         <p className="text-center text-white/80 text-sm">
           {t('auth.register.haveAccount')}{' '}
           <button
@@ -173,6 +159,9 @@ export const RegisterPage = () => {
           </button>
         </p>
       </div>
+
+      {/* Copyright */}
+      <Copyright variant="dark" />
     </div>
   );
 };

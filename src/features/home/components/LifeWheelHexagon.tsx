@@ -60,7 +60,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
 
     // Clear canvas
     ctx.clearRect(0, 0, size, size);
-    
+
     // Calculate icon positions for hexagon
     const iconPositions = [];
     for (let i = 0; i < 6; i++) {
@@ -151,7 +151,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
 
       orderedAreas.forEach((area, i) => {
         if (area.score <= 0) return; // Skip areas without scores
-        
+
         const angle = (Math.PI / 3) * i - Math.PI / 2;
         const scoreRadius = (area.score / 10) * maxScoreRadius;
         const endX = centerX + scoreRadius * Math.cos(angle);
@@ -197,8 +197,9 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
       <div className="absolute inset-0 z-10">
         {orderedAreas.map((area, index) => {
           const position = getIconPosition(index);
-          const isEnabled = !enabledAreaIds || enabledAreaIds.size === 0 || enabledAreaIds.has(area.id);
-          
+          // Si enabledAreaIds está definido, usar su lógica; si no está definido, habilitar todas
+          const isEnabled = enabledAreaIds === undefined || enabledAreaIds.has(area.id);
+
           return (
             <div
               key={area.id}
@@ -241,31 +242,60 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                 >
                   {getAreaIcon(area.areaName)}
                 </button>
-                
+
                 {/* Tooltip con el nombre del área */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-16 sm:-top-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                  <div className={`${
-                    isEnabled 
-                      ? 'bg-gray-900' 
-                      : area.score === 0 
-                        ? 'bg-amber-500' 
-                        : 'bg-red-600'
-                  } text-white px-3 py-1.5 rounded-lg shadow-lg text-xs sm:text-sm font-medium whitespace-nowrap`}>
-                    {isEnabled 
-                      ? t(getAreaTranslationKey(area.areaName))
-                      : area.score === 0 
-                        ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
-                        : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.locked')}`}
-                    <div className={`absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 ${
-                      isEnabled 
-                        ? 'bg-gray-900' 
-                        : area.score === 0 
-                          ? 'bg-amber-500' 
-                          : 'bg-red-600'
-                    } rotate-45`}></div>
-                  </div>
-                </div>
-                
+                {(() => {
+                  // Detectar si este ícono es el más superior
+                  const topMostArea = orderedAreas.reduce((top, current, i) => {
+                    const posTop = parseFloat(getIconPosition(i).top);
+                    const topTop = parseFloat(getIconPosition(orderedAreas.indexOf(top)).top);
+                    return posTop < topTop ? current : top;
+                  });
+
+                  const isTopArea = area.id === topMostArea.id;
+
+                  return (
+                    <div
+                      className={`absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50
+                        ${isTopArea
+                          ? 'left-full top-1/2 -translate-y-1/2 ml-3' // tooltip lateral (para el más superior)
+                          : 'left-1/2 -translate-x-1/2 -top-10 sm:-top-12' // posición normal para los demás
+                        }`}
+                    >
+                      <div
+                        className={`${
+                          isEnabled
+                            ? 'bg-gray-900'
+                            : area.score === 0
+                            ? 'bg-amber-500'
+                            : 'bg-red-600'
+                        } text-white px-3 py-1.5 rounded-lg shadow-lg text-xs sm:text-sm font-medium whitespace-nowrap relative`}
+                      >
+                        {isEnabled
+                          ? t(getAreaTranslationKey(area.areaName))
+                          : area.score === 0
+                          ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
+                          : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.locked')}`}
+
+                        {/* Flecha del tooltip */}
+                        <div
+                          className={`absolute ${
+                            isTopArea
+                              ? 'left-0 top-1/2 -translate-y-1/2 -ml-1 rotate-45'
+                              : 'left-1/2 -translate-x-1/2 -bottom-1 rotate-45'
+                          } w-2 h-2 ${
+                            isEnabled
+                              ? 'bg-gray-900'
+                              : area.score === 0
+                              ? 'bg-amber-500'
+                              : 'bg-red-600'
+                          }`}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Badge con el score */}
                 <div className={`absolute -bottom-10 sm:-bottom-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-md border ${
                   isEnabled 

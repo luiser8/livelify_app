@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright, LifeScoreCard } from '@/shared/components';
 import { LifeWheelHexagon } from '../components';
 import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
-import { getAreaIcon, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
+import { getAreaIcon, getAreaTranslationKey, getSelectableAreas, LifeArea, userSelectAreas } from '@/shared/utils';
+import { LifeAreasSelectionModal } from '@/shared/components/SelectionModal/LifeAreasSelectionModal';
 
 /**
  * Página principal - Life Wheel
@@ -14,12 +15,26 @@ export const HomePage = () => {
   const { t } = useTranslation();
   const [lifeWheel, setLifeWheel] = useState<LifeWheelResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSelectionModal, setShowSelectionModal] = useState(false);
+  const [selectedAreaIds, setSelectedAreaIds] = useState<string[]>([]);
+  const [selectionData, setSelectionData] = useState<{
+    candidateAreas: Array<{ id: string; areaName: string; score: number }>;
+    selectableAreaIds: Set<string>;
+  } | null>(null);
+  const [enabledAreaIds, setEnabledAreaIds] = useState<Set<string>>(new Set());
+  const [savingSelection, setSavingSelection] = useState(false);
 
   useEffect(() => {
     const fetchLifeWheel = async () => {
       try {
         const data = await lifeWheelService.getMyLifeWheel();
         setLifeWheel(data);
+
+        // Inicializar enabledAreaIds después de cargar los datos
+        if (data?.lifeAreas) {
+          const initialEnabledAreas = calculateEnabledAreas(data.lifeAreas, data);
+          setEnabledAreaIds(initialEnabledAreas as Set<string>);
+        }
       } catch (error) {
         console.error('Error fetching life wheel:', error);
       } finally {
@@ -40,46 +55,217 @@ export const HomePage = () => {
       navigate('/assessment/intro');
       return;
     }
-    
-    // Verificar si el área está habilitada (entre las 3 más bajas)
+
+    // Verificar si el área está habilitada (entre las seleccionadas)
     if (!enabledAreaIds.has(areaId)) {
       return; // No hacer nada si el área no está habilitada
     }
-    
+
     navigate(`/area/${areaId}/projects`);
   };
 
   const hasScores = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.some(area => area.score > 0);
-  const allAreasAnswered = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.length > 0 && 
+  const allAreasAnswered = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.length > 0 &&
     lifeWheel.lifeAreas.every(area => area.score > 0);
 
-  // Obtener las áreas habilitadas para hacer clic
-  const getEnabledAreas = () => {
-    if (!lifeWheel?.lifeAreas) return new Set<string>();
-    
-    // SIEMPRE filtrar primero solo áreas evaluadas (score > 0)
-    const evaluatedAreas = lifeWheel.lifeAreas.filter(area => area.score > 0);
-    
-    // Si no hay áreas evaluadas, no habilitar ninguna
+  // Función para calcular las áreas habilitadas
+  const calculateEnabledAreas = (areas: LifeArea[], lifeWheelResponse?: any) => {
+    if (!areas) return new Set<string>();
+
+    // 1️⃣ Filtrar solo áreas evaluadas y no perfectas
+    const evaluatedAreas = areas.filter(area => area.score > 0 && area.score < 10);
     if (evaluatedAreas.length === 0) return new Set<string>();
-    
-    // Si TODAS las áreas están contestadas, de las evaluadas solo permitir las 3 más bajas
-    if (allAreasAnswered) {
-      const sortedAreas = [...evaluatedAreas].sort((a, b) => a.score - b.score);
-      const lowestThree = sortedAreas.slice(0, 3);
-      return new Set(lowestThree.map(area => area.id));
+
+    // 2️⃣ Obtener las áreas seleccionables según la lógica inteligente
+    const result = getSelectableAreas(areas);
+
+    // Si no requiere selección → devolver directamente las áreas seleccionables
+    if (!result.requiresUserSelection || !result.candidateAreas) {
+      return result.selectableAreaIds;
     }
-    
-    // Si no todas están contestadas, permitir todas las evaluadas
-    return new Set(evaluatedAreas.map(area => area.id));
+
+    // 3️⃣ Intentar recuperar selección guardada en localStorage
+    const storedSelection = localStorage.getItem('userAreaSelection');
+    if (storedSelection) {
+      try {
+        const parsed = JSON.parse(storedSelection);
+        const stillValid =
+          Array.isArray(parsed.areaIds) &&
+          parsed.areaIds.length === 3 &&
+          parsed.areaIds.every((id: string) =>
+            result.candidateAreas!.some(area => area.id === id)
+          );
+
+        if (stillValid) {
+          return new Set(parsed.areaIds);
+        }
+      } catch  {}
+    }
+
+    // 4️⃣ Si no hay localStorage, revisar si el backend trae selección previa (lifeAreasSelected)
+    const backendSelected = lifeWheelResponse?.lifeAreasSelected;
+    const allLifeAreas = lifeWheelResponse?.lifeAreas;
+
+    if (Array.isArray(backendSelected) && backendSelected.length > 0 && Array.isArray(allLifeAreas)) {
+      // Mapear los areaId del backend a los IDs locales (lifeAreas.id)
+      const backendSelectedIds = backendSelected
+        .map((sel: any) => {
+          const fullArea = allLifeAreas.find((a: any) => a.areaId === sel.areaId);
+          return fullArea?.id ?? null;
+        })
+        .filter(Boolean) as string[];
+
+      if (backendSelectedIds.length === 3) {
+        // Verificar si coincide con las áreas bajas propuestas por getSelectableAreas
+        const lowestIds = Array.from(result.selectableAreaIds);
+        const matchesLowest = backendSelectedIds.every(id => lowestIds.includes(id));
+
+        if (matchesLowest) {
+          localStorage.setItem(
+            'userAreaSelection',
+            JSON.stringify({
+              areaIds: backendSelectedIds,
+              timestamp: new Date().toISOString(),
+              lifeWheelId: lifeWheelResponse?.id
+            })
+          );
+        } else {}
+
+        // En ambos casos usamos lo que viene del backend
+        return new Set(backendSelectedIds);
+      }
+
+      // Si backend tiene items mapeados parciales, devolverlos (sin guardar)
+      if (backendSelectedIds.length > 0) {
+        return new Set(backendSelectedIds);
+      }
+    }
+
+    // -----------------------------
+    // Nuevo comportamiento solicitado:
+    // Si NO hay localStorage válido y NO hay backendSelected,
+    // y SÍ hay empates/duplicados (result.hasMultipleTied o candidateAreas>3)
+    // → mostrar modal para que el usuario elija.
+    // -----------------------------
+    const noStorage = !storedSelection;
+    const noBackend = !Array.isArray(backendSelected) || backendSelected.length === 0;
+    const hasTies = Boolean(result.hasMultipleTied) || (result.candidateAreas && result.candidateAreas.length > 3);
+
+    if (noStorage && noBackend && hasTies) {
+      setSelectionData({
+        candidateAreas: result.candidateAreas,
+        selectableAreaIds: result.selectableAreaIds
+      });
+      setShowSelectionModal(true);
+
+      // Devolver placeholder temporal con las primeras 3 (mismo comportamiento anterior)
+      return new Set(result.candidateAreas.slice(0, 3).map(area => area.id));
+    }
+
+    // 5️⃣ Si no hay selección guardada ni en backend → usar las áreas calculadas sin mostrar modal
+    return result.selectableAreaIds;
   };
 
-  const enabledAreaIds = getEnabledAreas();
+  // Actualizar enabledAreaIds cuando cambie lifeWheel o allAreasAnswered
+  useEffect(() => {
+    if (lifeWheel?.lifeAreas) {
+      const newEnabledAreas = calculateEnabledAreas(lifeWheel.lifeAreas);
+      setEnabledAreaIds(newEnabledAreas as Set<string>);
+    }
+  }, [lifeWheel, allAreasAnswered]);
+
+  // Confirmar selección del usuario
+  const confirmUserSelection = async () => {
+    if (selectedAreaIds.length !== 3) {
+      alert(t('home.selectionModal.pleaseSelectThree') || 'Por favor selecciona exactamente 3 áreas');
+      return;
+    }
+
+    setSavingSelection(true);
+
+    try {
+      if (selectionData && lifeWheel) {
+        // 1️⃣ Obtener las áreas completas seleccionadas
+        const candidateLifeAreas = selectionData.candidateAreas
+          .filter(area => selectedAreaIds.includes(area.id))
+          .map(area => lifeWheel.lifeAreas.find(a => a.id === area.id))
+          .filter(Boolean);
+
+        //const candidateLifeAreas = selectionData.candidateAreas.map(ca => lifeWheel.lifeAreas.find(area => area.id === ca.id)! ).filter(Boolean);
+
+        if (candidateLifeAreas.length !== 3) {
+          throw new Error('No se pudieron encontrar todas las áreas seleccionadas');
+        }
+
+        // 2️⃣ Preparar datos para enviar al backend
+        const areasToSend = candidateLifeAreas.map(area => ({
+          areaId: area?.areaId ?? area?.id,
+          score: area?.score
+        }));
+
+        const requestBody = {
+          userId: '',
+          lifeWheelId: lifeWheel.id,
+          areaIds: areasToSend
+        };
+
+        // 3️⃣ Guardar en backend
+        await lifeWheelService.addLifeWheelAreas({
+          ...requestBody,
+          userId: '',
+          areaIds: requestBody.areaIds.map(a => ({
+            areaId: a.areaId ?? '',
+            score: a.score ?? 0
+          }))
+        });
+
+        // 4️⃣ Actualizar localStorage para recordar la selección del usuario
+        localStorage.setItem(
+          'userAreaSelection',
+          JSON.stringify({
+            areaIds: selectedAreaIds,
+            areaIdsWithAreaId: areasToSend.map(a => a.areaId),
+            timestamp: new Date().toISOString(),
+            lifeWheelId: lifeWheel.id
+          })
+        );
+
+        // 5️⃣ Actualizar UI local (habilitar áreas sin recargar)
+        const userSelectedSet = userSelectAreas(
+          selectedAreaIds,
+          candidateLifeAreas as LifeArea[]
+        );
+        setEnabledAreaIds(userSelectedSet);
+
+        setShowSelectionModal(false);
+        setSelectedAreaIds([]);
+        setSelectionData(null);
+      }
+    } catch (error) {
+      console.error('❌ Error al guardar la selección:', error);
+      alert(t('home.selectionModal.errorMessage') || 'Error al guardar la selección. Intenta nuevamente.');
+    } finally {
+      setSavingSelection(false);
+    }
+  };
+
+
+  // Cerrar modal sin seleccionar
+  const cancelUserSelection = () => {
+    setShowSelectionModal(false);
+    setSelectedAreaIds([]);
+    setSelectionData(null);
+  };
+
+  // Obtener información sobre cuántas áreas se pueden seleccionar
+  const selectionInfo = lifeWheel?.lifeAreas && allAreasAnswered
+    ? getSelectableAreas(lifeWheel.lifeAreas)
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <PageHeader 
+      <PageHeader
         title={t('home.title')}
         subtitle={t('home.subtitle')}
         showBackButton={true}
@@ -89,25 +275,50 @@ export const HomePage = () => {
       />
 
       {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6">
-        {/* Hexágono del Life Wheel */}
+      <main className="max-w-7xl mx-auto w-full px-6 py-8">
+        {/* Hexágono del Life Wheel con Global Score debajo */}
         {loading ? (
           <div className="mb-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
             <p className="text-gray-500 mt-4 text-sm sm:text-base">{t('home.loadingWheel')}</p>
           </div>
         ) : (
-          <div className="mb-12 sm:mb-16">
-            <LifeWheelHexagon 
-              lifeAreas={lifeWheel?.lifeAreas || []} 
-              onAreaClick={handleAreaClick}
-              enabledAreaIds={enabledAreaIds}
-            />
+          <div className="mb-6">
+            {/* Life Wheel Hexagon */}
+            <div className="flex justify-center">
+              <LifeWheelHexagon
+                lifeAreas={lifeWheel?.lifeAreas || []}
+                onAreaClick={handleAreaClick}
+                enabledAreaIds={enabledAreaIds}
+              />
+            </div>
+
+            {/* Global Score debajo de la rueda, alineado a la izquierda */}
+            {hasScores && lifeWheel && (
+              <div className="flex justify-center mt-6">
+                <div className="w-full max-w-2xl">
+                  <LifeScoreCard score={lifeWheel.globalScore} />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Contenedor para botón y mensajes */}
-        <div className="w-full pt-4">
+        {/* Modal de selección de áreas */}
+        {showSelectionModal && selectionData && (
+          <LifeAreasSelectionModal
+            show={showSelectionModal}
+            selectionData={selectionData}
+            selectedAreaIds={selectedAreaIds}
+            setSelectedAreaIds={setSelectedAreaIds}
+            confirmUserSelection={confirmUserSelection}
+            cancelUserSelection={cancelUserSelection}
+            saving={savingSelection}
+          />
+        )}
+
+        {/* Resto del contenido */}
+        <div className={`w-full ${allAreasAnswered ? 'pt-4' : 'pt-16'}`}>
           {/* Botón de acción - Solo mostrar si no todas las áreas están respondidas */}
           {!allAreasAnswered && (
             <>
@@ -135,7 +346,7 @@ export const HomePage = () => {
               {/* Texto informativo */}
               <div className="mt-6 text-center">
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                  {t('home.assessmentInfo.description', { 
+                  {t('home.assessmentInfo.description', {
                     min: t('home.assessmentInfo.min'),
                     max: t('home.assessmentInfo.max'),
                     time: t('home.assessmentInfo.time')
@@ -194,7 +405,13 @@ export const HomePage = () => {
                   <div className="flex-1">
                     <h4 className="text-sm font-semibold text-blue-900 mb-1">{t('home.focusLowest.title')}</h4>
                     <p className="text-xs sm:text-sm text-blue-800">
-                      {t('home.focusLowest.description', { count: 3 })}
+                      {selectionInfo && selectionInfo.hasMultipleTied
+                        ? t('home.focusLowest.tiedDescription', {
+                          count: selectionInfo.count,
+                          score: selectionInfo.lowestScore
+                        })
+                        : t('home.focusLowest.description', { count: selectionInfo?.count || 3 })
+                      }
                     </p>
                   </div>
                 </div>
@@ -208,26 +425,25 @@ export const HomePage = () => {
               <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4">{t('home.currentScores')}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 {lifeWheel.lifeAreas
-                  .sort((a, b) => a.score - b.score) // Ordenar por score ascendente
+                  .sort((a, b) => a.score - b.score)
                   .map((area) => {
                     const isEnabled = enabledAreaIds.has(area.id);
                     return (
-                      <div 
-                        key={area.id} 
-                        className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all ${
-                          isEnabled 
-                            ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 shadow-sm' 
-                            : area.score === 0
-                              ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300'
-                              : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
-                        }`}
+                      <div
+                        key={area.id}
+                        className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all ${isEnabled
+                          ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 shadow-sm'
+                          : area.score === 0
+                            ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300'
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
+                          }`}
                       >
-                        <div className="flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 relative" 
-                             style={{ 
-                               filter: isEnabled 
-                                 ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' 
-                                 : 'grayscale(50%)' 
-                             }}>
+                        <div className="flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 relative"
+                          style={{
+                            filter: isEnabled
+                              ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+                              : 'grayscale(50%)'
+                          }}>
                           {getAreaIcon(area.areaName)}
                           {!isEnabled && area.score === 0 && (
                             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-600 rounded-full flex items-center justify-center shadow-lg">
@@ -246,26 +462,24 @@ export const HomePage = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <p className={`text-xs sm:text-sm font-semibold truncate ${
-                              isEnabled 
-                                ? 'text-green-900' 
-                                : area.score === 0 
-                                  ? 'text-amber-900' 
-                                  : 'text-gray-700'
-                            }`}>
+                            <p className={`text-xs sm:text-sm font-semibold truncate ${isEnabled
+                              ? 'text-green-900'
+                              : area.score === 0
+                                ? 'text-amber-900'
+                                : 'text-gray-700'
+                              }`}>
                               {t(getAreaTranslationKey(area.areaName))}
                             </p>
                             {isEnabled && (
                               <span className="text-xs text-green-700">✓</span>
                             )}
                           </div>
-                          <p className={`text-lg sm:text-xl font-bold ${
-                            isEnabled 
-                              ? 'text-green-700' 
-                              : area.score === 0 
-                                ? 'text-amber-700' 
-                                : 'text-gray-700'
-                          }`}>
+                          <p className={`text-lg sm:text-xl font-bold ${isEnabled
+                            ? 'text-green-700'
+                            : area.score === 0
+                              ? 'text-amber-700'
+                              : 'text-gray-700'
+                            }`}>
                             {area.score === 0 ? '—' : `${area.score}/10`}
                           </p>
                         </div>
@@ -278,9 +492,11 @@ export const HomePage = () => {
         </div>
       </main>
 
+      {/* Copyright */}
+      <Copyright />
+
       {/* Navegación inferior */}
       <BottomNav />
     </div>
   );
 };
-

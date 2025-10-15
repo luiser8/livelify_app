@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Input } from '@/shared/components';
+import { Input, TermsAndConditions } from '@/shared/components';
+import { PrivacyAndPolicies } from '@/shared/components/PrivacyAndPolicies/PrivacyAndPolicies';
 
 export interface RegisterFormData {
   email: string;
@@ -11,6 +12,7 @@ export interface RegisterFormData {
   address: string;
   phone: string;
   avatarUrl?: string;
+  acceptedTermsAndPolicies: boolean;
 }
 
 interface RegisterFormProps {
@@ -33,9 +35,14 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     address: '',
     phone: '',
     avatarUrl: '',
+    acceptedTermsAndPolicies: false,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [hasReadTerms, setHasReadTerms] = useState(false);
+  const [hasReadPrivacy, setHasReadPrivacy] = useState(false);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof RegisterFormData, string>> = {};
@@ -83,6 +90,13 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       newErrors.address = t('auth.validation.addressRequired');
     }
 
+    // Terms acceptance - ahora requiere haber leído ambos documentos
+    if (!formData.acceptedTermsAndPolicies) {
+      newErrors.acceptedTermsAndPolicies = t('auth.validation.termsRequired');
+    } else if (!hasReadTerms || !hasReadPrivacy) {
+      newErrors.acceptedTermsAndPolicies = t('auth.validation.mustReadBothDocuments');
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,7 +105,6 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -99,11 +112,14 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (validate()) {
       onSubmit(formData);
     }
   };
+
+  // Verificar si puede aceptar los términos (solo si leyó ambos documentos)
+  const canAcceptTerms = hasReadTerms && hasReadPrivacy;
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
@@ -199,15 +215,103 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         disabled={isLoading}
       />
 
-      {/* <Input
-        type="url"
-        label="Avatar URL (Optional)"
-        placeholder="https://example.com/avatar.jpg"
-        value={formData.avatarUrl}
-        onChange={handleChange('avatarUrl')}
-        error={errors.avatarUrl}
-        disabled={isLoading}
-      /> */}
+      {/* Sección de Términos y Políticas */}
+      <div className="space-y-3">
+        <label className={`flex items-start gap-3 ${canAcceptTerms ? 'cursor-pointer' : 'cursor-not-allowed'} group`}>
+          <input
+            type="checkbox"
+            checked={formData.acceptedTermsAndPolicies}
+            onChange={(e) => {
+              if (canAcceptTerms) {
+                setFormData(prev => ({ ...prev, acceptedTermsAndPolicies: e.target.checked }));
+                if (errors.acceptedTermsAndPolicies) {
+                  setErrors(prev => ({ ...prev, acceptedTermsAndPolicies: undefined }));
+                }
+              }
+            }}
+            disabled={isLoading || !canAcceptTerms}
+            className="mt-1 w-5 h-5 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <span className="text-sm text-white/90 leading-relaxed flex-1">
+            {t('auth.register.termsAcceptance.part1')}{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-cream font-semibold hover:text-cream-dark underline underline-offset-2 transition-colors"
+            >
+              {t('auth.register.termsAcceptance.termsLink')}
+            </button>{' '}
+            {t('auth.register.termsAcceptance.part2')}{' '}
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              className="text-cream font-semibold hover:text-cream-dark underline underline-offset-2 transition-colors"
+            >
+              {t('auth.register.termsAcceptance.privacyLink')}
+            </button>
+          </span>
+        </label>
+
+        {/* Estado de lectura de documentos */}
+        <div className="ml-8 space-y-2">
+          {/* Estado de Términos y Condiciones */}
+          <div className={`flex items-center gap-2 text-sm ${hasReadTerms ? 'text-green-300' : 'text-amber-300'}`}>
+            {hasReadTerms ? (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            )}
+            <span>
+              {hasReadTerms 
+                ? t('auth.register.termsAcceptance.termsRead')
+                : t('auth.register.termsAcceptance.termsNotRead')
+              }
+            </span>
+          </div>
+
+          {/* Estado de Políticas de Privacidad */}
+          <div className={`flex items-center gap-2 text-sm ${hasReadPrivacy ? 'text-green-300' : 'text-amber-300'}`}>
+            {hasReadPrivacy ? (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            )}
+            <span>
+              {hasReadPrivacy 
+                ? t('auth.register.termsAcceptance.privacyRead')
+                : t('auth.register.termsAcceptance.privacyNotRead')
+              }
+            </span>
+          </div>
+
+          {/* Mensaje cuando puede aceptar */}
+          {canAcceptTerms && !formData.acceptedTermsAndPolicies && (
+            <div className="flex items-center gap-2 text-green-300 text-sm">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>{t('auth.register.termsAcceptance.canAcceptNow')}</span>
+            </div>
+          )}
+        </div>
+
+        {errors.acceptedTermsAndPolicies && (
+          <p className="text-red-300 text-sm ml-8 flex items-center gap-1">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {errors.acceptedTermsAndPolicies}
+          </p>
+        )}
+      </div>
 
       <button
         type="submit"
@@ -216,7 +320,23 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       >
         {isLoading ? t('auth.register.signingUp') : t('auth.register.signUp')}
       </button>
+
+      {/* Modales */}
+      <TermsAndConditions
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAcceptRead={() => {
+          setHasReadTerms(true);
+        }}
+      />
+
+      <PrivacyAndPolicies
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onAcceptRead={() => {
+          setHasReadPrivacy(true);
+        }}
+      />
     </form>
   );
 };
-

@@ -13,6 +13,7 @@ export interface RegisterCredentials {
   address: string;
   phone: string;
   avatarUrl?: string;
+  acceptTermsAndPolicies: boolean;
 }
 
 export interface UserProfile {

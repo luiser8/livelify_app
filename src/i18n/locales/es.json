@@ -90,7 +90,19 @@
       "signingUp": "Creando cuenta...",
       "haveAccount": "¿Ya tienes una cuenta?",
       "signIn": "Iniciar sesión",
-      "terms": "Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad"
+      "terms": "Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad",
+      "termsAcceptance": {
+        "part1": "Acepto los",
+        "termsLink": "Términos y Condiciones",
+        "part2": "y la",
+        "privacyLink": "Política de Privacidad",
+        "termsRead": "Términos y Condiciones leídos",
+        "termsNotRead": "Debes leer los Términos y Condiciones",
+        "privacyRead": "Política de Privacidad leída",
+        "privacyNotRead": "Debes leer la Política de Privacidad",
+        "canAcceptNow": "Ya puedes aceptar los términos marcando la casilla",
+        "mustReadBothDocuments": "Debes leer ambos documentos antes de aceptar"
+      }
     },
     "validation": {
       "emailRequired": "El correo electrónico es requerido",
@@ -103,7 +115,8 @@
       "lastNameRequired": "El apellido es requerido",
       "phoneRequired": "El teléfono es requerido",
       "phoneInvalid": "Formato de teléfono inválido",
-      "addressRequired": "La dirección es requerida"
+      "addressRequired": "La dirección es requerida",
+      "termsRequired": "Debes aceptar los términos y condiciones"
     },
     "errors": {
       "loginFailed": "Error al iniciar sesión. Por favor, intenta de nuevo.",
@@ -138,9 +151,24 @@
     },
     "focusLowest": {
       "title": "Enfócate en tus Áreas Más Bajas",
-      "description": "Solo puedes crear proyectos en tus {{count}} áreas con puntuación más baja. Esto te ayuda a enfocarte en lo que más necesita mejora. Las otras áreas están bloqueadas 🔒 hasta que mejores estas primero."
+      "description": "Solo puedes crear proyectos en tu(s) {{count}} área(s) con puntuación más baja. Esto te ayuda a enfocarte en lo que más necesita mejora. Las otras áreas están bloqueadas 🔒 hasta que mejores estas primero.",
+      "tiedDescription": "Tienes {{count}} áreas empatadas en {{score}}/10. Puedes trabajar en todas ellas, o seleccionar 3 para enfocarte y lograr el máximo impacto."
     },
-    "currentScores": "Tus Puntuaciones Actuales"
+    "currentScores": "Tus Puntuaciones Actuales",
+    "selectionModal": {
+      "title": "Selecciona tus 3 áreas de enfoque",
+      "description": "Tienes varias áreas con puntuaciones similares. Por favor selecciona las 3 áreas en las que te gustaría trabajar primero.",
+      "score": "Puntuación: {{score}}/10",
+      "selected": "{{count}} de 3 seleccionadas",
+      "pleaseSelectThree": "Por favor selecciona exactamente 3 áreas",
+      "successMessage": "Áreas seleccionadas guardadas exitosamente",
+      "errorMessage": "Error al guardar la selección. Por favor intenta nuevamente.",
+      "saving": "Guardando...",
+      "confirm": "Confirmar"
+    },
+    "common": {
+      "cancel": "Cancelar"
+    }
   },
   "dashboard": {
     "greeting": {
@@ -197,7 +225,19 @@
       "renews": "Renueva",
       "noActiveSubscription": "Sin Suscripción Activa",
       "chooseAPlan": "Elegir un Plan",
-      "unlockFeatures": "Elige un plan para desbloquear todas las funciones"
+      "unlockFeatures": "Elige un plan para desbloquear todas las funciones",
+      "pricing": "Tarifa Mensual",
+      "totalPaid": "Total Pagado",
+      "billingCycle": "Ciclo de Facturación",
+      "paymentMethod": "Método de Pago",
+      "nextRenewal": "Próxima Renovación",
+      "savings": "Ahorras",
+      "planFeatures": "Características del Plan",
+      "actionsPerMonth": "acciones por mes",
+      "activeProjects": "proyectos activos",
+      "analyticsInsights": "Análisis e Insights",
+      "period": "Período de Suscripción",
+      "daysRemaining": "Días Restantes"
     },
     "contexts": {
       "title": "Mis Contextos",
@@ -332,6 +372,12 @@
       "title": "Objetivos del Proyecto",
       "subtitle": "Define tu visión de transformación",
       "loading": "Cargando objetivos...",
+      "projectNotFound": "Proyecto no encontrado",
+      "backToProjects": "Volver a Proyectos",
+      "totalGoals": "Total de Objetivos",
+      "beGoals": "Objetivos SER",
+      "doGoals": "Objetivos HACER",
+      "haveGoals": "Objetivos TENER",
       "beTitle": "SER (BE)",
       "beDescription": "¿Quién necesitas SER?",
       "beExample": "Ejemplo: Ser una persona disciplinada y enfocada",
@@ -341,26 +387,54 @@
       "haveTitle": "TENER (HAVE)",
       "haveDescription": "¿Qué necesitas TENER?",
       "haveExample": "Ejemplo: Portafolio profesional con 5 proyectos",
+      "writingTips": "💡 Consejos para escribir objetivos {{type}}",
+      "beTip1": "Comienza con 'Soy alguien que...' - escribe en presente para encarnar la identidad",
+      "beTip2": "Enfócate en rasgos de carácter, hábitos mentales y formas de ser",
+      "beTip3": "Describe cómo te mostrarías y sentirías después de la transformación",
+      "doTip1": "Comienza con 'Haré...' - sé específico sobre acciones y frecuencia",
+      "doTip2": "Incluye medidas concretas cuando sea posible (tiempo, cantidad, frecuencia)",
+      "haveTip1": "Comienza con 'Habré...' - describe resultados y logros tangibles",
+      "haveTip2": "Enfócate en hitos verificables y resultados específicos",
+      "yourGoals": "Tus Objetivos {{type}}",
       "addGoal": "Agregar Objetivo {{type}}",
+      "noGoals": "Aún no hay objetivos {{type}}",
+      "createFirst": "Crear Primer Objetivo {{type}}",
+      "deleteGoal": "Eliminar Objetivo",
+      "goalDescription": "Descripción del Objetivo",
       "goalPlaceholder": "Escribe tu objetivo...",
-      "baseCapital": "Capital Base (opcional)",
-      "currencyCode": "Moneda",
+      "baseCapital": "Capital Base",
+      "optional": "opcional",
+      "currencyCode": "Código de Moneda",
+      "multiplier": "Multiplicador",
+      "target": "Objetivo",
       "creating": "Creando...",
       "create": "Crear",
       "cancel": "Cancelar",
+      "createNew": "✨ Crear Nuevo Objetivo {{type}}",
+      "examples": "💡 Ejemplos de Objetivos {{type}}",
+      "beExample1": "Soy alguien que se comunica abierta y honestamente en todas mis relaciones.",
+      "beExample2": "Soy alguien que expresa emociones abiertamente y crea espacios seguros para la vulnerabilidad en mis relaciones.",
+      "beExample3": "Soy alguien que realmente escucha para comprender, no solo para responder, haciendo que los demás se sientan escuchados y valorados.",
+      "doExample1": "Practicaré la escucha activa durante 15 minutos diarios con mi pareja.",
+      "doExample2": "Programaré citas semanales sin distracciones.",
+      "doExample3": "Expresaré gratitud a mis seres queridos todos los días.",
+      "haveExample1": "Habré resuelto 3 conflictos importantes con compasión.",
+      "haveExample2": "Habré profundizado la confianza con 5 relaciones cercanas.",
+      "haveExample3": "Habré creado 10 recuerdos significativos con mi familia.",
       "viewActions": "Ver Acciones",
       "actions": "acciones",
       "completed": "Completado",
       "finishProject": "Finalizar Proyecto",
       "continueToActions": "Continuar a Acciones",
       "backToProject": "Volver al Proyecto",
-      "minimumGoals": "Necesitas al menos 3 objetivos BE, 3 DO y 1 HAVE para continuar"
+      "minimumGoals": "Necesitas al menos 3 objetivos BE, 3 DO y 1 HAVE para continuar",
+      "characters": "caracteres"
     }
   },
   "assessment": {
     "intro": {
       "title": "Evaluación de la Rueda de la Vida",
-      "subtitle": "60 Preguntas. 10 Minutos. Tu Punto de Partida.",
+      "subtitle": "10 Preguntas. 10 Minutos. Tu Punto de Partida.",
       "permanentWarningTitle": "Esta evaluación es permanente y no se puede repetir",
       "permanentWarningDesc": "Tus resultados se convierten en tu línea base para todas las transformaciones futuras.",
       "answerHonestlyTitle": "Responde honestamente - esta es solo tu línea base. Mejorarás desde aquí.",
@@ -431,7 +505,17 @@
       "tip3": "Sé honesto - esto crea tu línea base para mejorar",
       "chooseAnswer": "Elige tu respuesta para continuar",
       "submitting": "Enviando...",
-      "completeAssessment": "Enviar Evaluación del Área"
+      "completeAssessment": "Enviar Evaluación del Área",
+      "maritalStatus": {
+        "subtitle": "Antes de comenzar, necesitamos saber tu estado de relación",
+        "question": "¿Cuál es tu estado de relación actual?",
+        "description": "Esto nos ayuda a adaptar las preguntas a tu situación específica",
+        "married": "En una Relación/Casado",
+        "marriedDesc": "Actualmente estoy en una relación comprometida o casado",
+        "single": "Soltero",
+        "singleDesc": "Actualmente estoy soltero o no estoy en una relación",
+        "info": "Tu respuesta determinará qué preguntas son más relevantes para tu situación. Todas tus respuestas son confidenciales."
+      }
     }
   },
   "areaProjects": {
@@ -503,6 +587,31 @@
     "processing": "Procesando...",
     "changePlan": "Cambiar Plan",
     "getStarted": "Comenzar",
+    "month": "mes",
+    "months": "meses",
+    "total": "total",
+    "save": "Ahorra",
+    "actions": "acciones/mes",
+    "projects": "proyectos activos",
+    "analytics": "Análisis e Insights",
+    "planTypes": {
+      "MONTHLY": {
+        "name": "Mensual",
+        "description": "Perfecto para probar la plataforma"
+      },
+      "QUARTERLY": {
+        "name": "Trimestral",
+        "description": "Mejor valor por 3 meses"
+      },
+      "SEMESTER": {
+        "name": "Semestral",
+        "description": "Grandes ahorros por 6 meses"
+      },
+      "ANNUAL": {
+        "name": "Anual",
+        "description": "Máximos ahorros durante todo el año"
+      }
+    },
     "faq": {
       "title": "Preguntas Frecuentes",
       "q1": "¿Puedo cambiar de plan en cualquier momento?",
@@ -575,7 +684,62 @@
     "createActionAbove": "Crea una nueva acción arriba"
   },
   "footer": {
-    "createdBy": "Creado por"
+    "createdBy": "Creado por",
+    "allRightsReserved": "Todos los derechos reservados"
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "loading": "Cargando política de privacidad...",
+    "loadError": "Error al cargar la política de privacidad. Por favor, inténtalo de nuevo más tarde.",
+    "lastUpdated": "Última Actualización",
+    "updateDate": "11 de octubre de 2025"
+  },
+  "terms": {
+    "title": "Términos y Condiciones",
+    "loading": "Cargando términos y condiciones...",
+    "loadError": "Error al cargar los términos y condiciones. Por favor, inténtalo de nuevo más tarde.",
+    "lastUpdated": "Última Actualización",
+    "updateDate": "11 de octubre de 2025",
+    "introduction": "Bienvenido a Livelify. Estos Términos y Condiciones rigen el uso de nuestra plataforma y servicios. Al crear una cuenta y usar Livelify, aceptas cumplir y estar sujeto a los siguientes términos. Por favor, léelos cuidadosamente.",
+    "section1": {
+      "title": "Aceptación de Términos",
+      "content": "Al acceder y usar los servicios de Livelify, reconoces que has leído, comprendido y aceptas estar sujeto a estos Términos y Condiciones, así como a nuestra Política de Privacidad. Si no estás de acuerdo con alguna parte de estos términos, por favor no uses nuestros servicios."
+    },
+    "section2": {
+      "title": "Uso del Servicio",
+      "content": "Livelify proporciona una plataforma de transformación personal diseñada para ayudarte a mejorar varias áreas de tu vida a través del establecimiento de objetivos, gestión de proyectos y acciones diarias. Aceptas usar nuestro servicio de manera responsable y de acuerdo con todas las leyes aplicables. Aceptas no:",
+      "item1": "Usar el servicio para ningún propósito ilegal o no autorizado",
+      "item2": "Intentar obtener acceso no autorizado a ninguna parte del servicio",
+      "item3": "Interferir o interrumpir el servicio o los servidores",
+      "item4": "Cargar o transmitir virus o cualquier código malicioso"
+    },
+    "section3": {
+      "title": "Cuenta de Usuario y Seguridad",
+      "content": "Eres responsable de mantener la confidencialidad de las credenciales de tu cuenta y de todas las actividades que ocurran bajo tu cuenta. Aceptas notificarnos inmediatamente de cualquier uso no autorizado de tu cuenta. Livelify no puede y no será responsable de ninguna pérdida o daño que surja de tu incumplimiento en mantener la seguridad de la cuenta."
+    },
+    "section4": {
+      "title": "Privacidad y Protección de Datos",
+      "content": "Tu privacidad es importante para nosotros. Nuestra Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información personal. Al usar Livelify, consientes nuestra recopilación y uso de tus datos como se describe en nuestra Política de Privacidad. Implementamos medidas de seguridad estándar de la industria para proteger tus datos, pero ningún método de transmisión por internet es 100% seguro."
+    },
+    "section5": {
+      "title": "Propiedad Intelectual",
+      "content": "Todo el contenido, características y funcionalidad de Livelify, incluyendo pero no limitado a texto, gráficos, logos, software y diseño, son propiedad exclusiva de Livelify y están protegidos por leyes internacionales de derechos de autor, marcas registradas y otras leyes de propiedad intelectual. No puedes copiar, modificar, distribuir o reproducir ninguna parte de nuestro servicio sin permiso explícito por escrito."
+    },
+    "section6": {
+      "title": "Limitación de Responsabilidad",
+      "content": "Livelify se proporciona 'tal cual' sin ninguna garantía, expresa o implícita. No garantizamos que el servicio será ininterrumpido, seguro o libre de errores. En ningún caso Livelify será responsable de ningún daño indirecto, incidental, especial, consecuente o punitivo que surja de tu uso o incapacidad de usar el servicio."
+    },
+    "section7": {
+      "title": "Cambios en los Términos",
+      "content": "Nos reservamos el derecho de modificar estos Términos y Condiciones en cualquier momento. Te notificaremos de cualquier cambio material actualizando la fecha de 'Última Actualización' y, cuando sea apropiado, enviándote una notificación por correo electrónico. Tu uso continuado de Livelify después de dichos cambios constituye tu aceptación de los nuevos términos."
+    },
+    "section8": {
+      "title": "Información de Contacto",
+      "content": "Si tienes alguna pregunta, inquietud o comentario sobre estos Términos y Condiciones, por favor contáctanos:"
+    },
+    "footerNote": "Estos términos y condiciones son solo para fines de demostración. Este es un texto de muestra para probar la función de aceptación de términos.",
+    "closeButton": "Entiendo",
+    "scrollToEnable": "Por favor, desplázate hacia abajo para leer todos los términos antes de continuar",
+    "scrollToEnablePrivacy": "Por favor, desplázate hacia abajo para leer todas las políticas antes de continuar"
   }
 }
-

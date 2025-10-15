@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type LifeWheelArea } from '@/infrastructure/services';
-import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
-import { PageHeader } from '@/shared/components';
+import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey, getSelectableAreas } from '@/shared/utils';
+import { PageHeader, Copyright, BottomNav } from '@/shared/components';
 
 /**
  * Página de creación de proyecto - Multi-step
@@ -58,30 +58,28 @@ export const CreateProjectPage = () => {
         // Si viene con un areaId, verificar validaciones
         if (urlAreaId) {
           const selectedArea = lifeWheelData.lifeAreas.find(a => a.id === urlAreaId);
-          
+
           // Validar que el área exista
           if (!selectedArea) {
             navigate('/home');
             return;
           }
 
-          // Validar que el área esté en las 3 más bajas
-          const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
-          const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
-          
-          if (!lowestThreeIds.has(urlAreaId)) {
-            console.log('Area not in lowest 3, redirecting...');
+          // Validar que el área esté entre las seleccionables
+          const result = getSelectableAreas(lifeWheelData.lifeAreas);
+          const enabledAreaIds = result.selectableAreaIds;
+
+          if (!enabledAreaIds.has(urlAreaId)) {
             navigate('/home');
             return;
           }
-          
+
           try {
             const projectsData = await projectService.getProjectsByArea(urlAreaId);
             const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
-            
+
             // Si ya tiene 2 proyectos activos, redirigir
             if (activeProjects.length >= 2) {
-              console.log('Area has reached project limit, redirecting...');
               navigate(`/area/${urlAreaId}/projects`);
               return;
             }
@@ -99,10 +97,10 @@ export const CreateProjectPage = () => {
     fetchData();
   }, [urlAreaId, navigate]);
 
-  const averageScore = lifeAreas.length > 0 
+  const averageScore = lifeAreas.length > 0
     ? (lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length).toFixed(1)
     : '0.0';
-  
+
   const lowestArea = lifeAreas.length > 0
     ? lifeAreas.reduce((min, area) => area.score < min.score ? area : min)
     : null;
@@ -110,17 +108,16 @@ export const CreateProjectPage = () => {
   // Verificar si todas las áreas están evaluadas
   const allAreasEvaluated = lifeAreas.length > 0 && lifeAreas.every(area => area.score > 0);
 
-  // Obtener las 3 áreas con menor puntaje (solo si todas están evaluadas)
+  // Obtener las áreas seleccionables usando la nueva lógica inteligente
   const getLowestScoringAreaIds = () => {
     if (!allAreasEvaluated) {
       // Si no todas están evaluadas, permitir todas las evaluadas
       return new Set(lifeAreas.filter(area => area.score > 0).map(area => area.id));
     }
-    
-    // Si todas están evaluadas, solo las 3 más bajas
-    const sortedAreas = [...lifeAreas].sort((a, b) => a.score - b.score);
-    const lowestThree = sortedAreas.slice(0, 3);
-    return new Set(lowestThree.map(area => area.id));
+
+    // Si todas están evaluadas, usar la lógica inteligente
+    const result = getSelectableAreas(lifeAreas);
+    return result.selectableAreaIds;
   };
 
   const enabledAreaIds = getLowestScoringAreaIds();
@@ -139,11 +136,11 @@ export const CreateProjectPage = () => {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     // Calcular diferencia en meses
     const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
     const daysDiff = end.getDate() - start.getDate();
-    
+
     // Ajustar si los días hacen que no llegue al mes completo
     const totalMonths = daysDiff >= 0 ? monthsDiff : monthsDiff - 1;
 
@@ -151,7 +148,7 @@ export const CreateProjectPage = () => {
       setDateError(t('projects.create.dateErrorMin'));
       return false;
     }
-    
+
     if (totalMonths > 6) {
       setDateError(t('projects.create.dateErrorMax'));
       return false;
@@ -576,6 +573,9 @@ export const CreateProjectPage = () => {
           </div>
         )}
       </main>
+
+      <Copyright />
+      <BottomNav />
     </div>
   );
 };

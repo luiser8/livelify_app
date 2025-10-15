@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright } from '@/shared/components';
 import { subscriptionService, type Subscription, type UserSubscription } from '@/infrastructure/services';
+import { decodeToken } from '@/shared/utils';
 
 /**
  * Página de Suscripción y Planes
@@ -37,14 +38,37 @@ export const SubscriptionPage = () => {
     try {
       setSubscribing(true);
       
+      // Obtener el currencyId del token
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      
+      const decoded = decodeToken(token);
+      const currencyId = decoded?.currencyId || '15c0d07a-eb59-443e-8856-7b0f838c97b4'; // Default currency si no está en el token
+      
+      // Encontrar el plan seleccionado para obtener el amountPaid (basePrice)
+      const selectedPlan = plans.find(p => p.id === planId);
+      const amountPaid = selectedPlan?.basePrice;
+      
       // Si ya tiene suscripción, actualizarla. Si no, crear una nueva.
       if (currentSubscription) {
-        await subscriptionService.updateSubscription(currentSubscription.id, planId);
+        await subscriptionService.updateSubscription({
+          id: currentSubscription.id,
+          planId,
+          currencyId,
+          amountPaid
+        });
         // Después de actualizar, recargar la información completa de la suscripción
         const updatedSub = await subscriptionService.getMySubscription();
         setCurrentSubscription(updatedSub);
       } else {
-        await subscriptionService.subscribeToPlan(planId);
+        await subscriptionService.subscribeToPlan({
+          planId,
+          currencyId,
+          amountPaid
+        });
         // Recargar también después de crear para tener la estructura completa
         const completeSub = await subscriptionService.getMySubscription();
         setCurrentSubscription(completeSub);
@@ -58,29 +82,37 @@ export const SubscriptionPage = () => {
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
-      case 'BASICO':
+      case 'MONTHLY':
         return {
-          bg: 'from-green-400 to-green-600',
-          border: 'border-green-500',
-          text: 'text-green-600',
-          button: 'bg-green-600 hover:bg-green-700',
-          badge: 'bg-green-500',
-        };
-      case 'INTERMEDIO':
-        return {
-          bg: 'from-blue-500 to-blue-700',
+          bg: 'from-blue-400 to-blue-600',
           border: 'border-blue-500',
           text: 'text-blue-600',
           button: 'bg-blue-600 hover:bg-blue-700',
           badge: 'bg-blue-500',
         };
-      case 'AVANZADO':
+      case 'QUARTERLY':
+        return {
+          bg: 'from-green-500 to-green-700',
+          border: 'border-green-500',
+          text: 'text-green-600',
+          button: 'bg-green-600 hover:bg-green-700',
+          badge: 'bg-green-500',
+        };
+      case 'SEMESTER':
         return {
           bg: 'from-purple-500 to-purple-700',
           border: 'border-purple-500',
           text: 'text-purple-600',
           button: 'bg-purple-600 hover:bg-purple-700',
           badge: 'bg-purple-500',
+        };
+      case 'ANNUAL':
+        return {
+          bg: 'from-amber-500 to-orange-600',
+          border: 'border-amber-500',
+          text: 'text-amber-600',
+          button: 'bg-amber-600 hover:bg-amber-700',
+          badge: 'bg-amber-500',
         };
       default:
         return {
@@ -95,20 +127,27 @@ export const SubscriptionPage = () => {
 
   const getPlanIcon = (planType: string) => {
     switch (planType) {
-      case 'BASICO':
-        return '🌱';
-      case 'INTERMEDIO':
+      case 'MONTHLY':
+        return '📅';
+      case 'QUARTERLY':
+        return '🌟';
+      case 'SEMESTER':
         return '⚡';
-      case 'AVANZADO':
+      case 'ANNUAL':
         return '👑';
       default:
         return '📦';
     }
   };
 
-  const getFeatureName = (feature: string) => {
-    const featureKey = `subscription.features.${feature}`;
-    return t(featureKey);
+  const getPlanName = (planType: string) => {
+    const key = `subscription.planTypes.${planType}.name`;
+    return t(key, planType);
+  };
+
+  const getPlanDescription = (planType: string) => {
+    const key = `subscription.planTypes.${planType}.description`;
+    return t(key, '');
   };
 
   if (loading) {
@@ -152,26 +191,37 @@ export const SubscriptionPage = () => {
 
         {/* Current Plan Banner - Only show if has subscription */}
         {hasSubscription && currentSubscription && (
-          <div className={`mb-8 bg-gradient-to-r ${getPlanColor(currentSubscription.planName).bg} rounded-2xl p-6 text-white shadow-xl`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-4xl">{getPlanIcon(currentSubscription.planName)}</span>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-2xl font-bold">{t('subscription.currentPlan')} {currentSubscription.plan.name}</h3>
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-semibold">
-                        {currentSubscription.active ? `✓ ${t('subscription.active')}` : t('subscription.inactive')}
+          <div className={`mb-8 bg-gradient-to-r ${getPlanColor(currentSubscription.plan.name).bg} rounded-2xl p-6 text-white shadow-xl`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-3xl">
+                  {getPlanIcon(currentSubscription.plan.name)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-2xl font-bold">{t('subscription.currentPlan')} {getPlanName(currentSubscription.plan.name)}</h3>
+                  </div>
+                  <p className="text-white/90 text-sm mb-2">{getPlanDescription(currentSubscription.plan.name)}</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 ${currentSubscription.active ? 'bg-white/20' : 'bg-red-500/50'} rounded-full text-sm font-semibold`}>
+                      {currentSubscription.active ? `✓ ${t('subscription.active')}` : t('subscription.inactive')}
+                    </span>
+                    {currentSubscription.autoRenew && (
+                      <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
+                        🔄 Auto-renew
                       </span>
-                    </div>
-                    <p className="text-white/90">{currentSubscription.plan.description}</p>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-4xl font-bold">${currentSubscription.price}</div>
-                <div className="text-white/90">{t('subscription.perMonth')}</div>
-                <div className="text-xs text-white/70 mt-1">
+              <div className="text-left sm:text-right">
+                <div className="flex items-baseline gap-1 justify-end">
+                  <span className="text-4xl font-bold">${currentSubscription.plan.basePrice}</span>
+                </div>
+                <div className="text-sm text-white/80 mt-1">
+                  {currentSubscription.plan.billingCycle} {currentSubscription.plan.billingCycle === 1 ? t('subscription.month') : t('subscription.months')}
+                </div>
+                <div className="text-xs text-white/70 mt-2">
                   {t('subscription.renews')} {new Date(currentSubscription.renewalDate).toLocaleDateString()}
                 </div>
               </div>
@@ -179,75 +229,87 @@ export const SubscriptionPage = () => {
           </div>
         )}
 
-        {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        {/* Plans Grid - Minimalist Design */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {plans.map((plan) => {
-            const colors = getPlanColor(plan.planType);
             const isCurrentPlan = isActivePlan(plan.id);
-            const isRecommended = plan.planType === 'INTERMEDIO';
+            const isRecommended = plan.name === 'ANNUAL';
+            const hasSavings = plan.savings > 0;
 
             return (
               <div
                 key={plan.id}
-                className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
-                  isCurrentPlan ? `${colors.border} ring-4 ring-offset-2 ring-${colors.border}` : 'border-gray-200 hover:border-gray-300'
+                className={`relative bg-white rounded-xl border transition-all duration-200 hover:shadow-md ${
+                  isCurrentPlan ? 'border-indigo-500 shadow-sm' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                {/* Recommended Badge */}
+                {/* Compact Badge */}
                 {isRecommended && !hasSubscription && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="px-4 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg">
-                      {t('subscription.recommended')}
+                  <div className="absolute -top-2 -right-2">
+                    <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-md">
+                      ⭐
                     </span>
                   </div>
                 )}
 
-                {/* Current Plan Badge */}
                 {isCurrentPlan && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className={`px-4 py-1 ${colors.badge} text-white text-sm font-bold rounded-full shadow-lg`}>
-                      {t('subscription.currentPlanBadge')}
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      ✓ {t('subscription.active')}
                     </span>
                   </div>
                 )}
 
-                <div className="p-6">
-                  {/* Plan Icon & Name */}
-                  <div className="text-center mb-6">
-                    <div className={`w-20 h-20 mx-auto mb-4 bg-gradient-to-br ${colors.bg} rounded-2xl flex items-center justify-center text-4xl shadow-lg`}>
-                      {getPlanIcon(plan.planType)}
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                    <p className="text-gray-600 text-sm">{plan.description}</p>
+                <div className="p-5">
+                  {/* Plan Header - Compact */}
+                  <div className="text-center mb-5">
+                    <div className="text-3xl mb-2">{getPlanIcon(plan.name)}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{getPlanName(plan.name)}</h3>
+                    <p className="text-gray-500 text-xs">{getPlanDescription(plan.name)}</p>
                   </div>
 
-                  {/* Price */}
-                  <div className="text-center mb-6">
-                    <div className="text-5xl font-bold text-gray-900 mb-1">
-                      ${plan.price}
+                  {/* Price - Simplified */}
+                  <div className="text-center mb-4 pb-4 border-b border-gray-100">
+                    <div className="flex items-baseline justify-center gap-1 mb-1">
+                      <span className="text-3xl font-bold text-gray-900">${plan.basePrice}</span>
                     </div>
-                    <div className="text-gray-500">{t('subscription.perMonth')}</div>
-                  </div>
-
-                  {/* Features */}
-                  <div className="mb-6 space-y-3">
-                    {plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className={`w-6 h-6 ${colors.badge} rounded-full flex items-center justify-center flex-shrink-0`}>
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700">{getFeatureName(feature)}</span>
+                    <div className="text-xs text-gray-500">
+                      {plan.billingCycle} {plan.billingCycle === 1 ? t('subscription.month') : t('subscription.months')} • ${plan.pricePerMonth}/{t('subscription.month')}
+                    </div>
+                    {hasSavings && (
+                      <div className="mt-2 inline-block px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded">
+                        -{plan.discount}% ({t('subscription.save')} ${plan.savings.toFixed(0)})
                       </div>
-                    ))}
+                    )}
                   </div>
 
-                  {/* CTA Button */}
+                  {/* Features - Minimal */}
+                  <div className="mb-5 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <svg className="w-4 h-4 text-indigo-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>{plan.features.actions} {t('subscription.actions')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <svg className="w-4 h-4 text-indigo-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>{plan.features.projects} {t('subscription.projects')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <svg className="w-4 h-4 text-indigo-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>{t('subscription.analytics')}</span>
+                    </div>
+                  </div>
+
+                  {/* CTA Button - Minimal */}
                   {isCurrentPlan ? (
                     <button
                       disabled
-                      className="w-full py-3 px-6 bg-gray-100 text-gray-500 font-semibold rounded-xl cursor-not-allowed"
+                      className="w-full py-2.5 px-4 bg-gray-50 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed border border-gray-200"
                     >
                       {t('subscription.currentPlanBadge')}
                     </button>
@@ -255,7 +317,7 @@ export const SubscriptionPage = () => {
                     <button
                       onClick={() => handleSubscribe(plan.id)}
                       disabled={subscribing}
-                      className={`w-full py-3 px-6 ${colors.button} text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className="w-full py-2.5 px-4 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {subscribing ? t('subscription.processing') : hasSubscription ? t('subscription.changePlan') : t('subscription.getStarted')}
                     </button>
@@ -294,8 +356,11 @@ export const SubscriptionPage = () => {
           </div>
         </div>
       </main>
+      <Copyright />
       <BottomNav />
     </div>
   );
 };
+
+
 

@@ -1,0 +1,2 @@
+export { LifeScoreCard } from './LifeScoreCard';
+

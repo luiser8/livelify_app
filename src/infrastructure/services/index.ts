@@ -110,3 +110,5 @@ export type {
   MyActionsResponse
 } from './actionService';
 
+// Servicio de Términos y Condiciones
+export { documentsService } from './documentsService';

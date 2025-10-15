@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { goalService, projectService, actionService, lifeWheelService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
-import { PageHeader, BottomNav } from '@/shared/components';
+import { PageHeader, BottomNav, Copyright } from '@/shared/components';
+import { getSelectableAreas } from '@/shared/utils';
 
 /**
  * Página de gestión de Goals (BE, DO, HAVE) de un proyecto
@@ -60,12 +61,12 @@ export const ProjectGoalsPage = () => {
           return;
         }
 
-        // Verificar que el área del proyecto esté entre las 3 más bajas
+        // Verificar que el área del proyecto esté entre las seleccionables
         const projectAreaId = currentProject.lifeWheelAreaId;
-        const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
-        const lowestThreeIds = new Set(sortedAreas.slice(0, 3).map(a => a.id));
+        const result = getSelectableAreas(lifeWheelData.lifeAreas);
+        const enabledAreaIds = result.selectableAreaIds;
         
-        if (!lowestThreeIds.has(projectAreaId)) {
+        if (!enabledAreaIds.has(projectAreaId)) {
           navigate('/home');
           return;
         }
@@ -172,19 +173,19 @@ export const ProjectGoalsPage = () => {
 
   const goalExamples = {
     BE: [
-      'I am someone who communicates openly and honestly in all my relationships.',
-      'I am someone who expresses emotions openly and creates safe spaces for vulnerability in my relationships.',
-      'I am someone who truly listens to understand, not just to respond, making others feel heard and valued.',
+      t('projects.goals.beExample1'),
+      t('projects.goals.beExample2'),
+      t('projects.goals.beExample3'),
     ],
     DO: [
-      'I will practice active listening for 15 minutes daily with my partner.',
-      'I will schedule weekly date nights without distractions.',
-      'I will express gratitude to my loved ones every day.',
+      t('projects.goals.doExample1'),
+      t('projects.goals.doExample2'),
+      t('projects.goals.doExample3'),
     ],
     HAVE: [
-      'I will have resolved 3 major conflicts with compassion.',
-      'I will have deepened trust with 5 close relationships.',
-      'I will have created 10 meaningful memories with family.',
+      t('projects.goals.haveExample1'),
+      t('projects.goals.haveExample2'),
+      t('projects.goals.haveExample3'),
     ],
   };
 
@@ -498,7 +499,7 @@ export const ProjectGoalsPage = () => {
                   placeholder={`e.g., ${goalExamples[currentStep][0]}`}
                   maxLength={120}
                 />
-                <p className="text-xs text-gray-500 mt-1">{formData.content.length}/120 characters</p>
+                <p className="text-xs text-gray-500 mt-1">{formData.content.length}/120 {t('projects.goals.characters')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -597,6 +598,7 @@ export const ProjectGoalsPage = () => {
         )}
       </main>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

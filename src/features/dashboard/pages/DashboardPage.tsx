@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, LanguageSelectorCompact } from '@/shared/components';
+import { BottomNav, LanguageSelectorCompact, Copyright, LifeScoreCard } from '@/shared/components';
 import { userService, type UserMeResponse } from '@/infrastructure/services';
 import { getAreaTranslationKey, getAreaIcon } from '@/shared/utils/lifeAreaHelpers';
 
@@ -55,13 +55,6 @@ export const DashboardPage = () => {
   const pendingGoals = summary.totalGoals - summary.completedGoals;
   const pendingActions = summary.totalActions - summary.completedActions;
   
-  // Get score color based on value
-  const getScoreColor = (score: number) => {
-    if (score < 5) return 'text-red-600';
-    if (score < 8) return 'text-yellow-600';
-    return 'text-green-600';
-  };
-  
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -91,12 +84,7 @@ export const DashboardPage = () => {
         {/* Summary Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {/* Life Score */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className={`text-4xl font-bold ${getScoreColor(lifeWheel.globalScore)} mb-2`}>
-              {lifeWheel.globalScore.toFixed(1)}<span className="text-2xl text-gray-400 font-normal">/10</span>
-            </div>
-            <div className="text-sm text-gray-600">{t('dashboard.stats.lifeScore')}</div>
-          </div>
+          <LifeScoreCard score={lifeWheel.globalScore} variant="compact" />
 
           {/* Total Goals */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -177,6 +165,7 @@ export const DashboardPage = () => {
         </div>
       </main>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

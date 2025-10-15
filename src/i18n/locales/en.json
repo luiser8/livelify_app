@@ -90,7 +90,19 @@
       "signingUp": "Creating account...",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
-      "terms": "By signing up, you agree to our Terms of Service and Privacy Policy"
+      "terms": "By signing up, you agree to our Terms of Service and Privacy Policy",
+      "termsAcceptance": {
+        "part1": "I accept the",
+        "termsLink": "Terms and Conditions",
+        "part2": "and the",
+        "privacyLink": "Privacy Policy",
+        "termsRead": "Terms and Conditions read",
+        "termsNotRead": "You must read the Terms and Conditions",
+        "privacyRead": "Privacy Policy read",
+        "privacyNotRead": "You must read the Privacy Policy",
+        "canAcceptNow": "You can now accept the terms by checking the box",
+        "mustReadBothDocuments": "You must read both documents before accepting"
+      }
     },
     "validation": {
       "emailRequired": "Email is required",
@@ -103,7 +115,8 @@
       "lastNameRequired": "Last name is required",
       "phoneRequired": "Phone is required",
       "phoneInvalid": "Invalid phone format",
-      "addressRequired": "Address is required"
+      "addressRequired": "Address is required",
+      "termsRequired": "You must accept the terms and conditions"
     },
     "errors": {
       "loginFailed": "Failed to sign in. Please try again.",
@@ -138,9 +151,24 @@
     },
     "focusLowest": {
       "title": "Focus on Your Lowest Areas",
-      "description": "You can only create projects in your {{count}} lowest scoring areas. This helps you focus on what needs the most improvement. Other areas are locked 🔒 until you improve these first."
+      "description": "You can only create projects in your {{count}} lowest scoring area(s). This helps you focus on what needs the most improvement. Other areas are locked 🔒 until you improve these first.",
+      "tiedDescription": "You have {{count}} areas tied at {{score}}/10. You can work on all of them, or select 3 to focus on for maximum impact."
     },
-    "currentScores": "Your Current Scores"
+    "currentScores": "Your Current Scores",
+    "selectionModal": {
+      "title": "Select Your 3 Focus Areas",
+      "description": "You have several areas with similar scores. Please select the 3 areas you would like to work on first.",
+      "score": "Score: {{score}}/10",
+      "selected": "{{count}} of 3 selected",
+      "pleaseSelectThree": "Please select exactly 3 areas",
+      "successMessage": "Selected areas saved successfully",
+      "errorMessage": "Error saving selection. Please try again.",
+      "saving": "Saving...",
+      "confirm": "Confirm"
+    },
+    "common": {
+      "cancel": "Cancel"
+    }
   },
   "dashboard": {
     "greeting": {
@@ -197,7 +225,19 @@
       "renews": "Renews",
       "noActiveSubscription": "No Active Subscription",
       "chooseAPlan": "Choose a Plan",
-      "unlockFeatures": "Choose a plan to unlock all features"
+      "unlockFeatures": "Choose a plan to unlock all features",
+      "pricing": "Monthly Rate",
+      "totalPaid": "Total Paid",
+      "billingCycle": "Billing Cycle",
+      "paymentMethod": "Payment Method",
+      "nextRenewal": "Next Renewal",
+      "savings": "You Save",
+      "planFeatures": "Plan Features",
+      "actionsPerMonth": "actions per month",
+      "activeProjects": "active projects",
+      "analyticsInsights": "Analytics & Insights",
+      "period": "Subscription Period",
+      "daysRemaining": "Days Left"
     },
     "contexts": {
       "title": "My Contexts",
@@ -332,6 +372,12 @@
       "title": "Project Goals",
       "subtitle": "Define your transformation vision",
       "loading": "Loading goals...",
+      "projectNotFound": "Project not found",
+      "backToProjects": "Back to Projects",
+      "totalGoals": "Total Goals",
+      "beGoals": "BE Goals",
+      "doGoals": "DO Goals",
+      "haveGoals": "HAVE Goals",
       "beTitle": "BE",
       "beDescription": "Who do you need to BE?",
       "beExample": "Example: Be a disciplined and focused person",
@@ -341,26 +387,54 @@
       "haveTitle": "HAVE",
       "haveDescription": "What do you need to HAVE?",
       "haveExample": "Example: Professional portfolio with 5 projects",
+      "writingTips": "💡 Tips for writing {{type}} goals",
+      "beTip1": "Start with 'I am someone who...' - write in present tense to embody the identity",
+      "beTip2": "Focus on character traits, mental habits, and ways of being",
+      "beTip3": "Describe how you'd show up and feel after the transformation",
+      "doTip1": "Start with 'I will...' - be specific about actions and frequency",
+      "doTip2": "Include concrete measures where possible (time, amount, frequency)",
+      "haveTip1": "Start with 'I will have...' - describe tangible outcomes and achievements",
+      "haveTip2": "Focus on verifiable milestones and specific results",
+      "yourGoals": "Your {{type}} Goals",
       "addGoal": "Add {{type}} Goal",
+      "noGoals": "No {{type}} goals yet",
+      "createFirst": "Create First {{type}} Goal",
+      "deleteGoal": "Delete Goal",
+      "goalDescription": "Goal Description",
       "goalPlaceholder": "Write your goal...",
-      "baseCapital": "Base Capital (optional)",
-      "currencyCode": "Currency",
+      "baseCapital": "Base Capital",
+      "optional": "optional",
+      "currencyCode": "Currency Code",
+      "multiplier": "Multiplier",
+      "target": "Target",
       "creating": "Creating...",
       "create": "Create",
       "cancel": "Cancel",
+      "createNew": "✨ Create New {{type}} Goal",
+      "examples": "💡 {{type}} Goal Examples",
+      "beExample1": "I am someone who communicates openly and honestly in all my relationships.",
+      "beExample2": "I am someone who expresses emotions openly and creates safe spaces for vulnerability in my relationships.",
+      "beExample3": "I am someone who truly listens to understand, not just to respond, making others feel heard and valued.",
+      "doExample1": "I will practice active listening for 15 minutes daily with my partner.",
+      "doExample2": "I will schedule weekly date nights without distractions.",
+      "doExample3": "I will express gratitude to my loved ones every day.",
+      "haveExample1": "I will have resolved 3 major conflicts with compassion.",
+      "haveExample2": "I will have deepened trust with 5 close relationships.",
+      "haveExample3": "I will have created 10 meaningful memories with family.",
       "viewActions": "View Actions",
       "actions": "actions",
       "completed": "Completed",
       "finishProject": "Finish Project",
       "continueToActions": "Continue to Actions",
       "backToProject": "Back to Project",
-      "minimumGoals": "You need at least 3 BE, 3 DO, and 1 HAVE goals to continue"
+      "minimumGoals": "You need at least 3 BE, 3 DO, and 1 HAVE goals to continue",
+      "characters": "characters"
     }
   },
   "assessment": {
     "intro": {
       "title": "Life Wheel Assessment",
-      "subtitle": "60 Questions. 10 Minutes. Your Starting Point.",
+      "subtitle": "10 Questions. 10 Minutes. Your Starting Point.",
       "permanentWarningTitle": "This assessment is permanent and cannot be retaken",
       "permanentWarningDesc": "Your results become your baseline for all future transformations.",
       "answerHonestlyTitle": "Answer honestly - this is just your baseline. You'll improve from here.",
@@ -431,7 +505,17 @@
       "tip3": "Be honest - this creates your baseline for improvement",
       "chooseAnswer": "Choose your answer to continue",
       "submitting": "Submitting...",
-      "completeAssessment": "Send Area Assessment"
+      "completeAssessment": "Send Area Assessment",
+      "maritalStatus": {
+        "subtitle": "Before we start, we need to know your relationship status",
+        "question": "What is your current relationship status?",
+        "description": "This helps us tailor the questions to your specific situation",
+        "married": "In a Relationship/Married",
+        "marriedDesc": "I am currently in a committed relationship or married",
+        "single": "Single",
+        "singleDesc": "I am currently single or not in a relationship",
+        "info": "Your answer will determine which questions are most relevant for your situation. All your responses are confidential."
+      }
     }
   },
   "areaProjects": {
@@ -503,6 +587,31 @@
     "processing": "Processing...",
     "changePlan": "Change Plan",
     "getStarted": "Get Started",
+    "month": "month",
+    "months": "months",
+    "total": "total",
+    "save": "Save",
+    "actions": "actions/month",
+    "projects": "active projects",
+    "analytics": "Analytics & Insights",
+    "planTypes": {
+      "MONTHLY": {
+        "name": "Monthly",
+        "description": "Perfect for trying out the platform"
+      },
+      "QUARTERLY": {
+        "name": "Quarterly",
+        "description": "Best value for 3 months"
+      },
+      "SEMESTER": {
+        "name": "Semester",
+        "description": "Great savings for 6 months"
+      },
+      "ANNUAL": {
+        "name": "Annual",
+        "description": "Maximum savings for the full year"
+      }
+    },
     "faq": {
       "title": "Frequently Asked Questions",
       "q1": "Can I change plans at any time?",
@@ -575,7 +684,63 @@
     "createActionAbove": "Create a new action above"
   },
   "footer": {
-    "createdBy": "Created by"
+    "createdBy": "Created by",
+    "allRightsReserved": "All rights reserved"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "loading": "Loading privacy policy...",
+    "loadError": "Failed to load privacy policy. Please try again later.",
+    "lastUpdated": "Last Updated",
+    "updateDate": "October 11, 2025"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "loading": "Loading terms and conditions...",
+    "loadError": "Failed to load terms and conditions. Please try again later.",
+    "lastUpdated": "Last Updated",
+    "updateDate": "October 11, 2025",
+    "introduction": "Welcome to Livelify. These Terms and Conditions govern your use of our platform and services. By creating an account and using Livelify, you agree to comply with and be bound by the following terms. Please read them carefully.",
+    "section1": {
+      "title": "Acceptance of Terms",
+      "content": "By accessing and using Livelify's services, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions, as well as our Privacy Policy. If you do not agree with any part of these terms, please do not use our services."
+    },
+    "section2": {
+      "title": "Use of Service",
+      "content": "Livelify provides a personal transformation platform designed to help you improve various areas of your life through goal setting, project management, and daily actions. You agree to use our service responsibly and in accordance with all applicable laws. You agree not to:",
+      "item1": "Use the service for any illegal or unauthorized purpose",
+      "item2": "Attempt to gain unauthorized access to any part of the service",
+      "item3": "Interfere with or disrupt the service or servers",
+      "item4": "Upload or transmit viruses or any malicious code"
+    },
+    "section3": {
+      "title": "User Account and Security",
+      "content": "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account. Livelify cannot and will not be liable for any loss or damage arising from your failure to maintain account security."
+    },
+    "section4": {
+      "title": "Privacy and Data Protection",
+      "content": "Your privacy is important to us. Our Privacy Policy explains how we collect, use, and protect your personal information. By using Livelify, you consent to our collection and use of your data as described in our Privacy Policy. We implement industry-standard security measures to protect your data, but no method of transmission over the internet is 100% secure."
+    },
+    "section5": {
+      "title": "Intellectual Property",
+      "content": "All content, features, and functionality of Livelify, including but not limited to text, graphics, logos, software, and design, are the exclusive property of Livelify and are protected by international copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or reproduce any part of our service without explicit written permission."
+    },
+    "section6": {
+      "title": "Limitation of Liability",
+      "content": "Livelify is provided 'as is' without any warranties, express or implied. We do not guarantee that the service will be uninterrupted, secure, or error-free. In no event shall Livelify be liable for any indirect, incidental, special, consequential, or punitive damages arising out of your use or inability to use the service."
+    },
+    "section7": {
+      "title": "Changes to Terms",
+      "content": "We reserve the right to modify these Terms and Conditions at any time. We will notify you of any material changes by updating the 'Last Updated' date and, where appropriate, by sending you an email notification. Your continued use of Livelify after such changes constitutes your acceptance of the new terms."
+    },
+    "section8": {
+      "title": "Contact Information",
+      "content": "If you have any questions, concerns, or feedback about these Terms and Conditions, please contact us:"
+    },
+    "footerNote": "These terms and conditions are for demonstration purposes only. This is sample text for testing the terms acceptance feature.",
+    "closeButton": "I Understand",
+    "scrollToEnable": "Please scroll down to read all terms before continuing",
+    "scrollToEnablePrivacy": "Please scroll down to read all policies before continuing"
   }
 }
 

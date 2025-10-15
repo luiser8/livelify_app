@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright } from '@/shared/components';
 import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type ProjectStatus, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
@@ -475,6 +475,7 @@ export const ProjectsPage = () => {
         </svg>
       </button>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

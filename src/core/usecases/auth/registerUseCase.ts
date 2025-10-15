@@ -33,6 +33,10 @@ export const registerUseCase = async (
     throw new Error('Dirección es requerida');
   }
 
+  if (!credentials.acceptTermsAndPolicies) {
+    throw new Error('Debes aceptar los términos, condiciones y políticas para continuar');
+  }
+
   // Validar formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(credentials.email)) {

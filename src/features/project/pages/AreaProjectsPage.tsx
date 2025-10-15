@@ -2,8 +2,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type Project, type LifeWheelArea } from '@/infrastructure/services';
-import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { getAreaIcon, getAreaColorVariants, getSelectableAreas } from '@/shared/utils';
+import { BottomNav, PageHeader, Copyright } from '@/shared/components';
 
 /**
  * Página de gestión de proyectos por área
@@ -40,13 +40,12 @@ export const AreaProjectsPage = () => {
           return;
         }
         
-        // Si todas están completadas, verificar que el área actual esté entre las 3 más bajas
-        const sortedAreas = [...lifeWheelData.lifeAreas].sort((a, b) => a.score - b.score);
-        const lowestThree = sortedAreas.slice(0, 3);
-        const enabledAreaIds = new Set(lowestThree.map(area => area.id));
+        // Si todas están completadas, verificar que el área actual esté entre las seleccionables
+        const result = getSelectableAreas(lifeWheelData.lifeAreas);
+        const enabledAreaIds = result.selectableAreaIds;
         
         if (!enabledAreaIds.has(areaId)) {
-          // Si el área no está entre las 3 más bajas, redirigir al home
+          // Si el área no está entre las seleccionables, redirigir al home
           navigate('/home');
           return;
         }
@@ -345,6 +344,7 @@ export const AreaProjectsPage = () => {
         </div>
       </main>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

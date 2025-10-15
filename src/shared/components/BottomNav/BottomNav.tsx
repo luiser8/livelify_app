@@ -64,7 +64,7 @@ export const BottomNav = () => {
           />
         </svg>
       ),
-      matchPaths: ['/area'],
+      matchPaths: ['/area', '/projects/'],
     },
     {
       id: 'actions',
@@ -95,6 +95,7 @@ export const BottomNav = () => {
           />
         </svg>
       ),
+      matchPaths: ['/subscription'],
     },
   ];
 

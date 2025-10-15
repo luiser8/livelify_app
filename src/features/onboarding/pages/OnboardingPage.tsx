@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CarouselDots } from '../components';
 import { useCarousel } from '../hooks';
 import { useAuth } from '@/features/auth/context';
-import { LanguageSelector, Footer } from '@/shared/components';
+import { LanguageSelector, Copyright } from '@/shared/components';
 
 /**
  * Página de Onboarding/Landing
@@ -12,7 +12,7 @@ export const OnboardingPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { isAuthenticated, logout, user } = useAuth();
-  
+
   // Slides dinámicos desde traducciones
   const slides = [
     {
@@ -59,7 +59,6 @@ export const OnboardingPage = () => {
   const handleLogout = () => {
     logout();
     // Opcional: mostrar mensaje de confirmación
-    console.log('Sesión cerrada');
   };
 
   return (
@@ -112,7 +111,7 @@ export const OnboardingPage = () => {
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8">
         {/* Logo */}
-        <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
           <svg
             className="w-12 h-12 text-white"
             fill="currentColor"
@@ -124,7 +123,7 @@ export const OnboardingPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('onboarding.title')}</h1>
+          <h1 className="text-5xl md:text-5xl font-bold mb-0">{t('onboarding.title')}</h1>
           <p className="text-lg md:text-xl text-white/90">{t('onboarding.tagline')}</p>
         </div>
 
@@ -160,9 +159,9 @@ export const OnboardingPage = () => {
         >
           {isAuthenticated ? t('onboarding.goToApp') : t('onboarding.exploreApp')}
         </button>
-        
-        {/* Footer */}
-        <Footer />
+
+        {/* Copyright */}
+        <Copyright variant="dark"/>
       </div>
     </div>
   );

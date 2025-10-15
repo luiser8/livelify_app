@@ -1,0 +1,2 @@
+export { Copyright } from './Copyright';
+

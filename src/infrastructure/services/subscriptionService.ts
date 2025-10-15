@@ -5,30 +5,30 @@ import { apiClient } from '../api/client';
  * Maneja las peticiones relacionadas con planes de suscripción
  */
 
-export type PlanType = 'BASICO' | 'INTERMEDIO' | 'AVANZADO';
+export type PlanType = 'MONTHLY' | 'QUARTERLY' | 'SEMESTER' | 'ANNUAL';
 
 export interface PlanFeatures {
   actions: number;
   projects: number;
-  analytics: boolean;
+  analytics: 'ENABLED' | 'DISABLED';
 }
 
 export interface Plan {
   id: string;
-  name: string;
+  name: PlanType;
   description: string;
-  price: string;
+  basePrice: number;
+  pricePerMonth: number;
+  savings: number;
+  discount: number;
+  billingCycle: number; // Meses
+  bestFor: string;
   features: PlanFeatures;
+  isActive?: boolean;
 }
 
-export interface Subscription {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  planType: PlanType;
-  features: string[];
-  isActive: boolean;
+export interface Subscription extends Plan {
+  // Los planes disponibles son iguales a Plan
 }
 
 export interface GetAllSubscriptionsResponse {
@@ -37,13 +37,15 @@ export interface GetAllSubscriptionsResponse {
 
 export interface UserSubscription {
   id: string;
-  planName: string;
-  price: number;
-  isActive: boolean;
+  currencyId: string;
   startDate: string;
   endDate: string;
   renewalDate: string;
   active: boolean;
+  autoRenew: boolean;
+  amountPaid: number;
+  paymentMethod: string;
+  paymentProvider: string;
   plan: Plan;
   createdAt: string;
   updatedAt: string;
@@ -51,11 +53,15 @@ export interface UserSubscription {
 
 export interface AddSubscriptionRequest {
   planId: string;
+  currencyId: string;
+  amountPaid?: number;
 }
 
 export interface UpdateSubscriptionRequest {
   id: string;
   planId: string;
+  currencyId: string;
+  amountPaid?: number;
 }
 
 export const subscriptionService = {
@@ -83,19 +89,16 @@ export const subscriptionService = {
    * Suscribe al usuario a un plan (primera vez)
    * Endpoint: POST /users/add-subscription
    */
-  subscribeToPlan: async (planId: string): Promise<UserSubscription> => {
-    return apiClient.post<UserSubscription>('/users/add-subscription', { planId });
+  subscribeToPlan: async (data: AddSubscriptionRequest): Promise<UserSubscription> => {
+    return apiClient.post<UserSubscription>('/users/add-subscription', data);
   },
 
   /**
    * Actualiza la suscripción existente del usuario a un nuevo plan
    * Endpoint: PUT /users/update-subscription
    */
-  updateSubscription: async (subscriptionId: string, planId: string): Promise<UserSubscription> => {
-    return apiClient.put<UserSubscription>('/users/update-subscription', { 
-      id: subscriptionId, 
-      planId 
-    });
+  updateSubscription: async (data: UpdateSubscriptionRequest): Promise<UserSubscription> => {
+    return apiClient.put<UserSubscription>('/users/update-subscription', data);
   },
 
   /**

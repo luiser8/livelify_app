@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LoginForm } from '../components';
 import { useAuth } from '@/features/auth/context';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
-import { LanguageSelector } from '@/shared/components';
+import { LanguageSelector, Copyright } from '@/shared/components';
 
 /**
  * Página de inicio de sesión
@@ -21,15 +21,11 @@ export const LoginPage = () => {
     setError('');
 
     try {
-      console.log('Intentando login con:', { email });
-
       // Llamar al caso de uso de login que conecta con el backend
       const { user } = await loginUseCase({ email, password });
 
       // Guardar usuario en el contexto (automáticamente guarda en localStorage)
       login(user);
-
-      console.log('Login exitoso:', user);
 
       // Redirigir al home
       navigate('/home');
@@ -84,7 +80,7 @@ export const LoginPage = () => {
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8">
         {/* Logo */}
-        <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
           <svg
             className="w-12 h-12 text-white"
             fill="currentColor"
@@ -96,7 +92,7 @@ export const LoginPage = () => {
 
         {/* Logo text */}
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">{t('auth.login.title')}</h1>
+          <h1 className="text-5xl md:text-5xl font-bold mb-0">{t('auth.login.title')}</h1>
           <p className="text-lg md:text-xl text-white/90">{t('auth.login.subtitle')}</p>
         </div>
 
@@ -136,7 +132,7 @@ export const LoginPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md pb-4">
         <p className="text-center text-white/80 text-sm">
           {t('auth.login.noAccount')}{' '}
           <button
@@ -147,6 +143,9 @@ export const LoginPage = () => {
           </button>
         </p>
       </div>
+
+      {/* Copyright dark */}
+      <Copyright variant="dark" />
     </div>
   );
 };

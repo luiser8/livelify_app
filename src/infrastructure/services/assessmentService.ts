@@ -11,8 +11,8 @@ import { apiClient } from '../api/client';
 export interface AssessmentQuestion {
   id: string;
   text: string;
-  type: string;
-  order: number;
+  tip: string; // Consejo dinámico para ayudar al usuario
+  haveMoreQuestions: boolean; // Para áreas con preguntas condicionales (ej: Pareja e Intimidad)
   isRequired: boolean;
 }
 

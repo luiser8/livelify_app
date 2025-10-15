@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { lifeWheelService, type LifeWheelResponse } from '@/infrastructure/services';
 import { getAreaIcon, getAreaTranslationKey } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav, PageHeader } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright } from '@/shared/components';
 
 /**
  * Página de introducción al Life Wheel Assessment
@@ -345,6 +345,7 @@ export const AssessmentIntroPage = () => {
         )}
       </main>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

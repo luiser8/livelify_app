@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  assessmentService, 
+import {
+  assessmentService,
   answerService,
   lifeWheelService,
-  type AssessmentQuestion 
+  type AssessmentQuestion
 } from '@/infrastructure/services';
 import { getAreaColor, getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav, LanguageSelectorCompact } from '@/shared/components';
+import { BottomNav, LanguageSelectorCompact, Copyright } from '@/shared/components';
 
 /**
  * Página de preguntas del Assessment para un área específica
@@ -17,13 +17,18 @@ export const AssessmentQuestionsPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { areaId } = useParams<{ areaId: string }>();
-  
-  const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
+
+  const [allQuestions, setAllQuestions] = useState<AssessmentQuestion[]>([]); // Todas las preguntas originales
+  const [questions, setQuestions] = useState<AssessmentQuestion[]>([]); // Preguntas filtradas
   const [areaName, setAreaName] = useState<string>('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Estados para la pregunta de estado civil (solo para Pareja e Intimidad)
+  const [showMaritalStatusQuestion, setShowMaritalStatusQuestion] = useState(false);
+  const [maritalStatus, setMaritalStatus] = useState<'married' | 'single' | null>(null);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -33,18 +38,31 @@ export const AssessmentQuestionsPage: React.FC = () => {
         // Primero verificar si el área ya tiene score
         const lifeWheel = await lifeWheelService.getMyLifeWheel();
         const area = lifeWheel.lifeAreas.find(a => a.areaId === areaId);
-        
+
         // Si el área ya tiene score > 0, redirigir al usuario
         if (area && area.score > 0) {
-          console.log('Area already completed, redirecting...');
           navigate('/assessment/intro');
           return;
         }
 
         // Si no tiene score, cargar las preguntas normalmente
         const data = await assessmentService.getAreaQuestions(areaId);
-        setQuestions(data.questions.sort((a, b) => a.order - b.order));
+        const sortedQuestions = data.questions;
+        setAllQuestions(sortedQuestions);
         setAreaName(data.area.name);
+
+        // Verificar si es el área de Pareja e Intimidad
+        const isCoupleArea = data.area.name === 'Couple & Intimacy' || 
+                            data.area.name === 'Pareja e Intimidad' ||
+                            data.area.name === 'Pareja & Intimidad';
+
+        if (isCoupleArea) {
+          // Para esta área, mostrar primero la pregunta de estado civil
+          setShowMaritalStatusQuestion(true);
+        } else {
+          // Para otras áreas, mostrar todas las preguntas normalmente
+          setQuestions(sortedQuestions);
+        }
       } catch (error) {
         console.error('Error fetching questions:', error);
         navigate('/assessment/intro');
@@ -63,10 +81,22 @@ export const AssessmentQuestionsPage: React.FC = () => {
   const allQuestionsAnswered = totalAnswered === questions.length;
   const areaColors = getAreaColorVariants(areaName);
 
-  // Debug: Log cuando cambian las respuestas
-  useEffect(() => {
-    console.log('Total answered:', totalAnswered, 'Total questions:', questions.length, 'All answered:', allQuestionsAnswered);
-  }, [totalAnswered, questions.length, allQuestionsAnswered]);
+  // Maneja la selección del estado civil (solo para Pareja e Intimidad)
+  const handleMaritalStatusSelect = (status: 'married' | 'single') => {
+    setMaritalStatus(status);
+
+    // Filtrar preguntas según el estado civil
+    const filtered = status === 'married'
+      ? allQuestions.filter(q => !q.haveMoreQuestions) // Casado: preguntas con haveMoreQuestions = false
+      : allQuestions.filter(q => q.haveMoreQuestions);  // Soltero: preguntas con haveMoreQuestions = true
+
+    setQuestions(filtered);
+
+    // Ocultar la pregunta de estado civil y mostrar las preguntas del assessment
+    setTimeout(() => {
+      setShowMaritalStatusQuestion(false);
+    }, 500);
+  };
 
   const handleAnswerSelect = (value: boolean) => {
     if (!currentQuestion) return;
@@ -105,8 +135,11 @@ export const AssessmentQuestionsPage: React.FC = () => {
         answers: answersList,
       });
 
-      console.log('Answers submitted successfully:', result);
-      navigate('/assessment/intro');
+      if (result.success) {
+        navigate('/assessment/intro');
+      } else {
+        console.error('Error submitting answers:', result.message);
+      }
     } catch (error) {
       console.error('Error submitting answers:', error);
     } finally {
@@ -126,7 +159,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
     );
   }
 
-  if (!currentQuestion) {
+  // Si no hay preguntas disponibles y no está mostrando la pregunta de estado civil
+  if (!currentQuestion && !showMaritalStatusQuestion) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -138,6 +172,111 @@ export const AssessmentQuestionsPage: React.FC = () => {
             {t('assessment.questions.goBack')}
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Mostrar pregunta de estado civil para el área de Pareja e Intimidad
+  if (showMaritalStatusQuestion) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="max-w-3xl mx-auto w-full px-6 py-8">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className={`w-16 h-16 ${getAreaColor(areaName)} rounded-2xl flex items-center justify-center text-3xl shadow-sm`}>
+                {getAreaIcon(areaName)}
+              </div>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{areaName}</h1>
+            <p className="text-gray-600">{t('assessment.questions.maritalStatus.subtitle')}</p>
+          </div>
+
+          {/* Marital Status Question Card */}
+          <div className={`bg-gradient-to-br ${areaColors.gradient} rounded-3xl p-8 sm:p-10 mb-6 shadow-xl`}>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg text-4xl">
+                💑
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-relaxed">
+                {t('assessment.questions.maritalStatus.question')}
+              </h2>
+              <p className="text-white/90 text-base leading-relaxed max-w-md mx-auto">
+                {t('assessment.questions.maritalStatus.description')}
+              </p>
+            </div>
+          </div>
+
+          {/* Answer Buttons */}
+          <div className="space-y-4 mb-6">
+            {/* Married Button */}
+            <button
+              onClick={() => handleMaritalStatusSelect('married')}
+              className={`w-full rounded-2xl transition-all transform hover:scale-102 ${
+                maritalStatus === 'married'
+                  ? `${areaColors.bg} text-white shadow-xl`
+                  : `${areaColors.bgLighter} ${areaColors.text} hover:${areaColors.bgLight} border-2 ${areaColors.border}`
+              }`}
+            >
+              <div className="flex items-center gap-4 p-6">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  maritalStatus === 'married' ? 'bg-white/30' : 'bg-white'
+                }`}>
+                  <span className="text-3xl">💑</span>
+                </div>
+                <div className="text-left flex-1">
+                  <div className="text-xl font-bold mb-1">{t('assessment.questions.maritalStatus.married')}</div>
+                  <div className={`text-sm ${maritalStatus === 'married' ? 'text-white/80' : 'text-gray-600'}`}>
+                    {t('assessment.questions.maritalStatus.marriedDesc')}
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            {/* Single Button */}
+            <button
+              onClick={() => handleMaritalStatusSelect('single')}
+              className={`w-full rounded-2xl transition-all transform hover:scale-102 ${
+                maritalStatus === 'single'
+                  ? `${areaColors.bg} text-white shadow-xl`
+                  : `${areaColors.bgLighter} ${areaColors.text} hover:${areaColors.bgLight} border-2 ${areaColors.border}`
+              }`}
+            >
+              <div className="flex items-center gap-4 p-6">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  maritalStatus === 'single' ? 'bg-white/30' : 'bg-white'
+                }`}>
+                  <span className="text-3xl">🙋</span>
+                </div>
+                <div className="text-left flex-1">
+                  <div className="text-xl font-bold mb-1">{t('assessment.questions.maritalStatus.single')}</div>
+                  <div className={`text-sm ${maritalStatus === 'single' ? 'text-white/80' : 'text-gray-600'}`}>
+                    {t('assessment.questions.maritalStatus.singleDesc')}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Info Box */}
+          <div className="bg-blue-50 rounded-2xl p-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-700">
+                  {t('assessment.questions.maritalStatus.info')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Copyright />
+        <BottomNav />
       </div>
     );
   }
@@ -166,12 +305,12 @@ export const AssessmentQuestionsPage: React.FC = () => {
           <div className="mb-4 sm:mb-5">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm sm:text-base text-gray-600">{t('assessment.questions.overallProgress')}</span>
-              <span className="text-sm sm:text-base font-medium text-gray-900">{t('assessment.questions.questionsProgress', { current: totalAnswered, total: 60 })}</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">{t('assessment.questions.questionsProgress', { current: totalAnswered, total: 10 })}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
               <div
                 className={`${areaColors.bg} h-2 sm:h-2.5 rounded-full transition-all duration-300`}
-                style={{ width: `${(totalAnswered / 60) * 100}%` }}
+                style={{ width: `${(totalAnswered / 10) * 100}%` }}
               />
             </div>
           </div>
@@ -199,42 +338,17 @@ export const AssessmentQuestionsPage: React.FC = () => {
         {/* Question Card */}
         <div className={`bg-gradient-to-br ${areaColors.gradient} rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 mb-6 shadow-xl`}>
           <div className="text-center">
-            {/* Icon */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6 shadow-lg text-2xl sm:text-3xl lg:text-4xl">
-              {getAreaIcon(areaName)}
-            </div>
-
             {/* Question Text */}
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 leading-relaxed px-2 sm:px-4">
               {currentQuestion.text}
             </h2>
 
-            {/* Subtitle */}
+            {/* Subtitle - Tip dinámico */}
             <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-md mx-auto px-2">
-              {t('assessment.questions.thinkTypicalWeek')}
+              {currentQuestion.tip}
             </p>
 
-            {/* Work-Life Balance Visual */}
-            <div className="flex items-center justify-center gap-4 mt-6">
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span className="text-white text-xs font-medium">{t('assessment.questions.work')}</span>
-              </div>
-              <div className="w-16 h-0.5 bg-white/30"></div>
 
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-2">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-                <span className="text-white text-xs font-medium">{t('assessment.questions.life')}</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -244,7 +358,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
           <button
             onClick={() => handleAnswerSelect(true)}
             disabled={!currentQuestion || submitting}
-            className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
+            className={`w-[50%] rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
               !currentQuestion || submitting
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
                 : answers[currentQuestion.id] === true
@@ -282,7 +396,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
           <button
             onClick={() => handleAnswerSelect(false)}
             disabled={!currentQuestion || submitting}
-            className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
+            className={`w-[50%] rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
               !currentQuestion || submitting
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
                 : answers[currentQuestion.id] === false
@@ -439,6 +553,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
         </div>
       </div>
 
+      <Copyright />
       <BottomNav />
     </div>
   );

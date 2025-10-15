@@ -11,6 +11,7 @@ export interface DecodedToken {
   firstName: string;
   lastName: string;
   phone: string;
+  currencyId?: string;
   type: 'access' | 'refresh';
   iat: number;
   exp: number;

@@ -110,6 +110,10 @@ class ApiClient {
   async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
+
+  getBaseURL(): string {
+    return this.baseURL;
+  }
 }
 
 // Instancia singleton del cliente API
