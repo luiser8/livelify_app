@@ -70,23 +70,23 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-6 py-8 text-white">
+    <div className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-4 sm:px-6 py-4 sm:py-8 text-white">
       {/* Header con botón de volver */}
-      <div className="w-full max-w-6xl flex justify-between items-center">
+      <div className="w-full max-w-6xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <button
           onClick={handleBack}
-          className="text-white/90 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
+          className="text-white/90 hover:text-white transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {t('common.back')}
         </button>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
           <LanguageSelector />
           <button
             onClick={handleSignIn}
-            className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+            className="text-white/90 hover:text-white transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
           >
             {t('auth.register.signIn')}
           </button>
@@ -94,11 +94,11 @@ export const RegisterPage = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8 py-8">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-4 sm:space-y-6 py-4 sm:py-8">
         {/* Logo */}
-        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
           <svg
-            className="w-12 h-12 text-white"
+            className="w-10 h-10 sm:w-12 sm:h-12 text-white"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -107,9 +107,9 @@ export const RegisterPage = () => {
         </div>
 
         {/* Logo text */}
-        <div>
-          <h1 className="text-5xl md:text-5xl font-bold mb-0">{t('auth.register.title')}</h1>
-          <p className="text-lg md:text-xl text-white/90">{t('auth.register.subtitle')}</p>
+        <div className="space-y-1">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0">{t('auth.register.title')}</h1>
+          <p className="text-sm sm:text-lg md:text-xl text-white/90 px-2">{t('auth.register.subtitle')}</p>
         </div>
 
         {/* Formulario de registro */}
@@ -120,9 +120,9 @@ export const RegisterPage = () => {
         />
 
         {/* Divider */}
-        <div className="w-full max-w-md flex items-center gap-4">
+        <div className="w-full max-w-md flex items-center gap-3 sm:gap-4 px-4 sm:px-0">
           <div className="flex-1 h-px bg-white/20"></div>
-          <span className="text-white/60 text-sm">{t('auth.login.orContinueWith')}</span>
+          <span className="text-white/60 text-xs sm:text-sm whitespace-nowrap">{t('auth.login.orContinueWith')}</span>
           <div className="flex-1 h-px bg-white/20"></div>
         </div>
 
@@ -148,8 +148,8 @@ export const RegisterPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="w-full max-w-md pb-4">
-        <p className="text-center text-white/80 text-sm">
+      <div className="w-full max-w-md pb-2 sm:pb-4 px-4 sm:px-0">
+        <p className="text-center text-white/80 text-xs sm:text-sm">
           {t('auth.register.haveAccount')}{' '}
           <button
             onClick={handleSignIn}

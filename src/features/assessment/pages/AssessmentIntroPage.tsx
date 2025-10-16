@@ -53,7 +53,7 @@ export const AssessmentIntroPage = () => {
       />
 
       {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
         {/* Icono y título */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">

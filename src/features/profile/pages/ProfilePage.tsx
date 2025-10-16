@@ -103,28 +103,28 @@ export const ProfilePage = () => {
         showFilter={false}
       />
 
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
-        <div className="space-y-6">
+      <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+        <div className="space-y-4 sm:space-y-6">
           {/* User Info Card - Full Width */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-indigo-600">
+          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg sm:text-2xl font-bold text-indigo-600">
                     {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                   </span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-xl font-semibold text-gray-900 truncate">
                     {user?.firstName} {user?.lastName}
                   </h2>
-                  <p className="text-gray-500">{user?.email}</p>
+                  <p className="text-sm sm:text-base text-gray-500 truncate">{user?.email}</p>
                 </div>
               </div>
-              {/* Logout Button - Small */}
+              {/* Logout Button - Responsive */}
               <button
                 onClick={logout}
-                className="px-4 py-2 text-sm bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors whitespace-nowrap flex-shrink-0"
               >
                 {t('profile.actions.logout')}
               </button>
@@ -132,17 +132,17 @@ export const ProfilePage = () => {
           </div>
 
           {/* Grid Layout for Subscription and Contexts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Subscription Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{t('profile.subscription.title')}</h3>
-                <p className="text-sm text-gray-500">{t('profile.subtitle')}</p>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('profile.subscription.title')}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 truncate">{t('profile.subtitle')}</p>
               </div>
               <button
                 onClick={() => navigate('/subscription')}
-                className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
               >
                 {t('profile.subscription.upgradePlan')}
               </button>
@@ -153,20 +153,20 @@ export const ProfilePage = () => {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
               </div>
             ) : subscription ? (
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5">
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 sm:p-5">
                 {/* Plan Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
                       {subscription.plan.name === 'MONTHLY' ? '📅' : subscription.plan.name === 'QUARTERLY' ? '🌟' : subscription.plan.name === 'SEMESTER' ? '⚡' : '👑'}
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-lg">{subscription.plan.bestFor}</p>
-                      <p className="text-sm text-gray-600">{subscription.plan.description}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-gray-900 text-base sm:text-lg truncate">{subscription.plan.bestFor}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{subscription.plan.description}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-gray-900">${subscription.plan.basePrice}</p>
+                  <div className="text-left sm:text-right flex-shrink-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">${subscription.plan.basePrice}</p>
                     <p className="text-xs text-gray-500">
                       {subscription.plan.billingCycle} {subscription.plan.billingCycle === 1 ? t('subscription.month') : t('subscription.months')}
                     </p>
@@ -174,18 +174,18 @@ export const ProfilePage = () => {
                 </div>
 
                 {/* Status and Renewal */}
-                <div className="flex items-center justify-between pt-4 border-t border-purple-200">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 ${subscription.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} text-xs font-semibold rounded-full`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-purple-200">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`px-3 py-1 ${subscription.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} text-xs font-semibold rounded-full whitespace-nowrap`}>
                       {subscription.active ? `✓ ${t('profile.subscription.active')}` : t('profile.subscription.inactive')}
                     </span>
                     {subscription.autoRenew && (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full whitespace-nowrap">
                         🔄 Auto-renew
                       </span>
                     )}
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <p className="text-xs text-gray-500">{t('profile.subscription.renews')}</p>
                     <p className="text-sm font-semibold text-gray-900">
                       {new Date(subscription.renewalDate).toLocaleDateString()}
@@ -213,15 +213,15 @@ export const ProfilePage = () => {
           </div>
 
             {/* Contexts Section */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{t('profile.contexts.title')}</h3>
-                <p className="text-sm text-gray-500">{t('profile.contexts.description')}</p>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('profile.contexts.title')}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 truncate">{t('profile.contexts.description')}</p>
               </div>
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
-                className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
               >
                 {showCreateForm ? t('profile.contexts.cancel') : t('profile.contexts.addContext')}
               </button>
@@ -229,19 +229,19 @@ export const ProfilePage = () => {
 
             {/* Create Form */}
             {showCreateForm && (
-              <form onSubmit={handleCreateContext} className="mb-4 p-4 bg-gray-50 rounded-lg">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <form onSubmit={handleCreateContext} className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   {t('profile.contexts.contextName')}
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 flex items-center border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
-                    <span className="pl-4 text-gray-700 font-medium text-base select-none">@</span>
+                    <span className="pl-3 sm:pl-4 text-gray-700 font-medium text-sm sm:text-base select-none">@</span>
                     <input
                       type="text"
                       value={newContextName}
                       onChange={(e) => setNewContextName(e.target.value)}
                       placeholder={t('profile.contexts.placeholder')}
-                      className="flex-1 px-2 py-2 border-0 outline-none bg-transparent"
+                      className="flex-1 px-2 py-2 text-sm sm:text-base border-0 outline-none bg-transparent"
                       disabled={creating}
                       required
                     />
@@ -249,7 +249,7 @@ export const ProfilePage = () => {
                   <button
                     type="submit"
                     disabled={creating || !newContextName.trim()}
-                    className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-4 sm:px-6 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
                     {creating ? t('profile.contexts.creating') : t('profile.contexts.create')}
                   </button>
@@ -279,39 +279,39 @@ export const ProfilePage = () => {
                 {contexts.map((context) => (
                   <div
                     key={context.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-start sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <svg className="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{context.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-gray-500">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base text-gray-900 truncate">{context.name}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
+                          <p className="text-xs text-gray-500 truncate">
                             {t('profile.contexts.created')} {new Date(context.createdAt).toLocaleDateString()}
                           </p>
                           {context.actionsCount > 0 && (
-                            <span className="text-xs text-gray-500">•</span>
-                          )}
-                          {context.actionsCount > 0 && (
-                            <p className="text-xs text-indigo-600 font-medium">
-                              {t('profile.contexts.actionsCount', { count: context.actionsCount })}
-                            </p>
+                            <>
+                              <span className="hidden sm:inline text-xs text-gray-500">•</span>
+                              <p className="text-xs text-indigo-600 font-medium">
+                                {t('profile.contexts.actionsCount', { count: context.actionsCount })}
+                              </p>
+                            </>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                      <span className="hidden sm:inline text-xs text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200 whitespace-nowrap">
                         {t('profile.contexts.active')}
                       </span>
                       <button
                         onClick={() => handleOpenDeleteModal(context)}
                         disabled={!context.canDelete}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
                           context.canDelete 
                             ? 'text-red-600 hover:bg-red-50 cursor-pointer' 
                             : 'text-gray-300 cursor-not-allowed'
@@ -322,7 +322,7 @@ export const ProfilePage = () => {
                             : t('profile.contexts.cannotDelete', { count: context.actionsCount })
                         }
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>

@@ -237,13 +237,13 @@ export const CreateProjectPage = () => {
       />
 
       {/* Progress indicator */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
               {t('projects.create.step')} {currentStep} {t('projects.create.of')} 2
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-xs sm:text-sm text-gray-500 truncate">
               {currentStep === 1 && t('projects.create.step1Title')}
               {currentStep === 2 && t('projects.create.step2Title')}
             </span>
@@ -258,33 +258,33 @@ export const CreateProjectPage = () => {
       </div>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
         {/* Step 1: Choose Area */}
         {currentStep === 1 && (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('projects.create.step1Title')}</h2>
-              <p className="text-sm text-gray-600 max-w-md mx-auto">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{t('projects.create.step1Title')}</h2>
+              <p className="text-xs sm:text-sm text-gray-600 max-w-md mx-auto px-4">
                 {t('projects.create.step1Description')}
               </p>
             </div>
 
             {/* Life Wheel visualization */}
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <span className="text-sm text-gray-600">{t('projects.create.yourLifeWheel')}</span>
-                <span className="text-sm font-bold text-gray-900">{t('projects.create.avg')}: {averageScore}/10</span>
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="inline-flex items-center gap-2 mb-2 flex-wrap justify-center">
+                <span className="text-xs sm:text-sm text-gray-600">{t('projects.create.yourLifeWheel')}</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-900">{t('projects.create.avg')}: {averageScore}/10</span>
               </div>
-              <p className="text-xs text-gray-500">{t('projects.create.recommendation')}</p>
+              <p className="text-xs text-gray-500 px-4">{t('projects.create.recommendation')}</p>
             </div>
 
             {/* Areas grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {lifeAreas.map((area) => {
                 const potentialPoints = Math.max(0, 10 - area.score);
                 const isEvaluated = area.score > 0;
@@ -296,7 +296,7 @@ export const CreateProjectPage = () => {
                     key={area.id}
                     onClick={() => handleSelectArea(area.id)}
                     disabled={!isEnabled}
-                    className={`bg-white border-2 rounded-2xl p-5 transition-all text-left group ${
+                    className={`bg-white border-2 rounded-2xl p-4 sm:p-5 transition-all text-left group ${
                       isEnabled
                         ? 'border-gray-200 hover:border-indigo-500 cursor-pointer' 
                         : isLocked
@@ -304,8 +304,8 @@ export const CreateProjectPage = () => {
                           : 'border-amber-200 opacity-60 cursor-not-allowed'
                     }`}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className={`flex items-center justify-center text-3xl flex-shrink-0 ${isEnabled ? 'group-hover:scale-110' : ''} transition-transform relative`} style={{ filter: isEnabled ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' : 'grayscale(50%)' }}>
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className={`flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 ${isEnabled ? 'group-hover:scale-110' : ''} transition-transform relative`} style={{ filter: isEnabled ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' : 'grayscale(50%)' }}>
                         {getAreaIcon(area.areaName)}
                         {!isEvaluated && (
                           <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
@@ -322,13 +322,13 @@ export const CreateProjectPage = () => {
                           </div>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <h3 className={`font-bold mb-1 ${isEnabled ? 'text-gray-900' : isLocked ? 'text-red-700' : 'text-amber-700'}`}>
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-bold text-sm sm:text-base mb-1 truncate ${isEnabled ? 'text-gray-900' : isLocked ? 'text-red-700' : 'text-amber-700'}`}>
                           {t(getAreaTranslationKey(area.areaName))}
                         </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg font-bold text-gray-900">{area.score === 0 ? '—' : area.score}</span>
-                          <span className="text-sm text-gray-500">/10</span>
+                          <span className="text-base sm:text-lg font-bold text-gray-900">{area.score === 0 ? '—' : area.score}</span>
+                          <span className="text-xs sm:text-sm text-gray-500">/10</span>
                         </div>
                         {isEnabled ? (
                           <div className="flex items-center gap-2">
@@ -357,21 +357,21 @@ export const CreateProjectPage = () => {
 
             {/* Warning for unevaluated areas */}
             {lifeAreas.some(area => area.score === 0) && (
-              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-amber-900 mb-1">{t('projects.create.assessmentRequired')}</p>
-                    <p className="text-sm text-amber-800 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm sm:text-base text-amber-900 mb-1">{t('projects.create.assessmentRequired')}</p>
+                    <p className="text-xs sm:text-sm text-amber-800 mb-3">
                       {t('projects.create.assessmentRequiredMessage')}
                     </p>
                     <button
                       onClick={() => navigate('/home')}
-                      className="px-4 py-2 bg-amber-600 text-white font-medium text-sm rounded-lg hover:bg-amber-700 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 bg-amber-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-amber-700 transition-colors"
                     >
                       {t('projects.create.completeAssessment')}
                     </button>
@@ -382,16 +382,16 @@ export const CreateProjectPage = () => {
 
             {/* Info about locked areas (high scoring) */}
             {allAreasEvaluated && lifeAreas.some(area => !enabledAreaIds.has(area.id)) && (
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-blue-900 mb-1">{t('projects.create.focusLowestTitle')}</p>
-                    <p className="text-sm text-blue-800">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm sm:text-base text-blue-900 mb-1">{t('projects.create.focusLowestTitle')}</p>
+                    <p className="text-xs sm:text-sm text-blue-800">
                       {t('projects.create.focusLowestMessage')}
                     </p>
                   </div>
@@ -401,16 +401,16 @@ export const CreateProjectPage = () => {
 
             {/* AI Recommendation */}
             {lowestArea && lowestArea.score > 0 && enabledAreaIds.has(lowestArea.id) && (
-              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-5">
+              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-900 mb-1">{t('projects.create.aiRecommendation')}</p>
-                    <p className="text-sm text-gray-700">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm sm:text-base text-gray-900 mb-1">{t('projects.create.aiRecommendation')}</p>
+                    <p className="text-xs sm:text-sm text-gray-700">
                       {t('projects.create.aiRecommendationMessage', { areaName: lowestArea.areaName, score: lowestArea.score })}
                     </p>
                   </div>
@@ -432,20 +432,20 @@ export const CreateProjectPage = () => {
 
         {/* Step 2: Project Details */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {selectedAreaId && (
               <>
                 {(() => {
                   const selectedArea = lifeAreas.find(a => a.id === selectedAreaId);
                   const colorVariants = selectedArea ? getAreaColorVariants(selectedArea.areaName) : null;
                   return selectedArea && colorVariants ? (
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                      <div className="flex items-center justify-center text-3xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
+                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                         {getAreaIcon(selectedArea.areaName)}
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600">{t('projects.create.selectedArea')}</p>
-                        <p className="font-bold text-gray-900">{t(getAreaTranslationKey(selectedArea.areaName))}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-600">{t('projects.create.selectedArea')}</p>
+                        <p className="font-bold text-sm sm:text-base text-gray-900 truncate">{t(getAreaTranslationKey(selectedArea.areaName))}</p>
                       </div>
                     </div>
                   ) : null;
@@ -453,14 +453,14 @@ export const CreateProjectPage = () => {
 
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     {t('projects.create.projectTitle')} *
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder={t('projects.create.projectTitlePlaceholder')}
                     required
                   />
@@ -468,24 +468,24 @@ export const CreateProjectPage = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                     {t('projects.create.description')} *
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder={t('projects.create.descriptionPlaceholder')}
                     required
                   />
                 </div>
 
                 {/* Dates */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         {t('projects.create.startDate')} *
                       </label>
                       <input
@@ -493,13 +493,13 @@ export const CreateProjectPage = () => {
                         value={formData.startDate}
                         onChange={(e) => handleStartDateChange(e.target.value)}
                         min={getTomorrowDate()}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
                       <p className="text-xs text-gray-500 mt-1">{t('projects.create.startDateHelp')}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         {t('projects.create.endDate')} *
                       </label>
                       <input
@@ -509,10 +509,10 @@ export const CreateProjectPage = () => {
                         min={getMinEndDate(formData.startDate)}
                         max={getMaxEndDate(formData.startDate)}
                         disabled={!formData.startDate}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                         required
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                         {formData.startDate 
                           ? `${t('projects.create.between')} ${getMinEndDate(formData.startDate)} ${t('projects.create.and')} ${getMaxEndDate(formData.startDate)}`
                           : t('projects.create.selectStartFirst')}
@@ -552,18 +552,18 @@ export const CreateProjectPage = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setCurrentStep(1)}
-                    className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+                    className="w-full sm:flex-1 py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                   >
                     {t('projects.create.back')}
                   </button>
                   <button
                     onClick={handleCreateProject}
                     disabled={creating || !formData.title || !formData.description || !formData.startDate || !formData.endDate || !!dateError}
-                    className="flex-1 py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:flex-1 py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base bg-indigo-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {creating ? t('projects.create.creating') : t('projects.create.createProject')}
                   </button>

@@ -180,53 +180,53 @@ export const AssessmentQuestionsPage: React.FC = () => {
   if (showMaritalStatusQuestion) {
     return (
       <div className="min-h-screen bg-gray-50 pb-20">
-        <div className="max-w-3xl mx-auto w-full px-6 py-8">
+        <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
           {/* Header */}
-          <div className="mb-8 text-center">
+          <div className="mb-6 sm:mb-8 text-center">
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className={`w-16 h-16 ${getAreaColor(areaName)} rounded-2xl flex items-center justify-center text-3xl shadow-sm`}>
+              <div className={`w-12 h-12 sm:w-16 sm:h-16 ${getAreaColor(areaName)} rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm`}>
                 {getAreaIcon(areaName)}
               </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{areaName}</h1>
-            <p className="text-gray-600">{t('assessment.questions.maritalStatus.subtitle')}</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{areaName}</h1>
+            <p className="text-sm sm:text-base text-gray-600 px-4">{t('assessment.questions.maritalStatus.subtitle')}</p>
           </div>
 
           {/* Marital Status Question Card */}
-          <div className={`bg-gradient-to-br ${areaColors.gradient} rounded-3xl p-8 sm:p-10 mb-6 shadow-xl`}>
+          <div className={`bg-gradient-to-br ${areaColors.gradient} rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 mb-6 shadow-xl`}>
             <div className="text-center">
-              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg text-4xl">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg text-3xl sm:text-4xl">
                 💑
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-relaxed">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 leading-relaxed px-2">
                 {t('assessment.questions.maritalStatus.question')}
               </h2>
-              <p className="text-white/90 text-base leading-relaxed max-w-md mx-auto">
+              <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-md mx-auto px-4">
                 {t('assessment.questions.maritalStatus.description')}
               </p>
             </div>
           </div>
 
           {/* Answer Buttons */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 sm:space-y-4 mb-6">
             {/* Married Button */}
             <button
               onClick={() => handleMaritalStatusSelect('married')}
-              className={`w-full rounded-2xl transition-all transform hover:scale-102 ${
+              className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
                 maritalStatus === 'married'
                   ? `${areaColors.bg} text-white shadow-xl`
                   : `${areaColors.bgLighter} ${areaColors.text} hover:${areaColors.bgLight} border-2 ${areaColors.border}`
               }`}
             >
-              <div className="flex items-center gap-4 p-6">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
+              <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
                   maritalStatus === 'married' ? 'bg-white/30' : 'bg-white'
                 }`}>
-                  <span className="text-3xl">💑</span>
+                  <span className="text-2xl sm:text-3xl">💑</span>
                 </div>
-                <div className="text-left flex-1">
-                  <div className="text-xl font-bold mb-1">{t('assessment.questions.maritalStatus.married')}</div>
-                  <div className={`text-sm ${maritalStatus === 'married' ? 'text-white/80' : 'text-gray-600'}`}>
+                <div className="text-left flex-1 min-w-0">
+                  <div className="text-base sm:text-xl font-bold mb-0.5 sm:mb-1 truncate">{t('assessment.questions.maritalStatus.married')}</div>
+                  <div className={`text-xs sm:text-sm ${maritalStatus === 'married' ? 'text-white/80' : 'text-gray-600'} line-clamp-2`}>
                     {t('assessment.questions.maritalStatus.marriedDesc')}
                   </div>
                 </div>
@@ -236,21 +236,21 @@ export const AssessmentQuestionsPage: React.FC = () => {
             {/* Single Button */}
             <button
               onClick={() => handleMaritalStatusSelect('single')}
-              className={`w-full rounded-2xl transition-all transform hover:scale-102 ${
+              className={`w-full rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
                 maritalStatus === 'single'
                   ? `${areaColors.bg} text-white shadow-xl`
                   : `${areaColors.bgLighter} ${areaColors.text} hover:${areaColors.bgLight} border-2 ${areaColors.border}`
               }`}
             >
-              <div className="flex items-center gap-4 p-6">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
+              <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center flex-shrink-0 ${
                   maritalStatus === 'single' ? 'bg-white/30' : 'bg-white'
                 }`}>
-                  <span className="text-3xl">🙋</span>
+                  <span className="text-2xl sm:text-3xl">🙋</span>
                 </div>
-                <div className="text-left flex-1">
-                  <div className="text-xl font-bold mb-1">{t('assessment.questions.maritalStatus.single')}</div>
-                  <div className={`text-sm ${maritalStatus === 'single' ? 'text-white/80' : 'text-gray-600'}`}>
+                <div className="text-left flex-1 min-w-0">
+                  <div className="text-base sm:text-xl font-bold mb-0.5 sm:mb-1 truncate">{t('assessment.questions.maritalStatus.single')}</div>
+                  <div className={`text-xs sm:text-sm ${maritalStatus === 'single' ? 'text-white/80' : 'text-gray-600'} line-clamp-2`}>
                     {t('assessment.questions.maritalStatus.singleDesc')}
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
           </div>
 
           {/* Info Box */}
-          <div className="bg-blue-50 rounded-2xl p-6">
+          <div className="bg-blue-50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -283,7 +283,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-7xl mx-auto w-full px-6 py-6">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
         {/* Header with Area Info */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-start justify-between gap-4 mb-4 sm:mb-6">

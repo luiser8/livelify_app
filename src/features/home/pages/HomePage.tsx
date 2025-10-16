@@ -275,7 +275,7 @@ export const HomePage = () => {
       />
 
       {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-8">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
         {/* Hexágono del Life Wheel con Global Score debajo */}
         {loading ? (
           <div className="mb-8 text-center">
@@ -421,9 +421,9 @@ export const HomePage = () => {
 
           {/* Scores Summary - Solo si hay scores */}
           {hasScores && lifeWheel && (
-            <div className="mt-8 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4">{t('home.currentScores')}</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="mt-6 sm:mt-8 bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">{t('home.currentScores')}</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
                 {lifeWheel.lifeAreas
                   .sort((a, b) => a.score - b.score)
                   .map((area) => {
@@ -431,14 +431,14 @@ export const HomePage = () => {
                     return (
                       <div
                         key={area.id}
-                        className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all ${isEnabled
+                        className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-4 rounded-xl transition-all ${isEnabled
                           ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 shadow-sm'
                           : area.score === 0
                             ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300'
                             : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
                           }`}
                       >
-                        <div className="flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 relative"
+                        <div className="flex items-center justify-center text-2xl sm:text-4xl flex-shrink-0 relative"
                           style={{
                             filter: isEnabled
                               ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'

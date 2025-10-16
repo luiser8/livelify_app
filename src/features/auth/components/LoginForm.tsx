@@ -45,14 +45,14 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 sm:space-y-6 px-4 sm:px-0">
       {serverError && (
-        <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-sm">
+        <div className="p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-xs sm:text-sm">
           <div className="flex items-start gap-2">
-            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span>{serverError}</span>
+            <span className="break-words">{serverError}</span>
           </div>
         </div>
       )}
@@ -79,17 +79,17 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
         disabled={isLoading}
       />
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm">
         <label className="flex items-center text-white/80 cursor-pointer hover:text-white transition-colors">
           <input
             type="checkbox"
-            className="mr-2 rounded border-white/30 bg-white/10 text-primary-500 focus:ring-white/50"
+            className="mr-1.5 sm:mr-2 rounded border-white/30 bg-white/10 text-primary-500 focus:ring-white/50"
           />
-          {t('auth.login.rememberMe')}
+          <span className="whitespace-nowrap">{t('auth.login.rememberMe')}</span>
         </label>
         <button
           type="button"
-          className="text-white/80 hover:text-white transition-colors"
+          className="text-white/80 hover:text-white transition-colors whitespace-nowrap"
         >
           {t('auth.login.forgotPassword')}
         </button>
@@ -98,7 +98,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
         {isLoading ? t('auth.login.signingIn') : t('auth.login.signIn')}
       </button>

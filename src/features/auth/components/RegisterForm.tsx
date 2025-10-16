@@ -122,20 +122,20 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
   const canAcceptTerms = hasReadTerms && hasReadPrivacy;
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
+    <form onSubmit={handleSubmit} className="w-full max-w-md space-y-3 sm:space-y-5 px-4 sm:px-0">
       {serverError && (
-        <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-sm">
+        <div className="p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-xs sm:text-sm">
           <div className="flex items-start gap-2">
-            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span>{serverError}</span>
+            <span className="break-words">{serverError}</span>
           </div>
         </div>
       )}
 
       {/* Nombre y Apellido en una fila */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <Input
           type="text"
           label={t('auth.register.firstName')}
@@ -199,7 +199,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           autoComplete="new-password"
           disabled={isLoading}
         />
-        <p className="text-xs text-white/70 mt-1 ml-1">
+        <p className="text-xs sm:text-xs text-white/70 mt-1 ml-1">
           {t('auth.register.passwordHint')}
         </p>
       </div>
@@ -216,8 +216,8 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       />
 
       {/* Sección de Términos y Políticas */}
-      <div className="space-y-3">
-        <label className={`flex items-start gap-3 ${canAcceptTerms ? 'cursor-pointer' : 'cursor-not-allowed'} group`}>
+      <div className="space-y-2 sm:space-y-3">
+        <label className={`flex items-start gap-2 sm:gap-3 ${canAcceptTerms ? 'cursor-pointer' : 'cursor-not-allowed'} group`}>
           <input
             type="checkbox"
             checked={formData.acceptedTermsAndPolicies}
@@ -230,9 +230,9 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
               }
             }}
             disabled={isLoading || !canAcceptTerms}
-            className="mt-1 w-5 h-5 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           />
-          <span className="text-sm text-white/90 leading-relaxed flex-1">
+          <span className="text-xs sm:text-sm text-white/90 leading-relaxed flex-1">
             {t('auth.register.termsAcceptance.part1')}{' '}
             <button
               type="button"
@@ -253,19 +253,19 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         </label>
 
         {/* Estado de lectura de documentos */}
-        <div className="ml-8 space-y-2">
+        <div className="ml-6 sm:ml-8 space-y-1.5 sm:space-y-2">
           {/* Estado de Términos y Condiciones */}
-          <div className={`flex items-center gap-2 text-sm ${hasReadTerms ? 'text-green-300' : 'text-amber-300'}`}>
+          <div className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm ${hasReadTerms ? 'text-green-300' : 'text-amber-300'}`}>
             {hasReadTerms ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             ) : (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             )}
-            <span>
+            <span className="break-words">
               {hasReadTerms 
                 ? t('auth.register.termsAcceptance.termsRead')
                 : t('auth.register.termsAcceptance.termsNotRead')
@@ -274,17 +274,17 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           </div>
 
           {/* Estado de Políticas de Privacidad */}
-          <div className={`flex items-center gap-2 text-sm ${hasReadPrivacy ? 'text-green-300' : 'text-amber-300'}`}>
+          <div className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm ${hasReadPrivacy ? 'text-green-300' : 'text-amber-300'}`}>
             {hasReadPrivacy ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             ) : (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             )}
-            <span>
+            <span className="break-words">
               {hasReadPrivacy 
                 ? t('auth.register.termsAcceptance.privacyRead')
                 : t('auth.register.termsAcceptance.privacyNotRead')
@@ -294,21 +294,21 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
 
           {/* Mensaje cuando puede aceptar */}
           {canAcceptTerms && !formData.acceptedTermsAndPolicies && (
-            <div className="flex items-center gap-2 text-green-300 text-sm">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-green-300 text-xs sm:text-sm">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span>{t('auth.register.termsAcceptance.canAcceptNow')}</span>
+              <span className="break-words">{t('auth.register.termsAcceptance.canAcceptNow')}</span>
             </div>
           )}
         </div>
 
         {errors.acceptedTermsAndPolicies && (
-          <p className="text-red-300 text-sm ml-8 flex items-center gap-1">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <p className="text-red-300 text-xs sm:text-sm ml-6 sm:ml-8 flex items-start gap-1">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
-            {errors.acceptedTermsAndPolicies}
+            <span className="break-words">{errors.acceptedTermsAndPolicies}</span>
           </p>
         )}
       </div>
@@ -316,7 +316,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full py-4 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
         {isLoading ? t('auth.register.signingUp') : t('auth.register.signUp')}
       </button>

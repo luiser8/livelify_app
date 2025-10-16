@@ -218,33 +218,33 @@ export const ActionsPage = () => {
         showFilter={false}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">{stats.totalActions}</div>
-            <div className="text-sm text-gray-500">{t('actions.totalActions')}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalActions}</div>
+            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.totalActions')}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="text-2xl font-bold text-blue-600">{stats.pendingActions}</div>
-            <div className="text-sm text-gray-500">{t('actions.pending')}</div>
+          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.pendingActions}</div>
+            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.pending')}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="text-2xl font-bold text-green-600">{stats.completedActions}</div>
-            <div className="text-sm text-gray-500">{t('actions.completed')}</div>
+          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.completedActions}</div>
+            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.completed')}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="text-2xl font-bold text-red-600">{stats.overdueActions}</div>
-            <div className="text-sm text-gray-500">{t('actions.overdue')}</div>
+          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.overdueActions}</div>
+            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.overdue')}</div>
           </div>
         </div>
 
         {/* Filtro de contextos y botón crear */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setSelectedContextFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg font-medium transition-all ${
                 selectedContextFilter === 'all'
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -256,7 +256,7 @@ export const ActionsPage = () => {
               <button
                 key={context.id}
                 onClick={() => setSelectedContextFilter(context.id)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg font-medium transition-all ${
                   selectedContextFilter === context.id
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -269,9 +269,9 @@ export const ActionsPage = () => {
 
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md flex items-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 text-sm sm:text-base bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md flex items-center justify-center gap-2 whitespace-nowrap"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             {t('actions.newAction')}
@@ -280,9 +280,9 @@ export const ActionsPage = () => {
 
         {/* Formulario de creación */}
         {showCreateForm && (
-          <div className="bg-white rounded-2xl border-2 border-indigo-200 p-6 mb-6 shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{t('actions.createNewAction')}</h3>
+          <div className="bg-white rounded-2xl border-2 border-indigo-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-md">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">{t('actions.createNewAction')}</h3>
               <button
                 onClick={() => {
                   setShowCreateForm(false);
@@ -488,20 +488,20 @@ export const ActionsPage = () => {
                 >
                   {/* Context Header */}
                   <div 
-                    className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="p-4 sm:p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => setExpandedContext(expandedContext === context.id ? null : context.id)}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex items-start justify-between gap-3 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                             </svg>
                           </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{context.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{context.name}</h3>
+                            <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mt-1 flex-wrap">
                               <span className="flex items-center gap-1">
                                 <span className="font-medium text-blue-600">{activeCount}</span>
                                 <span>{t('actions.active')}</span>
@@ -526,16 +526,16 @@ export const ActionsPage = () => {
 
                   {/* Actions List */}
                   {expandedContext === context.id && (
-                    <div className="bg-gray-50 p-5 border-t-2">
+                    <div className="bg-gray-50 p-3 sm:p-5 border-t-2">
                       {/* Lista de acciones */}
                       {contextActions.length > 0 ? (
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           {contextActions.map((action, index) => {
                             const { goal, project } = getActionMetadata(action);
                             return (
                               <div 
                                 key={action.id}
-                                className={`rounded-xl p-4 border-2 transition-all ${
+                                className={`rounded-xl p-3 sm:p-4 border-2 transition-all ${
                                   action.completed
                                     ? 'bg-green-50 border-green-200 opacity-75'
                                     : action.isOverdue 
@@ -543,25 +543,25 @@ export const ActionsPage = () => {
                                       : 'bg-white border-gray-200 hover:shadow-md'
                                 }`}
                               >
-                                <div className="flex items-start gap-4">
+                                <div className="flex items-start gap-2 sm:gap-4">
                                   <div className="flex items-center gap-2 pt-1">
-                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-semibold text-xs">
+                                    <span className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 text-indigo-700 font-semibold text-xs">
                                       {index + 1}
                                     </span>
                                   </div>
 
-                                  <div className="flex-1">
-                                    <div className="flex items-start justify-between gap-4 mb-2">
-                                      <h5 className={`font-semibold text-base ${action.completed ? 'line-through text-gray-600' : 'text-gray-900'}`}>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-2">
+                                      <h5 className={`font-semibold text-sm sm:text-base ${action.completed ? 'line-through text-gray-600' : 'text-gray-900'} line-clamp-2`}>
                                         {action.title}
                                       </h5>
                                       
                                       {!action.completed && (
                                         <button
                                           onClick={() => handleCompleteAction(action.id)}
-                                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all shadow-md flex items-center gap-2 flex-shrink-0"
+                                          className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all shadow-md flex items-center justify-center gap-2 flex-shrink-0 whitespace-nowrap"
                                         >
-                                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                           </svg>
                                           {t('actions.complete')}

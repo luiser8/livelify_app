@@ -99,19 +99,19 @@ export const ProjectsPage = () => {
     const duration = calculateProjectDuration();
 
     return (
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-3 sm:mb-4">
         {/* Header del proyecto */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-3 flex-1">
+        <div className="flex items-start justify-between mb-3 sm:mb-4">
+          <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
             {area && colorVariants && (
-              <div className="flex items-center justify-center text-3xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
+              <div className="flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' }}>
                 {getAreaIcon(area.areaName)}
               </div>
             )}
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{project.title}</h3>
-              <p className="text-sm text-gray-500 mb-2">{area?.areaName || 'Unknown Area'}</p>
-              <p className="text-sm text-gray-600">{project.description}</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 truncate">{project.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-500 mb-2 truncate">{area?.areaName || 'Unknown Area'}</p>
+              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{project.description}</p>
             </div>
           </div>
           <button
@@ -247,39 +247,16 @@ export const ProjectsPage = () => {
         {/* Contenido expandido */}
         {isExpanded && (
           <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
-            {/* Next Action */}
-            <div className="bg-yellow-50 rounded-xl p-4">
-              <p className="text-sm font-bold text-gray-900 mb-2">{t('projects.nextAction')}</p>
-              <p className="text-sm text-gray-700 mb-2">Complete morning meditation session (15 min)</p>
-              <p className="text-xs text-gray-600">
-                <span className="text-yellow-700 font-medium">@Home • Due in 2 hours</span>
-              </p>
-              <div className="flex items-center gap-2 mt-3">
-                <button className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Fecha límite */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>Due: {new Date(project.detail.endDate).toLocaleDateString()}</span>
-            </div>
 
             {/* Botones de acción */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <button 
+              <button
                 onClick={() => navigate(`/projects/${project.id}/goals`)}
                 className="py-2 px-4 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-colors"
               >
                 {t('projects.viewGoals')}
               </button>
-              
+
               {/* Selector de status */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">{t('projects.changeStatus')}</label>
@@ -324,21 +301,21 @@ export const ProjectsPage = () => {
       />
 
       {/* Contenido principal */}
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
         {/* Estadísticas */}
-        <div className="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="mb-4 sm:mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{activeProjects.length}</div>
-              <div className="text-xs text-gray-500">{t('projects.active')}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{activeProjects.length}</div>
+              <div className="text-xs text-gray-500 leading-tight">{t('projects.active')}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{somedayProjects.length}</div>
-              <div className="text-xs text-gray-500">{t('projects.someday')}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{somedayProjects.length}</div>
+              <div className="text-xs text-gray-500 leading-tight">{t('projects.someday')}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{completedProjects.length}</div>
-              <div className="text-xs text-gray-500">{t('projects.completed')}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{completedProjects.length}</div>
+              <div className="text-xs text-gray-500 leading-tight">{t('projects.completed')}</div>
             </div>
           </div>
         </div>
