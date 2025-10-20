@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 /**
  * Servicio de Assessment
@@ -38,11 +39,16 @@ export interface AreaQuestionsResponse {
  */
 export const assessmentService = {
   /**
-   * Obtiene las preguntas de un área específica del Life Wheel
+   * Obtiene las preguntas de un área específica del Life Wheel (CON CACHÉ)
    * Endpoint: GET /assessment/area/:areaId
    *
    * @param areaId - ID del área (ej: PERSONAL_DEVELOPMENT, HEALTH_NUTRITION, etc.)
    * @returns Objeto con las preguntas del área ordenadas
+   * 
+   * Configuración de caché:
+   * - Tipo: STATIC (desde env)
+   * - TTL: VITE_CACHE_TTL_STATIC
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_STATIC
    *
    * @example
    * ```typescript
@@ -52,7 +58,12 @@ export const assessmentService = {
    * ```
    */
   getAreaQuestions: async (areaId: string): Promise<AreaQuestionsResponse> => {
-    return apiClient.get<AreaQuestionsResponse>(`/assessment/area/${areaId}`);
+    return cacheApiCall(
+      `assessment_area_${areaId}`,
+      () => apiClient.get<AreaQuestionsResponse>(`/assessment/area/${areaId}`),
+      apiCache,
+      
+    );
   },
 };
 

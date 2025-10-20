@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 /**
  * Servicio de usuarios
@@ -138,21 +139,36 @@ export const userService = {
   },
 
   /**
-   * Obtiene el perfil del usuario actual
+   * Obtiene el perfil del usuario actual (CON CACHÉ)
    * Endpoint: GET /users/me
    * Requiere: Bearer token en Authorization header (automático)
+   * 
+   * Configuración de caché desde .env:
+   * - TTL: VITE_CACHE_TTL
+   * - Max accesos: VITE_CACHE_ACCESS_COUNT
    */
   getMe: async (): Promise<UserMeResponse> => {
-    return apiClient.get<UserMeResponse>('/users/me');
+    return cacheApiCall(
+      'user_me',
+      () => apiClient.get<UserMeResponse>('/users/me'),
+      apiCache
+    );
   },
 
   /**
    * Actualiza el perfil del usuario
    * Endpoint: PUT /users/update
    * Requiere: Bearer token en Authorization header (automático)
+   * 
+   * NOTA: Invalida el caché después de actualizar
    */
   updateUser: async (data: UpdateUserData): Promise<UserMeResponse> => {
-    return apiClient.put<UserMeResponse>('/users/update', data);
+    const result = await apiClient.put<UserMeResponse>('/users/update', data);
+    
+    // Invalidar caché después de actualizar para que la próxima llamada obtenga datos frescos
+    apiCache.remove('user_me');
+    
+    return result;
   },
 };
 

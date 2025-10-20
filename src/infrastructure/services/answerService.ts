@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { apiCache } from '@/shared/utils/apiCache';
 
 /**
  * Servicio de Answers (Respuestas)
@@ -38,6 +39,8 @@ export const answerService = {
   /**
    * Envía las respuestas de las preguntas de un área específica
    * Endpoint: POST /answers/submit-area
+   * 
+   * NOTA: Invalida cachés relacionados con el lifeWheel y usuario
    *
    * @param data - Objeto con el areaId y array de respuestas
    * @returns Respuesta con el resultado del envío
@@ -57,7 +60,13 @@ export const answerService = {
   submitAreaAnswers: async (
     data: SubmitAreaAnswersRequest
   ): Promise<SubmitAreaAnswersResponse> => {
-    return apiClient.post<SubmitAreaAnswersResponse>('/answers/submit-area', data);
+    const result = await apiClient.post<SubmitAreaAnswersResponse>('/answers/submit-area', data);
+    
+    // Invalidar cachés después de enviar respuestas (actualiza scores)
+    apiCache.remove('lifewheel_me');
+    apiCache.remove('user_me');
+    
+    return result;
   },
 };
 

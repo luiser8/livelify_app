@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 export interface Context {
   id: string;
@@ -18,17 +19,47 @@ export interface GetMyContextsResponse {
 }
 
 export const contextService = {
-  // API returns the context object directly, not wrapped
+  /**
+   * Agregar un contexto
+   * NOTA: Invalida caché de contextos
+   */
   addContext: async (data: AddContextRequest): Promise<Context> => {
-    return apiClient.post<Context>('/users/add-context', data);
+    const result = await apiClient.post<Context>('/users/add-context', data);
+    
+    // Invalidar caché después de agregar
+    apiCache.remove('contexts_me');
+    apiCache.remove('user_me');
+    
+    return result;
   },
 
+  /**
+   * Obtener contextos del usuario (CON CACHÉ)
+   * 
+   * Configuración de caché:
+   * - Tipo: SEMI_STATIC (desde env)
+   * - TTL: VITE_CACHE_TTL_SEMI_STATIC
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_SEMI_STATIC
+   */
   getMyContexts: async (): Promise<GetMyContextsResponse> => {
-    return apiClient.get<GetMyContextsResponse>('/users/my-contexts');
+    return cacheApiCall(
+      'contexts_me',
+      () => apiClient.get<GetMyContextsResponse>('/users/my-contexts'),
+      apiCache,
+      
+    );
   },
 
+  /**
+   * Eliminar un contexto
+   * NOTA: Invalida caché de contextos
+   */
   deleteContext: async (contextId: string): Promise<void> => {
-    return apiClient.delete(`/users/delete-context/${contextId}`);
+    await apiClient.delete(`/users/delete-context/${contextId}`);
+    
+    // Invalidar caché después de eliminar
+    apiCache.remove('contexts_me');
+    apiCache.remove('user_me');
   },
 };
 

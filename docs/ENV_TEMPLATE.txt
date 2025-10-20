@@ -12,6 +12,11 @@ VITE_APP_NAME=Livelify
 VITE_APP_VERSION=0.1.0
 VITE_SESSION_EXPIRE=10
 
+# Configuración de Caché API
+VITE_CACHE_TTL=300000              # 5 minutos (en milisegundos)
+VITE_CACHE_ACCESS_COUNT=10         # Número de accesos antes de refrescar
+VITE_CACHE_KEY_PREFIX=api_cache_   # Prefijo para las claves en localStorage
+
 # ============== QA ==============
 # Archivo: .env.qa
 VITE_APP_ENV=qa
@@ -19,6 +24,11 @@ VITE_API_URL=https://qa-api.livelify.com/api
 VITE_APP_NAME=Livelify QA
 VITE_APP_VERSION=0.1.0
 VITE_SESSION_EXPIRE=10
+
+# Configuración de Caché API (valores QA - más conservadores)
+VITE_CACHE_TTL=180000              # 3 minutos
+VITE_CACHE_ACCESS_COUNT=5          # 5 accesos
+VITE_CACHE_KEY_PREFIX=api_cache_
 
 # ============== PRODUCTION ==============
 # Archivo: .env.production
@@ -28,7 +38,19 @@ VITE_APP_NAME=Livelify
 VITE_APP_VERSION=0.1.0
 VITE_SESSION_EXPIRE=10
 
+# Configuración de Caché API (valores producción - optimizados)
+VITE_CACHE_TTL=300000              # 5 minutos
+VITE_CACHE_ACCESS_COUNT=10         # 10 accesos
+VITE_CACHE_KEY_PREFIX=api_cache_
+
 # ============== NOTAS ==============
 # - Las variables DEBEN comenzar con VITE_ para estar disponibles en el navegador
 # - No incluyas secretos sensibles en estas variables (son visibles en el cliente)
 # - Para variables locales usa .env.local (no se sube a git)
+# 
+# Configuración de Caché:
+# - VITE_CACHE_TTL: Time To Live en milisegundos (tiempo antes de expirar)
+# - VITE_CACHE_ACCESS_COUNT: Número máximo de accesos al caché antes de refrescar
+# - VITE_CACHE_KEY_PREFIX: Prefijo para las claves en localStorage
+
+

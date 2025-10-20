@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 /**
  * Servicio de Proyectos
@@ -100,6 +101,8 @@ export const projectService = {
    *
    * @param data - Datos del proyecto a crear
    * @returns Respuesta con el proyecto creado
+   * 
+   * NOTA: Invalida los cachés relevantes después de crear
    *
    * @example
    * ```typescript
@@ -115,28 +118,55 @@ export const projectService = {
   createFromLifeWheelArea: async (
     data: CreateProjectFromAreaRequest
   ): Promise<CreateProjectResponse> => {
-    return apiClient.post<CreateProjectResponse>('/projects/from-lifewheel-area', data);
+    const result = await apiClient.post<CreateProjectResponse>('/projects/from-lifewheel-area', data);
+    
+    // Invalidar cachés relacionados después de crear
+    apiCache.remove('projects_all');
+    apiCache.remove(`projects_area_${data.lifeWheelAreaId}`);
+    apiCache.remove('user_me'); // También invalidar user_me porque contiene proyectos
+    
+    return result;
   },
 
   /**
-   * Obtiene todos los proyectos de un área específica
+   * Obtiene todos los proyectos de un área específica (CON CACHÉ)
    * Endpoint: GET /projects/by-area?area={areaId}
    *
    * @param areaId - ID del área del Life Wheel
    * @returns Lista de proyectos del área con estadísticas
+   * 
+   * Configuración de caché:
+   * - Tipo: NORMAL (desde env)
+   * - TTL: VITE_CACHE_TTL_NORMAL
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_NORMAL
    */
   getProjectsByArea: async (areaId: string): Promise<GetProjectsByAreaResponse> => {
-    return apiClient.get<GetProjectsByAreaResponse>(`/projects/by-area?area=${areaId}`);
+    return cacheApiCall(
+      `projects_area_${areaId}`,
+      () => apiClient.get<GetProjectsByAreaResponse>(`/projects/by-area?area=${areaId}`),
+      apiCache,
+      
+    );
   },
 
   /**
-   * Obtiene todos los proyectos del usuario
+   * Obtiene todos los proyectos del usuario (CON CACHÉ)
    * Endpoint: GET /projects/me
    *
    * @returns Lista de todos los proyectos con estadísticas
+   * 
+   * Configuración de caché:
+   * - Tipo: NORMAL (desde env)
+   * - TTL: VITE_CACHE_TTL_NORMAL
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_NORMAL
    */
   getAllProjects: async (): Promise<GetAllProjectsResponse> => {
-    return apiClient.get<GetAllProjectsResponse>('/projects/me');
+    return cacheApiCall(
+      'projects_all',
+      () => apiClient.get<GetAllProjectsResponse>('/projects/me'),
+      apiCache,
+      
+    );
   },
 
   /**
@@ -146,9 +176,24 @@ export const projectService = {
    * @param projectId - ID del proyecto
    * @param status - Nuevo status del proyecto (ACTIVE, SOMEDAY, COMPLETED, CANCELLED)
    * @returns Proyecto actualizado
+   * 
+   * NOTA: Invalida los cachés relevantes después de actualizar
    */
   updateStatus: async (projectId: string, status: ProjectStatus): Promise<{ success: boolean; project: Project }> => {
-    return apiClient.put<{ success: boolean; project: Project }>(`/projects/${projectId}/status`, { status });
+    const result = await apiClient.put<{ success: boolean; project: Project }>(`/projects/${projectId}/status`, { status });
+    
+    // Invalidar cachés después de actualizar status
+    apiCache.remove('projects_all');
+    // No podemos saber qué área específica sin hacer otra llamada, así que limpiamos todo lo relacionado con proyectos
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.includes('projects_area_')) {
+        apiCache.remove(key.replace('api_cache_', ''));
+      }
+    });
+    apiCache.remove('user_me');
+    
+    return result;
   },
 };
 

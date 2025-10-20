@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 /**
  * Servicio de Life Wheel
@@ -49,20 +50,38 @@ export interface LifeWheelSelectedAreasResponse {
 
 export const lifeWheelService = {
   /**
-   * Obtiene el Life Wheel del usuario actual
+   * Obtiene el Life Wheel del usuario actual (CON CACHÉ)
    * Endpoint: GET /lifewheel/me
    * Requiere: Bearer token en Authorization header (automático)
+   * 
+   * Configuración de caché:
+   * - Tipo: NORMAL (desde env)
+   * - TTL: VITE_CACHE_TTL_NORMAL
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_NORMAL
    */
   getMyLifeWheel: async (): Promise<LifeWheelResponse> => {
-    return apiClient.get<LifeWheelResponse>('/lifewheel/me');
+    return cacheApiCall(
+      'lifewheel_me',
+      () => apiClient.get<LifeWheelResponse>('/lifewheel/me'),
+      apiCache,
+      
+    );
   },
 
   /**
-   * Obtiene el Life Wheel del usuario actual
+   * Agrega áreas al Life Wheel
    * Endpoint: POST /lifewheel/add-lifewheel-areas
    * Requiere: Bearer token en Authorization header (automático)
+   * 
+   * NOTA: Invalida el caché después de agregar áreas
    */
   addLifeWheelAreas: async (data: LifeWheelSelectedAreasRequest): Promise<LifeWheelSelectedAreasResponse> => {
-    return apiClient.post<LifeWheelSelectedAreasResponse>('/lifewheel/add-lifewheel-areas', data);
+    const result = await apiClient.post<LifeWheelSelectedAreasResponse>('/lifewheel/add-lifewheel-areas', data);
+    
+    // Invalidar caché después de agregar áreas
+    apiCache.remove('lifewheel_me');
+    apiCache.remove('user_me'); // También invalidar user_me porque contiene lifeWheel
+    
+    return result;
   },
 };

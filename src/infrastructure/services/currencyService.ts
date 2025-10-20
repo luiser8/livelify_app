@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 
 export interface Currency {
   id: string;
@@ -12,8 +13,21 @@ export interface GetAllCurrenciesResponse {
 }
 
 export const currencyService = {
+  /**
+   * Obtener todas las monedas disponibles (CON CACHÉ)
+   * 
+   * Configuración de caché:
+   * - Tipo: STATIC (desde env)
+   * - TTL: VITE_CACHE_TTL_STATIC
+   * - Max accesos: VITE_CACHE_MAX_ACCESS_STATIC
+   */
   getAllCurrencies: async (): Promise<GetAllCurrenciesResponse> => {
-    return apiClient.get<GetAllCurrenciesResponse>('/currencies/all');
+    return cacheApiCall(
+      'currencies_all',
+      () => apiClient.get<GetAllCurrenciesResponse>('/currencies/all'),
+      apiCache,
+      
+    );
   },
 };
 
