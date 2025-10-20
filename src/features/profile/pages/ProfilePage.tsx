@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BottomNav, PageHeader, ConfirmModal, Copyright } from '@/shared/components';
 import { useAuth } from '@/features/auth/context';
-import { contextService, subscriptionService, type Context, type UserSubscription } from '@/infrastructure/services';
+import { contextService, type Context } from '@/infrastructure/services';
 
 /**
  * Página de Profile
  */
 export const ProfilePage = () => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [contexts, setContexts] = useState<Context[]>([]);
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -26,12 +23,10 @@ export const ProfilePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [contextsData, subscriptionData] = await Promise.all([
+        const [contextsData] = await Promise.all([
           contextService.getMyContexts(),
-          subscriptionService.getMySubscription(),
         ]);
         setContexts(contextsData.contexts);
-        setSubscription(subscriptionData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -95,7 +90,7 @@ export const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
-      <PageHeader 
+      <PageHeader
         title={t('profile.title')}
         subtitle={t('profile.subtitle')}
         showBackButton={true}
@@ -132,85 +127,7 @@ export const ProfilePage = () => {
           </div>
 
           {/* Grid Layout for Subscription and Contexts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Subscription Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <div className="min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('profile.subscription.title')}</h3>
-                <p className="text-xs sm:text-sm text-gray-500 truncate">{t('profile.subtitle')}</p>
-              </div>
-              <button
-                onClick={() => navigate('/subscription')}
-                className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
-              >
-                {t('profile.subscription.upgradePlan')}
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
-              </div>
-            ) : subscription ? (
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 sm:p-5">
-                {/* Plan Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                      {subscription.plan.name === 'MONTHLY' ? '📅' : subscription.plan.name === 'QUARTERLY' ? '🌟' : subscription.plan.name === 'SEMESTER' ? '⚡' : '👑'}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-gray-900 text-base sm:text-lg truncate">{subscription.plan.bestFor}</p>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate">{subscription.plan.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-left sm:text-right flex-shrink-0">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">${subscription.plan.basePrice}</p>
-                    <p className="text-xs text-gray-500">
-                      {subscription.plan.billingCycle} {subscription.plan.billingCycle === 1 ? t('subscription.month') : t('subscription.months')}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Status and Renewal */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-purple-200">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`px-3 py-1 ${subscription.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} text-xs font-semibold rounded-full whitespace-nowrap`}>
-                      {subscription.active ? `✓ ${t('profile.subscription.active')}` : t('profile.subscription.inactive')}
-                    </span>
-                    {subscription.autoRenew && (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                        🔄 Auto-renew
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-xs text-gray-500">{t('profile.subscription.renews')}</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {new Date(subscription.renewalDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-6 bg-gray-50 rounded-lg">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-gray-600 font-medium mb-2">{t('profile.subscription.noActiveSubscription')}</p>
-                <p className="text-sm text-gray-500 mb-4">{t('profile.subscription.unlockFeatures')}</p>
-                <button
-                  onClick={() => navigate('/subscription')}
-                  className="px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  {t('profile.subscription.chooseAPlan')}
-                </button>
-              </div>
-            )}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6">
 
             {/* Contexts Section */}
             <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
