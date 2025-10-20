@@ -98,8 +98,8 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw score polygon if we have scores
-    const hasScores = orderedAreas.some(area => area.score > 0);
+    // Draw score polygon if we have scores (isArchived)
+    const hasScores = orderedAreas.some(area => area.isArchived);
 
     if (hasScores) {
       const scorePoints = orderedAreas.map((area, i) => {
@@ -150,7 +150,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
       };
 
       orderedAreas.forEach((area, i) => {
-        if (area.score <= 0) return; // Skip areas without scores
+        if (!area.isArchived) return; // Skip areas not evaluated yet
 
         const angle = (Math.PI / 3) * i - Math.PI / 2;
         const scoreRadius = (area.score / 10) * maxScoreRadius;
@@ -183,7 +183,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
   }, [orderedAreas]);
 
   // Determinar si hay evaluaciones completadas (usado para mostrar/ocultar contenido central)
-  const hasScores = orderedAreas.length > 0 && orderedAreas.some(area => area.score > 0);
+  const hasScores = orderedAreas.length > 0 && orderedAreas.some(area => area.isArchived);
 
   return (
     <div className="relative w-full max-w-md mx-auto aspect-square">
@@ -224,7 +224,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                   title={
                     isEnabled 
                       ? `${t('lifeAreas.clickToManage')} ${t(getAreaTranslationKey(area.areaName))}` 
-                      : area.score === 0 
+                      : !area.isArchived 
                         ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
                         : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.focusOnLowerAreas')}`
                   }
@@ -266,14 +266,14 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                         className={`${
                           isEnabled
                             ? 'bg-gray-900'
-                            : area.score === 0
+                            : !area.isArchived
                             ? 'bg-amber-500'
                             : 'bg-red-600'
                         } text-white px-3 py-1.5 rounded-lg shadow-lg text-xs sm:text-sm font-medium whitespace-nowrap relative`}
                       >
                         {isEnabled
                           ? t(getAreaTranslationKey(area.areaName))
-                          : area.score === 0
+                          : !area.isArchived
                           ? `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.completeAssessmentFirst')}`
                           : `${t(getAreaTranslationKey(area.areaName))} - ${t('lifeAreas.locked')}`}
 
@@ -286,7 +286,7 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                           } w-2 h-2 ${
                             isEnabled
                               ? 'bg-gray-900'
-                              : area.score === 0
+                              : !area.isArchived
                               ? 'bg-amber-500'
                               : 'bg-red-600'
                           }`}
@@ -300,27 +300,27 @@ export const LifeWheelHexagon = ({ lifeAreas, onAreaClick, enabledAreaIds }: Lif
                 <div className={`absolute -bottom-10 sm:-bottom-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-full shadow-md border ${
                   isEnabled 
                     ? 'border-gray-200' 
-                    : area.score === 0 
+                    : !area.isArchived 
                       ? 'border-amber-300 bg-amber-50' 
                       : 'border-red-200 bg-red-50'
                 }`}>
                   <span className={`text-sm sm:text-base font-bold ${
                     isEnabled 
                       ? 'text-gray-900' 
-                      : area.score === 0 
+                      : !area.isArchived 
                         ? 'text-amber-700' 
                         : 'text-red-600'
                   }`}>
-                    {area.score === 0 ? '—' : `${area.score}/10`}
+                    {!area.isArchived ? '—' : `${area.score}/10`}
                   </span>
                 </div>
 
                 {/* Icono para áreas deshabilitadas */}
                 {!isEnabled && (
                   <div className={`absolute top-0 right-0 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white ${
-                    area.score === 0 ? 'bg-amber-500' : 'bg-red-500'
+                    !area.isArchived ? 'bg-amber-500' : 'bg-red-500'
                   }`}>
-                    {area.score === 0 ? (
+                    {!area.isArchived ? (
                       <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>

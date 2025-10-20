@@ -93,9 +93,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * Cierra la sesión del usuario
+   * La limpieza del caché se hace automáticamente en clearUserFromStorage()
    */
   const logout = (): void => {
-    clearUserFromStorage();
+    clearUserFromStorage(); // Limpia user data + caché del API
     setUser(authUserInitial);
   };
 

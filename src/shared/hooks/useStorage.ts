@@ -1,4 +1,5 @@
 import { AuthUser } from '../types/auth.types';
+import { apiCache } from '../utils/apiCache';
 
 /**
  * Hook personalizado para manejar localStorage
@@ -69,8 +70,11 @@ const useStorage = () => {
 
   /**
    * Elimina todos los datos del usuario de localStorage
+   * IMPORTANTE: También limpia TODO el caché del API para que el siguiente
+   * usuario que inicie sesión no vea datos del usuario anterior
    */
   const clearUserFromStorage = (): void => {
+    // Limpiar datos de autenticación
     window.localStorage.removeItem('userId');
     window.localStorage.removeItem('email');
     window.localStorage.removeItem('firstName');
@@ -79,6 +83,9 @@ const useStorage = () => {
     window.localStorage.removeItem('access_token');
     window.localStorage.removeItem('refresh_token');
     window.localStorage.removeItem('userAreaSelection');
+
+    // Limpiar TODO el caché del API (api_cache_*)
+    apiCache.clearAll();
   };
 
   /**

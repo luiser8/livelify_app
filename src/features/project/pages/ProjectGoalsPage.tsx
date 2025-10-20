@@ -53,7 +53,7 @@ export const ProjectGoalsPage = () => {
 
         // Validar que TODAS las áreas estén completadas
         const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
-          lifeWheelData.lifeAreas.every(area => area.score > 0);
+          lifeWheelData.lifeAreas.every(area => area.isArchived);
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
@@ -65,10 +65,10 @@ export const ProjectGoalsPage = () => {
         const projectAreaId = currentProject.lifeWheelAreaId;
         const result = getSelectableAreas(lifeWheelData.lifeAreas);
         const enabledAreaIds = result.selectableAreaIds;
-        
+
         if (!enabledAreaIds.has(projectAreaId)) {
-          navigate('/home');
-          return;
+          //navigate('/home');
+          //return;
         }
 
         if (currentProject && allGoals && allGoals.goals) {

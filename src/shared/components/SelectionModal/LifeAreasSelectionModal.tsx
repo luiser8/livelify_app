@@ -6,6 +6,8 @@ interface LifeAreasSelectionModalProps {
   show: boolean;
   selectionData: {
     candidateAreas: { id: string; areaName: string; score: number }[];
+    autoSelectedAreas?: { id: string; areaName: string; score: number }[];
+    remainingSlotsForUser?: number;
   } | null;
   selectedAreaIds: string[];
   setSelectedAreaIds: (ids: string[]) => void;
@@ -49,39 +51,35 @@ export const LifeAreasSelectionModal: React.FC<LifeAreasSelectionModalProps> = (
 
   if (!show || !selectionData) return null;
 
-  // ---- Lógica dinámica (idéntica a la anterior) ----
-  const sortedAreas = [...selectionData.candidateAreas].sort((a, b) => a.score - b.score);
-  const scores = sortedAreas.map(a => a.score);
-  const thirdScore = scores[2];
-  const lowerThanThird = sortedAreas.filter(a => a.score < thirdScore);
-  const tiedAtThird = sortedAreas.filter(a => a.score === thirdScore);
+  // ---- NUEVA Lógica: Usar autoSelectedAreas y candidateAreas ----
+  const autoSelectedAreas = selectionData.autoSelectedAreas || [];
+  const candidateAreas = selectionData.candidateAreas || [];
+  const remainingSlotsForUser = selectionData.remainingSlotsForUser ?? 3;
+  
+  const autoSelectedIds = new Set(autoSelectedAreas.map(a => a.id));
 
-  const lockedAreaIds = new Set(lowerThanThird.map(a => a.id));
-  const tiedAreas = tiedAtThird;
-
-  // Inicializar las bloqueadas si no hay selección previa
+  // Inicializar áreas auto-seleccionadas si no hay selección previa
   useEffect(() => {
-    if (selectedAreaIds.length === 0 && lockedAreaIds.size > 0) {
-      setSelectedAreaIds([...lockedAreaIds]);
+    if (selectedAreaIds.length === 0 && autoSelectedIds.size > 0) {
+      setSelectedAreaIds([...autoSelectedIds]);
     }
   }, [selectionData]);
 
   const handleClick = (areaId: string) => {
-    const isLocked = lockedAreaIds.has(areaId);
-    const isTied = tiedAreas.some(a => a.id === areaId);
-    if (!isTied || isLocked) return;
-
-    const currentlySelectedTied = selectedAreaIds.filter(id =>
-      tiedAreas.some(a => a.id === id)
-    );
+    // No permitir modificar áreas auto-seleccionadas (prioridad)
+    if (autoSelectedIds.has(areaId)) return;
 
     let newSelection = [...selectedAreaIds];
 
-    if (currentlySelectedTied.includes(areaId)) {
+    if (newSelection.includes(areaId)) {
+      // Deseleccionar
       newSelection = newSelection.filter(id => id !== areaId);
     } else {
-      newSelection = newSelection.filter(id => !tiedAreas.some(a => a.id === id));
-      newSelection.push(areaId);
+      // Solo permitir seleccionar si no se ha alcanzado el límite
+      const currentUserSelections = newSelection.filter(id => !autoSelectedIds.has(id));
+      if (currentUserSelections.length < remainingSlotsForUser) {
+        newSelection.push(areaId);
+      }
     }
 
     setSelectedAreaIds(newSelection);
@@ -103,67 +101,93 @@ export const LifeAreasSelectionModal: React.FC<LifeAreasSelectionModalProps> = (
         </h3>
 
         <p className="text-gray-600 mb-4">
-          {t('home.selectionModal.description') ||
-            'Tienes varias áreas con puntuaciones similares. Por favor selecciona las 3 áreas en las que te gustaría trabajar primero.'}
+          {autoSelectedAreas.length > 0
+            ? t('home.selectionModal.descriptionWithAuto', { count: remainingSlotsForUser }) ||
+              `Tienes áreas con puntuaciones similares. Hemos pre-seleccionado las áreas con menor puntuación (prioridad). Por favor selecciona ${remainingSlotsForUser} área${remainingSlotsForUser > 1 ? 's' : ''} más.`
+            : t('home.selectionModal.description') ||
+              'Tienes varias áreas con puntuaciones similares. Por favor selecciona las 3 áreas en las que te gustaría trabajar primero.'}
         </p>
 
-        <div className="space-y-3 mb-6">
-          {sortedAreas.map(area => {
-            const isLocked = lockedAreaIds.has(area.id);
-            const isSelected = selectedAreaIds.includes(area.id);
-            const isTied = tiedAreas.some(a => a.id === area.id);
-
-            return (
-              <div
-                key={area.id}
-                className={`flex items-center gap-3 p-3 border-2 rounded-lg transition-all ${isSelected
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 bg-white hover:bg-gray-50'
-                  } ${isLocked
-                    ? 'opacity-70 cursor-not-allowed'
-                    : isTied
-                      ? 'cursor-pointer'
-                      : 'opacity-50 cursor-not-allowed'
-                  }`}
-                onClick={() => handleClick(area.id)}
-              >
+        {/* Áreas auto-seleccionadas (prioridad) */}
+        {autoSelectedAreas.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              {t('home.selectionModal.priorityAreas') || 'Áreas de Prioridad (auto-seleccionadas)'}
+            </h4>
+            <div className="space-y-2">
+              {autoSelectedAreas.map(area => (
                 <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected
-                      ? 'border-indigo-500 bg-indigo-500'
-                      : 'border-gray-300'
-                    }`}
+                  key={area.id}
+                  className="flex items-center gap-3 p-3 border-2 border-green-500 bg-green-50 rounded-lg"
                 >
-                  {isSelected && (
-                    <svg
-                      className="w-3 h-3 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={3}
-                        d="M5 13l4 4L19 7"
-                      />
+                  <div className="w-6 h-6 rounded-full border-2 border-green-500 bg-green-500 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
-                  )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-green-900">{t(getAreaTranslationKey(area.areaName))}</p>
+                    <p className="text-sm text-green-700">
+                      {t('home.selectionModal.score', { score: area.score }) || `Puntuación: ${area.score}/10`}
+                    </p>
+                  </div>
+                  <span className="text-xs text-green-700 font-semibold px-2 py-1 bg-green-100 rounded">
+                    {t('home.selectionModal.priority') || 'Prioridad'}
+                  </span>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">
-                    {t(getAreaTranslationKey(area.areaName))}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {t('home.selectionModal.score', { score: area.score }) ||
-                      `Puntuación: ${area.score}/10`}
-                  </p>
-                </div>
+        {/* Áreas candidatas para selección del usuario */}
+        {candidateAreas.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">
+              {t('home.selectionModal.chooseFrom', { count: remainingSlotsForUser }) || `Selecciona ${remainingSlotsForUser} más:`}
+            </h4>
+            <div className="space-y-2">
+              {candidateAreas.map(area => {
+                const isSelected = selectedAreaIds.includes(area.id);
+                const currentUserSelections = selectedAreaIds.filter(id => !autoSelectedIds.has(id));
+                const canSelect = !isSelected && currentUserSelections.length < remainingSlotsForUser;
 
-              </div>
-            );
-          })}
-        </div>
+                return (
+                  <div
+                    key={area.id}
+                    className={`flex items-center gap-3 p-3 border-2 rounded-lg transition-all ${
+                      isSelected
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    } ${canSelect || isSelected ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                    onClick={() => handleClick(area.id)}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300'
+                      }`}
+                    >
+                      {isSelected && (
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{t(getAreaTranslationKey(area.areaName))}</p>
+                      <p className="text-sm text-gray-500">
+                        {t('home.selectionModal.score', { score: area.score }) || `Puntuación: ${area.score}/10`}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-between items-center">
           <p className="text-sm text-gray-500">

@@ -30,9 +30,9 @@ export const AreaProjectsPage = () => {
         const currentArea = lifeWheelData.lifeAreas.find(a => a.id === areaId);
         setArea(currentArea || null);
         
-        // Validar que TODAS las áreas estén completadas
+        // Validar que TODAS las áreas estén completadas (isArchived)
         const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
-          lifeWheelData.lifeAreas.every(area => area.score > 0);
+          lifeWheelData.lifeAreas.every(area => area.isArchived);
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
@@ -42,7 +42,49 @@ export const AreaProjectsPage = () => {
         
         // Si todas están completadas, verificar que el área actual esté entre las seleccionables
         const result = getSelectableAreas(lifeWheelData.lifeAreas);
-        const enabledAreaIds = result.selectableAreaIds;
+        let enabledAreaIds = result.selectableAreaIds;
+        
+        // Si requiere selección del usuario, verificar localStorage o backend
+        if (result.requiresUserSelection && result.candidateAreas) {
+          // Intentar recuperar selección guardada en localStorage
+          const storedSelection = localStorage.getItem('userAreaSelection');
+          if (storedSelection) {
+            try {
+              const parsed = JSON.parse(storedSelection);
+              const allSelectableAreas = [
+                ...(result.autoSelectedAreas || []),
+                ...(result.candidateAreas || [])
+              ];
+              
+              const stillValid =
+                Array.isArray(parsed.areaIds) &&
+                parsed.areaIds.length === 3 &&
+                parsed.areaIds.every((id: string) =>
+                  allSelectableAreas.some(area => area.id === id)
+                );
+
+              if (stillValid) {
+                enabledAreaIds = new Set(parsed.areaIds);
+              }
+            } catch (e) {
+              console.error('Error parsing stored selection:', e);
+            }
+          }
+          
+          // Si no hay localStorage, revisar backend
+          if (!storedSelection && lifeWheelData.lifeAreasSelected && lifeWheelData.lifeAreasSelected.length > 0) {
+            const backendSelectedIds = lifeWheelData.lifeAreasSelected
+              .map((sel: any) => {
+                const fullArea = lifeWheelData.lifeAreas.find((a: any) => a.areaId === sel.areaId);
+                return fullArea?.id ?? null;
+              })
+              .filter(Boolean) as string[];
+
+            if (backendSelectedIds.length === 3) {
+              enabledAreaIds = new Set(backendSelectedIds);
+            }
+          }
+        }
         
         if (!enabledAreaIds.has(areaId)) {
           // Si el área no está entre las seleccionables, redirigir al home
@@ -89,8 +131,8 @@ export const AreaProjectsPage = () => {
 
   const colorVariants = getAreaColorVariants(area.areaName);
   
-  // Validar que el área esté evaluada (score > 0)
-  const isAreaEvaluated = area.score > 0;
+  // Validar que el área esté evaluada (isArchived)
+  const isAreaEvaluated = area.isArchived;
   
   // Validar límite de proyectos: máximo 2 proyectos activos por área
   const activeProjectsCount = projectsData?.projects.filter(p => p.status === 'ACTIVE').length || 0;
@@ -328,12 +370,12 @@ export const AreaProjectsPage = () => {
                         >
                           {t('areaProjects.buttons.goals')}
                         </button>
-                        <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
+{/*                         <button className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
                           {t('areaProjects.buttons.edit')}
                         </button>
                         <button className={`flex-1 py-2 px-4 ${colorVariants.bg} text-white font-medium rounded-xl hover:opacity-90 transition-all`}>
                           {t('areaProjects.buttons.viewDetails')}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}

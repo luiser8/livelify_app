@@ -158,6 +158,11 @@
     "selectionModal": {
       "title": "Select Your 3 Focus Areas",
       "description": "You have several areas with similar scores. Please select the 3 areas you would like to work on first.",
+      "descriptionWithAuto": "We've pre-selected the areas with the lowest scores (priority). Please select {{count}} more area from the available options.",
+      "descriptionWithAuto_plural": "We've pre-selected the areas with the lowest scores (priority). Please select {{count}} more areas from the available options.",
+      "priorityAreas": "Priority Areas (auto-selected)",
+      "priority": "Priority",
+      "chooseFrom": "Select {{count}} more:",
       "score": "Score: {{score}}/10",
       "selected": "{{count}} of 3 selected",
       "pleaseSelectThree": "Please select exactly 3 areas",
@@ -507,6 +512,11 @@
       "chooseAnswer": "Choose your answer to continue",
       "submitting": "Submitting...",
       "completeAssessment": "Send Area Assessment",
+      "resetAnswers": "Reset Answers",
+      "resetModalTitle": "Reset Answers",
+      "resetModalMessage": "Are you sure you want to reset all your answers? This action cannot be undone and you will return to the first question.",
+      "resetConfirm": "Yes, reset",
+      "resetCancel": "Cancel",
       "maritalStatus": {
         "subtitle": "Before we start, we need to know your relationship status",
         "question": "What is your current relationship status?",

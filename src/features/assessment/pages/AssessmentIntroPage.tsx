@@ -29,9 +29,9 @@ export const AssessmentIntroPage = () => {
     fetchLifeWheel();
   }, []);
 
-  const handleAreaClick = (areaId: string, hasScore: boolean) => {
-    // Si el área ya tiene score, no permitir responder de nuevo
-    if (hasScore) {
+  const handleAreaClick = (areaId: string, isArchived: boolean) => {
+    // Si el área ya está evaluada (isArchived), no permitir responder de nuevo
+    if (isArchived) {
       return;
     }
     navigate(`/assessment/area/${areaId}`);
@@ -39,7 +39,7 @@ export const AssessmentIntroPage = () => {
 
   // Verificar si todas las áreas están completadas
   const allAreasCompleted = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.length > 0 && 
-    lifeWheel.lifeAreas.every(area => area.score > 0);
+    lifeWheel.lifeAreas.every(area => area.isArchived);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -141,25 +141,24 @@ export const AssessmentIntroPage = () => {
               {lifeWheel?.lifeAreas
                 .slice()
                 .sort((a, b) => {
-                  // Ordenar: completadas primero (score > 0), luego no completadas
-                  const aCompleted = a.score > 0;
-                  const bCompleted = b.score > 0;
+                  // Ordenar: completadas primero (isArchived), luego no completadas
+                  const aCompleted = a.isArchived;
+                  const bCompleted = b.isArchived;
                   if (aCompleted && !bCompleted) return -1;
                   if (!aCompleted && bCompleted) return 1;
                   return 0;
                 })
                 .map((area, index, sortedAreas) => {
-                const hasScore = area.score > 0;
-                const isCompleted = hasScore;
+                const isCompleted = area.isArchived;
                 
                 // Encontrar la primera área no completada (la siguiente sugerida)
-                const firstIncompleteIndex = sortedAreas.findIndex(a => a.score === 0);
+                const firstIncompleteIndex = sortedAreas.findIndex(a => !a.isArchived);
                 const isSuggested = !isCompleted && index === firstIncompleteIndex;
                 
                 return (
                   <button
                     key={area.id}
-                    onClick={() => handleAreaClick(area.areaId, hasScore)}
+                    onClick={() => handleAreaClick(area.areaId, area.isArchived)}
                     disabled={isCompleted}
                     className={`bg-white border rounded-lg sm:rounded-xl p-4 sm:p-5 transition-all text-left relative ${
                       isCompleted 

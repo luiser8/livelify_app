@@ -158,6 +158,11 @@
     "selectionModal": {
       "title": "Selecciona tus 3 áreas de enfoque",
       "description": "Tienes varias áreas con puntuaciones similares. Por favor selecciona las 3 áreas en las que te gustaría trabajar primero.",
+      "descriptionWithAuto": "Hemos pre-seleccionado las áreas con menor puntuación (prioridad). Por favor selecciona {{count}} área más de las opciones disponibles.",
+      "descriptionWithAuto_plural": "Hemos pre-seleccionado las áreas con menor puntuación (prioridad). Por favor selecciona {{count}} áreas más de las opciones disponibles.",
+      "priorityAreas": "Áreas de Prioridad (auto-seleccionadas)",
+      "priority": "Prioridad",
+      "chooseFrom": "Selecciona {{count}} más:",
       "score": "Puntuación: {{score}}/10",
       "selected": "{{count}} de 3 seleccionadas",
       "pleaseSelectThree": "Por favor selecciona exactamente 3 áreas",
@@ -507,6 +512,11 @@
       "chooseAnswer": "Elige tu respuesta para continuar",
       "submitting": "Enviando...",
       "completeAssessment": "Enviar Evaluación del Área",
+      "resetAnswers": "Resetear Respuestas",
+      "resetModalTitle": "Resetear Respuestas",
+      "resetModalMessage": "¿Estás seguro de que quieres resetear todas tus respuestas? Esta acción no se puede deshacer y volverás a la primera pregunta.",
+      "resetConfirm": "Sí, resetear",
+      "resetCancel": "Cancelar",
       "maritalStatus": {
         "subtitle": "Antes de comenzar, necesitamos saber tu estado de relación",
         "question": "¿Cuál es tu estado de relación actual?",

@@ -78,6 +78,7 @@ export interface LifeArea {
   areaId: string;
   areaName: string;
   score: number;
+  isArchived: boolean;
   projects: Project[];
 }
 

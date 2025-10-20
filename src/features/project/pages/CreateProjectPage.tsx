@@ -47,7 +47,7 @@ export const CreateProjectPage = () => {
 
         // Validar que TODAS las áreas estén completadas antes de permitir crear proyectos
         const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
-          lifeWheelData.lifeAreas.every(area => area.score > 0);
+          lifeWheelData.lifeAreas.every(area => area.isArchived);
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
@@ -67,7 +67,49 @@ export const CreateProjectPage = () => {
 
           // Validar que el área esté entre las seleccionables
           const result = getSelectableAreas(lifeWheelData.lifeAreas);
-          const enabledAreaIds = result.selectableAreaIds;
+          let enabledAreaIds = result.selectableAreaIds;
+
+          // Si requiere selección del usuario, verificar localStorage o backend
+          if (result.requiresUserSelection && result.candidateAreas) {
+            // Intentar recuperar selección guardada en localStorage
+            const storedSelection = localStorage.getItem('userAreaSelection');
+            if (storedSelection) {
+              try {
+                const parsed = JSON.parse(storedSelection);
+                const allSelectableAreas = [
+                  ...(result.autoSelectedAreas || []),
+                  ...(result.candidateAreas || [])
+                ];
+                
+                const stillValid =
+                  Array.isArray(parsed.areaIds) &&
+                  parsed.areaIds.length === 3 &&
+                  parsed.areaIds.every((id: string) =>
+                    allSelectableAreas.some(area => area.id === id)
+                  );
+
+                if (stillValid) {
+                  enabledAreaIds = new Set(parsed.areaIds);
+                }
+              } catch (e) {
+                console.error('Error parsing stored selection:', e);
+              }
+            }
+            
+            // Si no hay localStorage, revisar backend
+            if (!storedSelection && lifeWheelData.lifeAreasSelected && lifeWheelData.lifeAreasSelected.length > 0) {
+              const backendSelectedIds = lifeWheelData.lifeAreasSelected
+                .map((sel: any) => {
+                  const fullArea = lifeWheelData.lifeAreas.find((a: any) => a.areaId === sel.areaId);
+                  return fullArea?.id ?? null;
+                })
+                .filter(Boolean) as string[];
+
+              if (backendSelectedIds.length === 3) {
+                enabledAreaIds = new Set(backendSelectedIds);
+              }
+            }
+          }
 
           if (!enabledAreaIds.has(urlAreaId)) {
             navigate('/home');
@@ -106,13 +148,13 @@ export const CreateProjectPage = () => {
     : null;
 
   // Verificar si todas las áreas están evaluadas
-  const allAreasEvaluated = lifeAreas.length > 0 && lifeAreas.every(area => area.score > 0);
+  const allAreasEvaluated = lifeAreas.length > 0 && lifeAreas.every(area => area.isArchived);
 
   // Obtener las áreas seleccionables usando la nueva lógica inteligente
   const getLowestScoringAreaIds = () => {
     if (!allAreasEvaluated) {
       // Si no todas están evaluadas, permitir todas las evaluadas
-      return new Set(lifeAreas.filter(area => area.score > 0).map(area => area.id));
+      return new Set(lifeAreas.filter(area => area.isArchived).map(area => area.id));
     }
 
     // Si todas están evaluadas, usar la lógica inteligente
@@ -287,7 +329,7 @@ export const CreateProjectPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {lifeAreas.map((area) => {
                 const potentialPoints = Math.max(0, 10 - area.score);
-                const isEvaluated = area.score > 0;
+                const isEvaluated = area.isArchived;
                 const isEnabled = enabledAreaIds.has(area.id);
                 const isLocked = isEvaluated && !isEnabled;
                 
@@ -327,7 +369,7 @@ export const CreateProjectPage = () => {
                           {t(getAreaTranslationKey(area.areaName))}
                         </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-base sm:text-lg font-bold text-gray-900">{area.score === 0 ? '—' : area.score}</span>
+                          <span className="text-base sm:text-lg font-bold text-gray-900">{!area.isArchived ? '—' : area.score}</span>
                           <span className="text-xs sm:text-sm text-gray-500">/10</span>
                         </div>
                         {isEnabled ? (
@@ -356,7 +398,7 @@ export const CreateProjectPage = () => {
             </div>
 
             {/* Warning for unevaluated areas */}
-            {lifeAreas.some(area => area.score === 0) && (
+            {lifeAreas.some(area => !area.isArchived) && (
               <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -400,7 +442,7 @@ export const CreateProjectPage = () => {
             )}
 
             {/* AI Recommendation */}
-            {lowestArea && lowestArea.score > 0 && enabledAreaIds.has(lowestArea.id) && (
+            {lowestArea && lowestArea.isArchived && enabledAreaIds.has(lowestArea.id) && (
               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">

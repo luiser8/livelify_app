@@ -7,23 +7,29 @@ export interface LifeArea {
   areaId: string;
   areaName: string;
   score: number;
+  isArchived: boolean;
 }
 
 /**
  * Obtiene las áreas más bajas dinámicamente según sus puntuaciones.
  * 
- * Lógica inteligente mejorada:
- * 1. Ordena todas las áreas de menor a mayor puntuación
- * 2. Identifica las áreas candidatas (las más bajas)
- * 3. Si hay más de 3 áreas candidatas debido a empates, el usuario DEBE ELEGIR 3
- * 4. Si hay exactamente 3 o menos, se seleccionan automáticamente
+ * Lógica inteligente corregida:
+ * 1. PRIORIDAD EN LOS MENORES SIEMPRE
+ * 2. Ordena todas las áreas de menor a mayor puntuación
+ * 3. Agrupa por puntuación y selecciona las 3 áreas con menor puntuación
+ * 4. Solo pregunta al usuario cuando hay MÁS de 3 áreas con empate en puntuaciones bajas
+ * 
+ * Ejemplos:
+ * - 3 áreas con 5/10 y 1 con 9/10 → Auto-selecciona las 3 de 5/10 (NO pregunta)
+ * - 4 áreas con 5/10 → Pregunta porque hay empate de 4 áreas en el score más bajo
+ * - 2 áreas con 7/10 y 2 con 8/10 → Pregunta porque necesitamos 3 y hay empate
  * 
  * @param lifeAreas - Array de áreas de vida evaluadas
  * @returns Set con los IDs de las áreas seleccionables y metadata
  */
 export const getSelectableAreas = (lifeAreas: LifeArea[]) => {
-  // Filtrar solo áreas evaluadas y no perfectas
-  const evaluatedAreas = lifeAreas.filter(area => area.score > 0 && area.score < 10);
+  // Filtrar solo áreas evaluadas (isArchived) y no perfectas
+  const evaluatedAreas = lifeAreas.filter(area => area.isArchived && area.score < 10);
   
   if (evaluatedAreas.length === 0) {
     return {
@@ -35,53 +41,75 @@ export const getSelectableAreas = (lifeAreas: LifeArea[]) => {
     };
   }
 
-  // Ordenar áreas por puntuación ascendente
+  // Ordenar áreas por puntuación ascendente (menor a mayor)
   const sortedAreas = [...evaluatedAreas].sort((a, b) => a.score - b.score);
 
   const lowestScore = sortedAreas[0].score;
   
-  // Estrategia: Tomar áreas hasta completar 3 posiciones únicas
-  // Solo pedir selección si hay empates que nos dan MÁS de 3 áreas
-  
-  const candidateAreas: LifeArea[] = [];
-  const uniqueScores: number[] = [];
-  
-  for (let i = 0; i < sortedAreas.length; i++) {
-    const currentArea = sortedAreas[i];
-    const currentScore = currentArea.score;
-    
-    // Si es un score nuevo, agregarlo a uniqueScores
-    if (!uniqueScores.includes(currentScore)) {
-      uniqueScores.push(currentScore);
+  // Estrategia CORREGIDA: Priorizar SIEMPRE las puntuaciones más bajas
+  // 1. Agrupar áreas por puntuación
+  const areasByScore = new Map<number, LifeArea[]>();
+  for (const area of sortedAreas) {
+    if (!areasByScore.has(area.score)) {
+      areasByScore.set(area.score, []);
     }
+    areasByScore.get(area.score)!.push(area);
+  }
+  
+  // 2. Obtener puntuaciones únicas ordenadas de menor a mayor
+  const uniqueScores = Array.from(areasByScore.keys()).sort((a, b) => a - b);
+  
+  // 3. Seleccionar áreas empezando por la puntuación más baja
+  const autoSelectedAreas: LifeArea[] = []; // Áreas que se auto-seleccionan (prioridad)
+  const candidateAreas: LifeArea[] = []; // Áreas entre las que el usuario debe elegir
+  let selectedCount = 0;
+  
+  for (const score of uniqueScores) {
+    const areasWithThisScore = areasByScore.get(score)!;
+    const remainingSlots = 3 - selectedCount;
     
-    // Si ya tenemos 3 scores únicos Y este área tiene un score nuevo, detener
-    if (uniqueScores.length > 3 && !uniqueScores.slice(0, 3).includes(currentScore)) {
-      break;
+    if (remainingSlots <= 0) break; // Ya tenemos 3
+    
+    // Si con este score completamos o superamos 3, agregamos estas áreas
+    if (areasWithThisScore.length <= remainingSlots) {
+      // Todas las áreas de este score caben automáticamente
+      autoSelectedAreas.push(...areasWithThisScore);
+      selectedCount += areasWithThisScore.length;
+    } else {
+      // Hay más áreas de las que necesitamos → EMPATE, usuario debe elegir
+      candidateAreas.push(...areasWithThisScore);
+      break; // Salir porque hay empate
     }
-    
-    candidateAreas.push(currentArea);
   }
 
   // Decidir si necesita selección del usuario
-  const requiresUserSelection = candidateAreas.length > 3;
+  const requiresUserSelection = candidateAreas.length > 0;
   
-  // Si no necesita selección, tomar las primeras 3
+  // Si no necesita selección, usar solo las auto-seleccionadas
+  // Si necesita selección, combinar auto-seleccionadas + candidatas
   const finalSelectedAreas = requiresUserSelection 
-    ? candidateAreas // Todas las candidatas para que usuario elija
-    : candidateAreas.slice(0, 3);
+    ? autoSelectedAreas // Solo las que YA están confirmadas
+    : autoSelectedAreas.slice(0, 3);
+
+  const remainingSlotsForUser = 3 - autoSelectedAreas.length;
 
   return {
     selectableAreaIds: new Set(finalSelectedAreas.map(area => area.id)),
     count: finalSelectedAreas.length,
     lowestScore,
-    hasMultipleTied: candidateAreas.length > 3,
+    hasMultipleTied: candidateAreas.length > 0,
     requiresUserSelection,
+    autoSelectedAreas: autoSelectedAreas.map(a => ({ 
+      id: a.id, 
+      areaName: a.areaName, 
+      score: a.score 
+    })),
     candidateAreas: requiresUserSelection ? candidateAreas.map(a => ({ 
       id: a.id, 
       areaName: a.areaName, 
       score: a.score 
-    })) : undefined
+    })) : undefined,
+    remainingSlotsForUser // Cuántas áreas más debe elegir el usuario
   };
 };
 

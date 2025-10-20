@@ -8,7 +8,7 @@ import {
   type AssessmentQuestion
 } from '@/infrastructure/services';
 import { getAreaColor, getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
-import { BottomNav, LanguageSelectorCompact, Copyright } from '@/shared/components';
+import { BottomNav, LanguageSelectorCompact, Copyright, ConfirmModal } from '@/shared/components';
 
 /**
  * Página de preguntas del Assessment para un área específica
@@ -25,6 +25,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Estados para la pregunta de estado civil (solo para Pareja e Intimidad)
   const [showMaritalStatusQuestion, setShowMaritalStatusQuestion] = useState(false);
@@ -39,8 +41,8 @@ export const AssessmentQuestionsPage: React.FC = () => {
         const lifeWheel = await lifeWheelService.getMyLifeWheel();
         const area = lifeWheel.lifeAreas.find(a => a.areaId === areaId);
 
-        // Si el área ya tiene score > 0, redirigir al usuario
-        if (area && area.score > 0) {
+        // Si el área ya está evaluada (isArchived), redirigir al usuario
+        if (area && area.isArchived) {
           navigate('/assessment/intro');
           return;
         }
@@ -99,7 +101,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
   };
 
   const handleAnswerSelect = (value: boolean) => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || isTransitioning) return;
     
     const newAnswers = {
       ...answers,
@@ -108,16 +110,37 @@ export const AssessmentQuestionsPage: React.FC = () => {
     
     setAnswers(newAnswers);
 
+    // Deshabilitar botones durante la transición
+    setIsTransitioning(true);
+
     // Auto-advance to next question after 500ms (solo si no es la última)
     setTimeout(() => {
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
       }
+      // Habilitar botones después de la transición
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 100);
     }, 500);
   };
 
   const handleSkipArea = () => {
     navigate('/assessment/intro');
+  };
+
+  const handleOpenResetModal = () => {
+    setShowResetModal(true);
+  };
+
+  const handleCloseResetModal = () => {
+    setShowResetModal(false);
+  };
+
+  const handleConfirmReset = () => {
+    setAnswers({});
+    setCurrentQuestionIndex(0);
+    setShowResetModal(false);
   };
 
   const handleSubmit = async () => {
@@ -357,9 +380,9 @@ export const AssessmentQuestionsPage: React.FC = () => {
           {/* YES Button */}
           <button
             onClick={() => handleAnswerSelect(true)}
-            disabled={!currentQuestion || submitting}
+            disabled={!currentQuestion || submitting || isTransitioning}
             className={`w-[50%] rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
-              !currentQuestion || submitting
+              !currentQuestion || submitting || isTransitioning
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
                 : answers[currentQuestion.id] === true
                 ? 'bg-green-500 text-white shadow-xl'
@@ -368,12 +391,12 @@ export const AssessmentQuestionsPage: React.FC = () => {
           >
             <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5">
               <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-                !currentQuestion || submitting
+                !currentQuestion || submitting || isTransitioning
                   ? 'bg-gray-300'
                   : answers[currentQuestion.id] === true ? 'bg-white/30' : 'bg-white'
               }`}>
                 <svg className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                  !currentQuestion || submitting
+                  !currentQuestion || submitting || isTransitioning
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === true ? 'text-white' : 'text-green-600'
                 }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,7 +406,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
               <div className="text-left flex-1">
                 <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">{t('assessment.questions.yes')}</div>
                 <div className={`text-xs sm:text-sm font-medium ${
-                  !currentQuestion || submitting
+                  !currentQuestion || submitting || isTransitioning
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === true ? 'text-white/90' : 'text-green-600'
                 }`}>
@@ -395,9 +418,9 @@ export const AssessmentQuestionsPage: React.FC = () => {
           {/* NO Button */}
           <button
             onClick={() => handleAnswerSelect(false)}
-            disabled={!currentQuestion || submitting}
+            disabled={!currentQuestion || submitting || isTransitioning}
             className={`w-[50%] rounded-xl sm:rounded-2xl transition-all transform active:scale-98 ${
-              !currentQuestion || submitting
+              !currentQuestion || submitting || isTransitioning
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300 opacity-50'
                 : answers[currentQuestion.id] === false
                 ? 'bg-red-500 text-white shadow-xl'
@@ -406,12 +429,12 @@ export const AssessmentQuestionsPage: React.FC = () => {
           >
             <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5">
               <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-                !currentQuestion || submitting
+                !currentQuestion || submitting || isTransitioning
                   ? 'bg-gray-300'
                   : answers[currentQuestion.id] === false ? 'bg-white/30' : 'bg-white'
               }`}>
                 <svg className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                  !currentQuestion || submitting
+                  !currentQuestion || submitting || isTransitioning
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === false ? 'text-white' : 'text-red-600'
                 }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,7 +444,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
               <div className="text-left flex-1">
                 <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1">{t('assessment.questions.no')}</div>
                 <div className={`text-xs sm:text-sm font-medium ${
-                  !currentQuestion || submitting
+                  !currentQuestion || submitting || isTransitioning
                     ? 'text-gray-500'
                     : answers[currentQuestion.id] === false ? 'text-white/90' : 'text-red-600'
                 }`}>
@@ -443,6 +466,21 @@ export const AssessmentQuestionsPage: React.FC = () => {
             }`}
           >
             {submitting ? t('assessment.questions.submitting') : t('assessment.questions.completeAssessment')}
+          </button>
+        )}
+
+        {/* Reset Button - Solo si hay respuestas y no se está enviando */}
+        {totalAnswered > 0 && !submitting && (
+          <button
+            onClick={handleOpenResetModal}
+            className="w-full py-3 sm:py-4 mb-6 rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base transition-all border-2 border-red-300 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-400"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>{t('assessment.questions.resetAnswers')}</span>
+            </div>
           </button>
         )}
 
@@ -555,6 +593,19 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
       <Copyright />
       <BottomNav />
+
+      {/* Modal de confirmación para resetear respuestas */}
+      <ConfirmModal
+        isOpen={showResetModal}
+        onClose={handleCloseResetModal}
+        onConfirm={handleConfirmReset}
+        title={t('assessment.questions.resetModalTitle')}
+        message={t('assessment.questions.resetModalMessage')}
+        confirmText={t('assessment.questions.resetConfirm')}
+        cancelText={t('assessment.questions.resetCancel')}
+        confirmButtonClass="bg-orange-600 hover:bg-orange-700"
+        isLoading={false}
+      />
     </div>
   );
 };
