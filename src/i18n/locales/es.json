@@ -372,7 +372,9 @@
       "viewAllAreas": "Ver Detalles de Todas las Áreas",
       "creating": "Creando Proyecto...",
       "back": "Volver",
-      "createProject": "Crear Proyecto"
+      "createProject": "Crear Proyecto",
+      "projects": "proyectos",
+      "maxReached": "Máximo Alcanzado - 2/2 proyectos"
     },
     "goals": {
       "title": "Objetivos del Proyecto",
@@ -678,6 +680,10 @@
     "high": "Alta",
     "time": "Tiempo (min)",
     "dueDate": "Fecha Límite *",
+    "dueDateHint": "El proyecto termina el",
+    "dateGuidelines": "📅 Guías de Fecha",
+    "guidelineToday": "La acción debe programarse desde hoy en adelante",
+    "guidelineMaxDate": "No puede exceder la fecha de fin del proyecto",
     "cancel": "Cancelar",
     "creating": "Creando...",
     "createAction": "Crear Acción",

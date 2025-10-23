@@ -106,8 +106,9 @@ export const actionService = {
     // Invalidar cachés después de crear
     apiCache.remove('actions_me');
     apiCache.remove(`actions_goal_${data.goalId}`);
-    apiCache.remove('user_me'); // Dashboard también muestra acciones
-    
+    apiCache.remove('user_me');
+    apiCache.remove('contexts_me');
+    apiCache.remove('goals_me');
     return response;
   },
 

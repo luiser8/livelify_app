@@ -14,13 +14,13 @@ import { env } from '@/config/env';
 export interface CacheConfig {
   /**
    * Tiempo de vida del caché en milisegundos
-   * Por defecto: desde VITE_CACHE_TTL (5 minutos)
+   * Por defecto: desde VITE_CACHE_TTL (10 minutos)
    */
   ttl?: number;
 
   /**
    * Número máximo de accesos al caché antes de refrescar desde API
-   * Por defecto: desde VITE_CACHE_ACCESS_COUNT (10 accesos)
+   * Por defecto: desde VITE_CACHE_ACCESS_COUNT (15 accesos)
    */
   maxAccessCount?: number;
 
@@ -233,7 +233,7 @@ export class ApiCache {
  * 
  * @example
  * ```typescript
- * const apiCache = new ApiCache({ ttl: 300000, maxAccessCount: 10 });
+ * const apiCache = new ApiCache({ ttl: 600000, maxAccessCount: 15 });
  * 
  * const getUserData = () => cacheApiCall(
  *   'user_me',
@@ -267,8 +267,8 @@ export async function cacheApiCall<T>(
 /**
  * Instancia global del caché con configuración por defecto
  * Valores tomados de variables de entorno:
- * - TTL: VITE_CACHE_TTL (default: 5 minutos)
- * - Max accesos: VITE_CACHE_ACCESS_COUNT (default: 10)
+ * - TTL: VITE_CACHE_TTL (default: 10 minutos)
+ * - Max accesos: VITE_CACHE_ACCESS_COUNT (default: 15)
  * - Prefijo: VITE_CACHE_KEY_PREFIX (default: 'api_cache_')
  */
 export const apiCache = new ApiCache({

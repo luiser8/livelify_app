@@ -94,22 +94,45 @@ export const ActionsPage = () => {
     setFormData({ ...formData, goalId: '' });
   };
 
+  // Obtener fechas límite para el selector de fecha
+  const getDateLimits = () => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+    
+    let maxDate = '';
+    if (selectedProjectId) {
+      const selectedProject = projects.find(p => p.id === selectedProjectId);
+      if (selectedProject?.detail?.endDate) {
+        const projectEndDate = new Date(selectedProject.detail.endDate);
+        maxDate = projectEndDate.toISOString().split('T')[0];
+      }
+    }
+    
+    return { today, maxDate };
+  };
+
+  const { today, maxDate } = getDateLimits();
+
   const handleCreateAction = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.goalId || !formData.title.trim() || !formData.contextId) {
+    if (!formData.goalId || !formData.title.trim() || !formData.contextId || !formData.dueDate) {
       return;
     }
 
     try {
       setCreating(true);
+      
+      // Convertir fecha a formato ISO (agregar hora por defecto 00:00:00)
+      const dueDateISO = `${formData.dueDate}T00:00:00.000Z`;
+      
       await actionService.createAction({
         goalId: formData.goalId,
         title: formData.title,
         description: formData.description,
         energy: formData.energy,
         timeEstimate: formData.timeEstimate,
-        dueDate: formData.dueDate,
+        dueDate: dueDateISO,
         contextId: formData.contextId,
       });
 
@@ -406,7 +429,7 @@ export const ActionsPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.energy')}</label>
                   <select
@@ -430,16 +453,46 @@ export const ActionsPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                 </div>
+              </div>
 
+              {/* Due Date */}
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('actions.dueDate')}</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    {t('actions.dueDate')}
+                  </label>
                   <input
-                    type="datetime-local"
+                    type="date"
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                    min={today}
+                    max={maxDate || undefined}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
+                  {selectedProjectId && maxDate && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      📅 {t('actions.dueDateHint')} {new Date(maxDate).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+
+                {/* Info about date selection */}
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-xs text-blue-700">
+                      <p className="font-semibold mb-1">{t('actions.dateGuidelines')}</p>
+                      <ul className="space-y-1 list-disc list-inside">
+                        <li>{t('actions.guidelineToday')}</li>
+                        {selectedProjectId && maxDate && (
+                          <li>{t('actions.guidelineMaxDate')}</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 

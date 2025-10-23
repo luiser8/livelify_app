@@ -19,6 +19,7 @@ export const CreateProjectPage = () => {
   const [currentStep, setCurrentStep] = useState(urlAreaId ? 2 : 1); // Si viene con área, ir directo a step 2
   const [selectedAreaId, setSelectedAreaId] = useState<string>(urlAreaId || '');
   const [creating, setCreating] = useState(false);
+  const [projectCountByArea, setProjectCountByArea] = useState<Map<string, number>>(new Map());
   
   // Calcular fechas mínimas y máximas
   const getTomorrowDate = () => {
@@ -44,6 +45,24 @@ export const CreateProjectPage = () => {
         setLoading(true);
         const lifeWheelData = await lifeWheelService.getMyLifeWheel();
         setLifeAreas(lifeWheelData.lifeAreas);
+
+        // Cargar TODOS los proyectos del usuario para contar proyectos por área
+        try {
+          const allProjectsData = await projectService.getAllProjects();
+          const countMap = new Map<string, number>();
+          
+          // Contar proyectos ACTIVOS por área
+          allProjectsData.projects.forEach(project => {
+            if (project.status === 'ACTIVE') {
+              const currentCount = countMap.get(project.lifeWheelAreaId) || 0;
+              countMap.set(project.lifeWheelAreaId, currentCount + 1);
+            }
+          });
+          
+          setProjectCountByArea(countMap);
+        } catch (error) {
+          console.error('Error loading projects count:', error);
+        }
 
         // Validar que TODAS las áreas estén completadas antes de permitir crear proyectos
         const allAreasAnswered = lifeWheelData.lifeAreas.length > 0 && 
@@ -166,10 +185,21 @@ export const CreateProjectPage = () => {
 
   const handleSelectArea = (areaId: string) => {
     // Solo permitir seleccionar áreas habilitadas
-    if (enabledAreaIds.has(areaId)) {
-      setSelectedAreaId(areaId);
-      setCurrentStep(2);
+    if (!enabledAreaIds.has(areaId)) {
+      return;
     }
+
+    // Verificar que el área no tenga ya 2 proyectos activos
+    const activeProjectsCount = projectCountByArea.get(areaId) || 0;
+    if (activeProjectsCount >= 2) {
+      // Redirigir al área si ya tiene 2 proyectos activos
+      navigate(`/area/${areaId}/projects`);
+      return;
+    }
+
+    // Si todo está bien, continuar al siguiente paso
+    setSelectedAreaId(areaId);
+    setCurrentStep(2);
   };
 
   // Validar duración del proyecto (3-6 meses)
@@ -237,6 +267,17 @@ export const CreateProjectPage = () => {
 
     try {
       setCreating(true);
+      
+      // Verificar una vez más el límite de proyectos antes de crear (doble validación)
+      const projectsData = await projectService.getProjectsByArea(selectedAreaId);
+      const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
+
+      if (activeProjects.length >= 2) {
+        // Si ya tiene 2 proyectos activos, redirigir
+        navigate(`/area/${selectedAreaId}/projects`);
+        return;
+      }
+
       await projectService.createFromLifeWheelArea({
         lifeWheelAreaId: selectedAreaId,
         ...formData,
@@ -330,8 +371,10 @@ export const CreateProjectPage = () => {
               {lifeAreas.map((area) => {
                 const potentialPoints = Math.max(0, 10 - area.score);
                 const isEvaluated = area.isArchived;
-                const isEnabled = enabledAreaIds.has(area.id);
-                const isLocked = isEvaluated && !isEnabled;
+                const activeProjectsCount = projectCountByArea.get(area.id) || 0;
+                const hasReachedLimit = activeProjectsCount >= 2;
+                const isEnabled = enabledAreaIds.has(area.id) && !hasReachedLimit;
+                const isLocked = isEvaluated && (!enabledAreaIds.has(area.id) || hasReachedLimit);
                 
                 return (
                   <button
@@ -356,7 +399,14 @@ export const CreateProjectPage = () => {
                             </svg>
                           </div>
                         )}
-                        {isLocked && (
+                        {isLocked && hasReachedLimit && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {isLocked && !hasReachedLimit && (
                           <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
                             <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
@@ -371,16 +421,29 @@ export const CreateProjectPage = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base sm:text-lg font-bold text-gray-900">{!area.isArchived ? '—' : area.score}</span>
                           <span className="text-xs sm:text-sm text-gray-500">/10</span>
+                          {/* Mostrar contador de proyectos activos - siempre en áreas habilitadas */}
+                          {isEnabled && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-auto ${
+                              hasReachedLimit 
+                                ? 'bg-red-100 text-red-700' 
+                                : activeProjectsCount > 0
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {activeProjectsCount}/2 {t('projects.create.projects')}
+                            </span>
+                          )}
                         </div>
                         {isEnabled ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
                               +{potentialPoints} {t('projects.create.potential')}
                             </span>
-                            {lowestArea?.id === area.id && (
-                              <span className="text-xs text-gray-600">{t('projects.create.available')}</span>
-                            )}
                           </div>
+                        ) : hasReachedLimit ? (
+                          <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">
+                            🔒 {t('projects.create.maxReached')}
+                          </span>
                         ) : isLocked ? (
                           <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">
                             🔒 {t('projects.create.locked')}
