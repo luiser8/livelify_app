@@ -11,6 +11,7 @@ export interface DecodedToken {
   firstName: string;
   lastName: string;
   phone: string;
+  address: string;
   currencyId?: string;
   type: 'access' | 'refresh';
   iat: number;
@@ -26,6 +27,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   phone: string;
+  address: string;
   access_token: string;
   refresh_token: string;
 }
@@ -39,6 +41,7 @@ export const authUserInitial: AuthUser = {
   firstName: '',
   lastName: '',
   phone: '',
+  address: '',
   access_token: '',
   refresh_token: '',
 };

@@ -128,14 +128,14 @@ export const ProjectGoalsPage = () => {
     }
   };
 
-  const handleDeleteGoal = async (goalId: string) => {
-    try {
-      await goalService.deleteGoal(goalId);
-      setGoals(goals.filter(g => g.id !== goalId));
-    } catch (error) {
-      console.error('Error deleting goal:', error);
-    }
-  };
+  // const handleDeleteGoal = async (goalId: string) => {
+  //   try {
+  //     await goalService.deleteGoal(goalId);
+  //     setGoals(goals.filter(g => g.id !== goalId));
+  //   } catch (error) {
+  //     console.error('Error deleting goal:', error);
+  //   }
+  // };
 
   const getGoalsByType = (type: GoalType) => goals.filter(g => g.goalType === type);
 
@@ -437,7 +437,7 @@ export const ProjectGoalsPage = () => {
                         </div>
                       )}
                     </div>
-                    <button
+                    {/* <button
                       onClick={() => handleDeleteGoal(goal.id)}
                       className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors flex-shrink-0"
                       title={t('projects.goals.deleteGoal')}
@@ -445,9 +445,9 @@ export const ProjectGoalsPage = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                    </button>
+                    </button> */}
                   </div>
-                  
+
                   {/* Botón de acciones */}
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <button

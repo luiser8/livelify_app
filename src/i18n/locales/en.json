@@ -217,7 +217,33 @@
       "email": "Email",
       "phone": "Phone",
       "address": "Address",
-      "notProvided": "Not provided"
+      "notProvided": "Not provided",
+      "editPersonalData": "Edit Personal Data",
+      "changePassword": "Change Password"
+    },
+    "editModal": {
+      "title": "Edit Personal Data",
+      "subtitle": "Update your profile information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone",
+      "address": "Address",
+      "avatarUrl": "Avatar URL",
+      "changePassword": "Change Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "passwordHint": "Leave blank if you don't want to change your password. Minimum 6 characters.",
+      "passwordHintRequired": "Minimum 6 characters required.",
+      "passwordRequired": "Both password fields are required when changing password.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters.",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "successMessage": "Profile updated successfully",
+      "errorMessage": "Error updating profile. Please try again."
     },
     "subscription": {
       "title": "Subscription",
@@ -758,6 +784,13 @@
     "closeButton": "I Understand",
     "scrollToEnable": "Please scroll down to read all terms before continuing",
     "scrollToEnablePrivacy": "Please scroll down to read all policies before continuing"
+  },
+  "sessionExpired": {
+    "title": "Session Expired",
+    "message": "Your session has expired. Please log in again to continue.",
+    "autoRedirect": "Auto-redirecting to login in",
+    "seconds": "seconds...",
+    "goToLogin": "Go to Login"
   }
 }
 

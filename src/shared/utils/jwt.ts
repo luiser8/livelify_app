@@ -52,6 +52,7 @@ export const tokenToAuthUser = (
     firstName: decodedToken.firstName,
     lastName: decodedToken.lastName,
     phone: decodedToken.phone,
+    address: decodedToken.address,
     access_token: access_token,
     refresh_token: refresh_token,
   };

@@ -127,6 +127,7 @@ export interface UpdateUserData {
   address?: string;
   phone?: string;
   avatarUrl?: string;
+  password?: string;
 }
 
 export const userService = {
@@ -163,12 +164,12 @@ export const userService = {
    * 
    * NOTA: Invalida el caché después de actualizar
    */
-  updateUser: async (data: UpdateUserData): Promise<UserMeResponse> => {
-    const result = await apiClient.put<UserMeResponse>('/users/update', data);
-    
+  updateUser: async (data: UpdateUserData): Promise<UpdateUserData> => {
+    const result = await apiClient.put<UpdateUserData>('/users/update', data);
+
     // Invalidar caché después de actualizar para que la próxima llamada obtenga datos frescos
     apiCache.remove('user_me');
-    
+
     return result;
   },
 };

@@ -15,7 +15,8 @@ export type {
   User,
   DashboardSummary,
   LifeArea,
-  Action
+  Action,
+  UpdateUserData
 } from './userService';
 
 // Re-export types from userService with aliases to avoid conflicts

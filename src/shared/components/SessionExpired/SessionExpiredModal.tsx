@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { env } from '@/config/env';
 
 interface SessionExpiredModalProps {
@@ -10,6 +11,7 @@ interface SessionExpiredModalProps {
  * Modal que se muestra cuando la sesión del usuario expira
  */
 export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen }) => {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState(env.SESSION_EXPIRE_SECONDS);
 
   // Función para redirigir al login
@@ -40,11 +42,31 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
     }
   }, [isOpen, countdown]);
 
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop - mismo estilo que ConfirmModal */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        onClick={handleLogin}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all">
         {/* Icono */}
         <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,16 +76,16 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
 
         {/* Contenido */}
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
-          Session Expired
+          {t('sessionExpired.title')}
         </h2>
         <p className="text-gray-600 text-center mb-6">
-          Your session has expired. Please log in again to continue.
+          {t('sessionExpired.message')}
         </p>
 
         {/* Countdown */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-center">
           <p className="text-sm text-amber-800">
-            Auto-redirecting to login in <span className="font-bold text-xl">{countdown}</span> seconds...
+            {t('sessionExpired.autoRedirect')} <span className="font-bold text-xl">{countdown}</span> {t('sessionExpired.seconds')}
           </p>
         </div>
 
@@ -72,7 +94,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
           onClick={handleLogin}
           className="w-full py-3 px-6 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all shadow-lg"
         >
-          Go to Login
+          {t('sessionExpired.goToLogin')}
         </button>
       </div>
     </div>

@@ -41,6 +41,13 @@ const useStorage = () => {
     return window.localStorage.getItem('phone');
   };
 
+    /**
+   * Obtiene el address desde localStorage
+   */
+    const getAddressStorage = (): string | null => {
+      return window.localStorage.getItem('address');
+    };
+
   /**
    * Obtiene el token desde localStorage
    */
@@ -64,6 +71,7 @@ const useStorage = () => {
     window.localStorage.setItem('firstName', userData.firstName);
     window.localStorage.setItem('lastName', userData.lastName);
     window.localStorage.setItem('phone', userData.phone);
+    window.localStorage.setItem('address', userData.address);
     window.localStorage.setItem('access_token', userData.access_token);
     window.localStorage.setItem('refresh_token', userData.refresh_token);
   };
@@ -80,6 +88,7 @@ const useStorage = () => {
     window.localStorage.removeItem('firstName');
     window.localStorage.removeItem('lastName');
     window.localStorage.removeItem('phone');
+    window.localStorage.removeItem('address');
     window.localStorage.removeItem('access_token');
     window.localStorage.removeItem('refresh_token');
     window.localStorage.removeItem('userAreaSelection');
@@ -97,6 +106,7 @@ const useStorage = () => {
     const firstName = getFirstNameStorage();
     const lastName = getLastNameStorage();
     const phone = getPhoneStorage();
+    const address = getAddressStorage();
     const access_token = getTokenStorage();
     const refresh_token = getRefreshTokenStorage();
 
@@ -110,6 +120,7 @@ const useStorage = () => {
       firstName: firstName || '',
       lastName: lastName || '',
       phone: phone || '',
+      address: address || '',
       access_token,
       refresh_token,
     };
@@ -121,6 +132,7 @@ const useStorage = () => {
     getFirstNameStorage,
     getLastNameStorage,
     getPhoneStorage,
+    getAddressStorage,
     getTokenStorage,
     getRefreshTokenStorage,
     saveUserToStorage,

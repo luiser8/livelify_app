@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input, TermsAndConditions } from '@/shared/components';
 import { PrivacyAndPolicies } from '@/shared/components/PrivacyAndPolicies/PrivacyAndPolicies';
+import countryCodes from '@/shared/utils/countryCodesData';
 
 export interface RegisterFormData {
   email: string;
@@ -43,6 +44,10 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [hasReadTerms, setHasReadTerms] = useState(false);
   const [hasReadPrivacy, setHasReadPrivacy] = useState(false);
+  const [countryCode, setCountryCode] = useState('+1'); // Default to US
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState('');
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof RegisterFormData, string>> = {};
@@ -79,9 +84,9 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     }
 
     // Phone
-    if (!formData.phone) {
+    if (!phoneNumber) {
       newErrors.phone = t('auth.validation.phoneRequired');
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
+    } else if (!/^[\d\s-()]+$/.test(phoneNumber)) {
       newErrors.phone = t('auth.validation.phoneInvalid');
     }
 
@@ -114,9 +119,31 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     e.preventDefault();
 
     if (validate()) {
-      onSubmit(formData);
+      // Combinar código de país con número de teléfono
+      const fullPhone = `${countryCode}${phoneNumber}`;
+      onSubmit({ ...formData, phone: fullPhone });
     }
   };
+
+  const handleCountryCodeSelect = (code: string) => {
+    setCountryCode(code);
+    setShowCountryDropdown(false);
+    setCountrySearchTerm('');
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d\s-()]/g, ''); // Solo números, espacios, guiones y paréntesis
+    setPhoneNumber(value);
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: undefined }));
+    }
+  };
+
+  // Filtrar países basado en la búsqueda
+  const filteredCountries = countryCodes.filter(country => 
+    country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) || 
+    country.dial_code.includes(countrySearchTerm)
+  );
 
   // Verificar si puede aceptar los términos (solo si leyó ambos documentos)
   const canAcceptTerms = hasReadTerms && hasReadPrivacy;
@@ -126,10 +153,10 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
       {serverError && (
         <div className="p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-xs sm:text-sm">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span className="break-words">{serverError}</span>
+            <span className="wrap-break-word">{serverError}</span>
           </div>
         </div>
       )}
@@ -167,16 +194,99 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
         disabled={isLoading}
       />
 
-      <Input
-        type="tel"
-        label={t('auth.register.phone')}
-        placeholder={t('auth.register.phonePlaceholder')}
-        value={formData.phone}
-        onChange={handleChange('phone')}
-        error={errors.phone}
-        autoComplete="tel"
-        disabled={isLoading}
-      />
+      {/* Campo de Teléfono con selector de código de país */}
+      <div>
+        <label className="block text-sm sm:text-base font-medium text-white/90 mb-1.5 sm:mb-2">
+          {t('auth.register.phone')}
+        </label>
+        <div className="flex gap-2">
+          {/* Selector de código de país */}
+          <div className="relative w-28 sm:w-32">
+            <button
+              type="button"
+              onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+              disabled={isLoading}
+              className="w-full h-12 sm:h-14 px-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white text-sm sm:text-base font-medium hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between"
+            >
+              <span className="truncate">{countryCode}</span>
+              <svg className="w-4 h-4 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown de códigos de país */}
+            {showCountryDropdown && (
+              <>
+                {/* Overlay para cerrar el dropdown */}
+                <div 
+                  className="fixed inset-0 z-10"
+                  onClick={() => {
+                    setShowCountryDropdown(false);
+                    setCountrySearchTerm('');
+                  }}
+                />
+                {/* Lista de códigos */}
+                <div className="absolute top-full left-0 mt-1 w-80 sm:w-96 bg-white/95 backdrop-blur-md border border-white/30 rounded-xl shadow-2xl z-20">
+                  <div className="p-2 border-b border-gray-200">
+                    <input
+                      type="text"
+                      placeholder="Buscar país..."
+                      value={countrySearchTerm}
+                      onChange={(e) => setCountrySearchTerm(e.target.value)}
+                      className="w-full px-5 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map((country) => (
+                        <button
+                          key={country.code}
+                          type="button"
+                          onClick={() => handleCountryCodeSelect(country.dial_code)}
+                          className="w-full px-6 py-2.5 text-left hover:bg-indigo-50 transition-colors flex items-center justify-between group"
+                        >
+                          <span className="text-gray-900 text-sm font-medium group-hover:text-indigo-600 truncate">
+                            {country.name}
+                          </span>
+                          <span className="text-gray-600 text-sm font-semibold group-hover:text-indigo-600 ml-2 shrink-0">
+                            {country.dial_code}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                        No se encontraron países
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Input de número de teléfono */}
+          <div className="flex-1">
+            <input
+              type="tel"
+              placeholder="000-000-0000"
+              value={phoneNumber}
+              onChange={handlePhoneNumberChange}
+              disabled={isLoading}
+              autoComplete="tel"
+              className="w-full h-12 sm:h-14 px-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/40 focus:bg-white/15 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+            />
+          </div>
+        </div>
+        {errors.phone && (
+          <p className="text-red-300 text-xs sm:text-sm mt-1 ml-1 flex items-start gap-1">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span>{errors.phone}</span>
+          </p>
+        )}
+      </div>
 
       <Input
         type="text"
@@ -230,7 +340,7 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
               }
             }}
             disabled={isLoading || !canAcceptTerms}
-            className="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+            className="mt-1 w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           />
           <span className="text-xs sm:text-sm text-white/90 leading-relaxed flex-1">
             {t('auth.register.termsAcceptance.part1')}{' '}
@@ -257,15 +367,15 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           {/* Estado de Términos y Condiciones */}
           <div className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm ${hasReadTerms ? 'text-green-300' : 'text-amber-300'}`}>
             {hasReadTerms ? (
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             ) : (
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             )}
-            <span className="break-words">
+            <span className="wrap-break-word">
               {hasReadTerms 
                 ? t('auth.register.termsAcceptance.termsRead')
                 : t('auth.register.termsAcceptance.termsNotRead')
@@ -276,15 +386,15 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           {/* Estado de Políticas de Privacidad */}
           <div className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm ${hasReadPrivacy ? 'text-green-300' : 'text-amber-300'}`}>
             {hasReadPrivacy ? (
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             ) : (
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             )}
-            <span className="break-words">
+            <span className="wrap-break-word">
               {hasReadPrivacy 
                 ? t('auth.register.termsAcceptance.privacyRead')
                 : t('auth.register.termsAcceptance.privacyNotRead')
@@ -295,20 +405,20 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           {/* Mensaje cuando puede aceptar */}
           {canAcceptTerms && !formData.acceptedTermsAndPolicies && (
             <div className="flex items-center gap-1.5 sm:gap-2 text-green-300 text-xs sm:text-sm">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span className="break-words">{t('auth.register.termsAcceptance.canAcceptNow')}</span>
+              <span className="wrap-break-word">{t('auth.register.termsAcceptance.canAcceptNow')}</span>
             </div>
           )}
         </div>
 
         {errors.acceptedTermsAndPolicies && (
           <p className="text-red-300 text-xs sm:text-sm ml-6 sm:ml-8 flex items-start gap-1">
-            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
-            <span className="break-words">{errors.acceptedTermsAndPolicies}</span>
+            <span className="wrap-break-word">{errors.acceptedTermsAndPolicies}</span>
           </p>
         )}
       </div>
