@@ -13,4 +13,4 @@ export { SessionExpiredModal } from './SessionExpired/SessionExpiredModal';
 export { TermsAndConditions } from './TermsAndConditions';
 export { LanguageSelector, LanguageSelectorCompact } from './LanguageSelector';
 export { LifeScoreCard } from './LifeScoreCard';
-
+export { default as Pagination } from './Pagination/Pagination';

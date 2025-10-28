@@ -12,7 +12,9 @@
     "search": "Search",
     "filter": "Filter",
     "close": "Close",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "previous": "Previous",
+    "next": "Next"
   },
   "nav": {
     "home": "Home",

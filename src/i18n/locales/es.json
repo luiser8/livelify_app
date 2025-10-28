@@ -12,7 +12,9 @@
     "search": "Buscar",
     "filter": "Filtrar",
     "close": "Cerrar",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "previous": "Anterior",
+    "next": "Siguiente"
   },
   "nav": {
     "home": "Inicio",
