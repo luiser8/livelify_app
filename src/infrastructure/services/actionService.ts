@@ -109,6 +109,8 @@ export const actionService = {
     apiCache.remove('user_me');
     apiCache.remove('contexts_me');
     apiCache.remove('goals_me');
+    apiCache.remove('projects_all');
+
     return response;
   },
 
@@ -125,6 +127,7 @@ export const actionService = {
       apiCache.remove(`actions_goal_${data.goalId}`);
     }
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
     
     return response;
   },
@@ -146,6 +149,7 @@ export const actionService = {
       }
     });
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
     
     return response;
   },
@@ -166,7 +170,8 @@ export const actionService = {
       }
     });
     apiCache.remove('user_me');
-    
+    apiCache.remove('projects_all');
+
     return response;
   },
 
@@ -186,6 +191,7 @@ export const actionService = {
       }
     });
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
     
     return response;
   },

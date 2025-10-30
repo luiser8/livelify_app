@@ -63,6 +63,12 @@ export const HomePage = () => {
       return; // No hacer nada si el área no está habilitada
     }
 
+    // Verificar si el área alcanzó 10/10 (objetivo cumplido)
+    const selectedArea = lifeWheel?.lifeAreas.find(a => a.id === areaId);
+    if (selectedArea && selectedArea.score >= 10) {
+      return; // No permitir clic en áreas con objetivo cumplido
+    }
+
     navigate(`/area/${areaId}/projects`);
   };
 
@@ -74,8 +80,12 @@ export const HomePage = () => {
   const calculateEnabledAreas = (areas: LifeArea[], lifeWheelResponse?: any) => {
     if (!areas) return new Set<string>();
 
-    // 1️⃣ Filtrar solo áreas evaluadas (isArchived) y no perfectas
-    const evaluatedAreas = areas.filter(area => area.isArchived && area.score < 10);
+    // 1️⃣ Filtrar solo áreas evaluadas (isArchived), no perfectas y no bloqueadas
+    const evaluatedAreas = areas.filter(area => 
+      area.isArchived && 
+      area.score < 10 && 
+      !area.isBlocked
+    );
     if (evaluatedAreas.length === 0) return new Set<string>();
 
     // 2️⃣ Obtener las áreas seleccionables según la lógica inteligente
@@ -100,9 +110,11 @@ export const HomePage = () => {
         const stillValid =
           Array.isArray(parsed.areaIds) &&
           parsed.areaIds.length === 3 &&
-          parsed.areaIds.every((id: string) =>
-            allSelectableAreas.some(area => area.id === id)
-          );
+          parsed.areaIds.every((id: string) => {
+            const area = areas.find(a => a.id === id);
+            // Verificar que el área exista, esté en las seleccionables y no esté bloqueada
+            return area && !area.isBlocked && allSelectableAreas.some(selArea => selArea.id === id);
+          });
 
         if (stillValid) {
           return new Set(parsed.areaIds);
@@ -119,7 +131,8 @@ export const HomePage = () => {
       const backendSelectedIds = backendSelected
         .map((sel: any) => {
           const fullArea = allLifeAreas.find((a: any) => a.areaId === sel.areaId);
-          return fullArea?.id ?? null;
+          // Verificar que el área exista y no esté bloqueada
+          return (fullArea && !fullArea.isBlocked) ? fullArea.id : null;
         })
         .filter(Boolean) as string[];
 
@@ -182,13 +195,305 @@ export const HomePage = () => {
     if (lifeWheel?.lifeAreas) {
       const newEnabledAreas = calculateEnabledAreas(lifeWheel.lifeAreas, lifeWheel);
       setEnabledAreaIds(newEnabledAreas as Set<string>);
+
+      console.log('🔍 DEBUG - Condiciones para unlock automático:', {
+        allAreasAnswered,
+        showSelectionModal,
+        isAnswered: lifeWheel.isAnswered,
+        enabledAreasSize: newEnabledAreas.size,
+        allAreas: lifeWheel.lifeAreas.map(a => ({
+          name: a.areaName,
+          score: a.score,
+          isBlocked: a.isBlocked,
+          isArchived: a.isArchived
+        }))
+      });
+
+      // 🔹 Verificar si ya se desbloquearon las áreas (desde localStorage)
+      const storedSelection = localStorage.getItem('userAreaSelection');
+      let alreadyUnlocked = false;
+      
+      if (storedSelection) {
+        try {
+          const parsed = JSON.parse(storedSelection);
+          alreadyUnlocked = parsed.isAnswered === true;
+          console.log('🔍 DEBUG - localStorage:', { alreadyUnlocked, parsed });
+        } catch (e) {
+          console.error('Error parsing localStorage:', e);
+        }
+      }
+
+      // 🔹 Si todas las áreas están respondidas Y NO hay modal mostrado
+      // Y isAnswered === false (primera vez completando el assessment)
+      // Y NO se ha desbloqueado previamente (localStorage.isAnswered !== true)
+      // → Desbloquear las 3 áreas automáticamente
+      if (allAreasAnswered && !showSelectionModal && lifeWheel.isAnswered === false && !alreadyUnlocked) {
+        console.log('✅ Cumple condiciones para unlock automático');
+        if (newEnabledAreas.size === 3) {
+          const areaIdsToUnlock = Array.from(newEnabledAreas) as string[];
+          
+          // 🔹 Obtener las áreas que PERMANECERÁN BLOQUEADAS (las que NO están en areaIdsToUnlock)
+          // IMPORTANTE: NO incluir áreas con 10/10 (se manejan en otro flujo)
+          const areaIdsToKeepBlocked = lifeWheel.lifeAreas
+            .filter(area => 
+              !areaIdsToUnlock.includes(area.id) && 
+              area.score < 10  // ← NO incluir áreas con 10/10
+            )
+            .map(area => area.id);
+          
+          console.log('🚀 Enviando POST /unlock-areas con áreas a MANTENER BLOQUEADAS:', areaIdsToKeepBlocked);
+          console.log('ℹ️ Áreas que se DESBLOQUEARÁN:', areaIdsToUnlock);
+          console.log('ℹ️ Áreas con 10/10 excluidas del POST (se manejan en otro flujo)');
+          console.log('📊 Total áreas a enviar:', areaIdsToKeepBlocked.length, '(debe ser ~3)');
+          
+          // Llamar al servicio de unlock enviando las áreas que permanecerán bloqueadas
+          lifeWheelService.unlockAreas({
+            lifeWheelAreaIds: areaIdsToKeepBlocked
+          })
+            .then(() => {
+              console.log('✅ Áreas desbloqueadas automáticamente (sin empates)');
+              
+              // Guardar en localStorage que ya se desbloquearon
+              const areaIdsWithAreaId = lifeWheel.lifeAreas
+                .filter(area => areaIdsToUnlock.includes(area.id))
+                .map(area => area.areaId);
+              
+              // Guardar scores actuales para comparación futura
+              const currentScores: Record<string, number> = {};
+              lifeWheel.lifeAreas.forEach(area => {
+                currentScores[area.id] = area.score;
+              });
+              
+              localStorage.setItem(
+                'userAreaSelection',
+                JSON.stringify({
+                  areaIds: areaIdsToUnlock,
+                  areaIdsWithAreaId,
+                  scores: currentScores, // 🆕 Guardar scores iniciales
+                  timestamp: new Date().toISOString(),
+                  lifeWheelId: lifeWheel.id,
+                  isAnswered: true // ✨ Marcar como ya respondido
+                })
+              );
+            })
+            .catch((error) => {
+              console.error('⚠️ Error al desbloquear áreas automáticamente:', error);
+            });
+        } else {
+          console.log('⚠️ No hay exactamente 3 áreas habilitadas:', newEnabledAreas.size);
+        }
+      } else {
+        console.log('❌ NO cumple condiciones para unlock automático');
+      }
+
+      // 🆕 NUEVA VALIDACIÓN: Detectar áreas que alcanzaron 10/10 y bloquearlas automáticamente
+      // Esta validación se ejecuta SIEMPRE que haya localStorage (independiente del unlock automático)
+      console.log('🔍 DEBUG - Verificando localStorage para detección 10/10:', {
+        hasStoredSelection: !!storedSelection,
+        enabledAreasSize: newEnabledAreas.size
+      });
+      
+      // 🆕 NUEVO: Validar si el backend tiene isAnswered=false y enviar POST
+      // Esto sucede cuando el usuario vuelve a Home después del assessment inicial
+      const parsedStorage = storedSelection ? JSON.parse(storedSelection) : null;
+      const backendNeedsSync = lifeWheel.isAnswered === false && newEnabledAreas.size === 3;
+      
+      // Validar si el backend está realmente sincronizado chequeando isBlocked
+      const enabledAreasList = Array.from(newEnabledAreas);
+      const blockedAreasInBackend = lifeWheel.lifeAreas.filter(area => area.isBlocked).length;
+      const expectedBlockedAreas = lifeWheel.lifeAreas.length - newEnabledAreas.size;
+      const backendIsActuallySynced = blockedAreasInBackend === expectedBlockedAreas;
+      
+      const alreadySynced = parsedStorage?.backendSynced === true && backendIsActuallySynced;
+      
+      console.log('🔍 DEBUG - Validando sincronización con backend:', {
+        hasStoredSelection: !!storedSelection,
+        backendIsAnswered: lifeWheel.isAnswered,
+        backendNeedsSync,
+        localStorageSynced: parsedStorage?.backendSynced === true,
+        blockedAreasInBackend,
+        expectedBlockedAreas,
+        backendIsActuallySynced,
+        alreadySynced,
+        enabledAreasSize: newEnabledAreas.size
+      });
+      
+      if (backendNeedsSync && !alreadySynced) {
+        console.log('🚀 Backend tiene isAnswered=false - Enviando POST para sincronizar');
+        
+        // Obtener áreas a mantener bloqueadas (las que NO están en las 3 habilitadas)
+        // En este caso de primera sincronización, incluir TODAS las áreas no seleccionadas
+        const areaIdsToKeepBlocked = lifeWheel.lifeAreas
+          .filter(area => !enabledAreasList.includes(area.id))
+          .map(area => area.id);
+        
+        console.log('📋 Áreas DESBLOQUEADAS (frontend):', enabledAreasList);
+        console.log('🔒 Áreas BLOQUEADAS (enviar al backend):', areaIdsToKeepBlocked);
+        console.log('📊 Total áreas bloqueadas en POST:', areaIdsToKeepBlocked.length);
+        
+        // Enviar POST al backend con las áreas a MANTENER BLOQUEADAS
+        // (el endpoint unlock-areas recibe las áreas a bloquear, no las que se desbloquean)
+        lifeWheelService.unlockAreas({
+          lifeWheelAreaIds: areaIdsToKeepBlocked
+        })
+          .then(async () => {
+            console.log('✅ POST enviado - Backend sincronizado');
+            
+            // Marcar como sincronizado en localStorage
+            const currentScores: Record<string, number> = {};
+            lifeWheel.lifeAreas.forEach(area => {
+              currentScores[area.id] = area.score;
+            });
+            
+            const areaIdsWithAreaId = lifeWheel.lifeAreas
+              .filter(area => enabledAreasList.includes(area.id))
+              .map(area => area.areaId);
+            
+            localStorage.setItem(
+              'userAreaSelection',
+              JSON.stringify({
+                areaIds: enabledAreasList,
+                areaIdsWithAreaId,
+                scores: currentScores,
+                timestamp: new Date().toISOString(),
+                lifeWheelId: lifeWheel.id,
+                isAnswered: true,
+                backendSynced: true // 🆕 Marcar como sincronizado
+              })
+            );
+            
+            // Recargar lifeWheel desde el backend para obtener estado actualizado
+            try {
+              const updatedLifeWheel = await lifeWheelService.getMyLifeWheel();
+              setLifeWheel(updatedLifeWheel);
+              console.log('✅ LifeWheel actualizado desde backend');
+            } catch (error) {
+              console.error('⚠️ Error al recargar lifeWheel:', error);
+            }
+          })
+          .catch((error) => {
+            console.error('⚠️ Error al enviar POST unlock-areas:', error);
+          });
+      } else if (backendNeedsSync && alreadySynced) {
+        console.log('ℹ️ Backend ya fue sincronizado anteriormente');
+      }
+      
+      // Si NO hay localStorage pero ya se desbloquearon áreas, inicializarlo
+      if (!storedSelection && newEnabledAreas.size > 0 && allAreasAnswered) {
+        console.log('🔧 Inicializando localStorage con scores actuales');
+        
+        const currentScores: Record<string, number> = {};
+        lifeWheel.lifeAreas.forEach(area => {
+          currentScores[area.id] = area.score;
+        });
+        
+        const enabledAreasList = Array.from(newEnabledAreas);
+        const areaIdsWithAreaId = lifeWheel.lifeAreas
+          .filter(area => enabledAreasList.includes(area.id))
+          .map(area => area.areaId);
+        
+        localStorage.setItem(
+          'userAreaSelection',
+          JSON.stringify({
+            areaIds: enabledAreasList,
+            areaIdsWithAreaId,
+            scores: currentScores,
+            timestamp: new Date().toISOString(),
+            lifeWheelId: lifeWheel.id,
+            isAnswered: true,
+            backendSynced: backendNeedsSync // Marcar si se necesitó sync
+          })
+        );
+        
+        console.log('✅ localStorage inicializado');
+      }
+      
+      if (storedSelection) {
+        try {
+          const parsed = JSON.parse(storedSelection);
+          const previousScores = parsed.scores || {};
+          
+          console.log('🔍 DEBUG - Comparando scores:', {
+            previousScores,
+            hasScores: Object.keys(previousScores).length > 0,
+            currentScores: lifeWheel.lifeAreas.map(a => ({ id: a.id, name: a.areaName, score: a.score }))
+          });
+          
+          // Detectar áreas que alcanzaron 10/10
+          const areasReachedMaxScore = lifeWheel.lifeAreas.filter(area => {
+            const previousScore = previousScores[area.id];
+            const currentScore = area.score;
+            
+            console.log(`🔍 Área ${area.areaName}: prev=${previousScore}, curr=${currentScore}`);
+            
+            // Si antes tenía menos de 10 y ahora tiene 10 o más
+            return previousScore !== undefined && previousScore < 10 && currentScore >= 10;
+          });
+
+          if (areasReachedMaxScore.length > 0) {
+            console.log('🎯 Áreas que alcanzaron 10/10:', areasReachedMaxScore.map(a => a.areaName));
+            
+            // Obtener IDs de SOLO las áreas que alcanzaron 10/10 para bloquearlas
+            const areaIdsToBlock = areasReachedMaxScore.map(area => area.id);
+            
+            console.log('🔒 Enviando POST /unlock-areas para bloquear SOLO áreas con 10/10:', areaIdsToBlock);
+            console.log('📊 Total áreas en POST:', areaIdsToBlock.length);
+            
+            // Enviar al backend SOLO las áreas que alcanzaron 10/10
+            lifeWheelService.unlockAreas({
+              lifeWheelAreaIds: areaIdsToBlock
+            })
+              .then(async () => {
+                console.log('✅ Áreas con 10/10 bloqueadas automáticamente');
+                
+                // Actualizar enabledAreaIds removiendo las áreas con 10/10
+                const updatedEnabledAreas = Array.from(newEnabledAreas).filter(
+                  id => !areaIdsToBlock.includes(id)
+                );
+                setEnabledAreaIds(new Set(updatedEnabledAreas));
+                
+                // 🆕 Recargar lifeWheel desde el backend para obtener estado actualizado
+                try {
+                  const updatedLifeWheel = await lifeWheelService.getMyLifeWheel();
+                  setLifeWheel(updatedLifeWheel);
+                  console.log('✅ LifeWheel actualizado desde backend');
+                } catch (error) {
+                  console.error('⚠️ Error al recargar lifeWheel:', error);
+                }
+              })
+              .catch((error) => {
+                console.error('⚠️ Error al bloquear áreas con 10/10:', error);
+              });
+          } else {
+            console.log('✅ No se detectaron áreas que alcanzaron 10/10');
+          }
+          
+          // IMPORTANTE: Actualizar scores SIEMPRE (no solo cuando hay cambios)
+          const currentScores: Record<string, number> = {};
+          lifeWheel.lifeAreas.forEach(area => {
+            currentScores[area.id] = area.score;
+          });
+          
+          console.log('💾 Actualizando scores en localStorage:', currentScores);
+          
+          localStorage.setItem(
+            'userAreaSelection',
+            JSON.stringify({
+              ...parsed,
+              scores: currentScores,
+              timestamp: new Date().toISOString()
+            })
+          );
+        } catch (e) {
+          console.error('Error parsing localStorage for score comparison:', e);
+        }
+      }
     }
-  }, [lifeWheel, allAreasAnswered]);
+  }, [lifeWheel, allAreasAnswered, showSelectionModal]);
 
   // Confirmar selección del usuario
   const confirmUserSelection = async () => {
     if (selectedAreaIds.length !== 3) {
-      alert(t('home.selectionModal.pleaseSelectThree') || 'Por favor selecciona exactamente 3 áreas');
       return;
     }
 
@@ -196,6 +501,19 @@ export const HomePage = () => {
 
     try {
       if (selectionData && lifeWheel) {
+        // 🔹 Verificar si ya se desbloquearon las áreas (desde localStorage)
+        const storedSelection = localStorage.getItem('userAreaSelection');
+        let alreadyUnlocked = false;
+        
+        if (storedSelection) {
+          try {
+            const parsed = JSON.parse(storedSelection);
+            alreadyUnlocked = parsed.isAnswered === true;
+          } catch (e) {
+            console.error('Error parsing localStorage:', e);
+          }
+        }
+
         // 1️⃣ Combinar autoSelectedAreas y candidateAreas para buscar
         const allSelectableAreas = [
           ...(selectionData.autoSelectedAreas || []),
@@ -234,14 +552,58 @@ export const HomePage = () => {
           }))
         });
 
+        // 4.5️⃣ Desbloquear las 3 áreas seleccionadas 
+        // (solo si isAnswered === false Y no se ha desbloqueado previamente)
+        console.log('🔍 DEBUG - Modal confirmado. Condiciones unlock:', {
+          isAnswered: lifeWheel.isAnswered,
+          alreadyUnlocked,
+          selectedAreaIds
+        });
+        
+        if (lifeWheel.isAnswered === false && !alreadyUnlocked) {
+          try {
+            // 🔹 Obtener las áreas que PERMANECERÁN BLOQUEADAS (las que NO están en selectedAreaIds)
+            // IMPORTANTE: NO incluir áreas con 10/10 (se manejan en otro flujo)
+            const areaIdsToKeepBlocked = lifeWheel.lifeAreas
+              .filter(area => 
+                !selectedAreaIds.includes(area.id) && 
+                area.score < 10  // ← NO incluir áreas con 10/10
+              )
+              .map(area => area.id);
+            
+            console.log('🚀 Enviando POST /unlock-areas desde modal con áreas a MANTENER BLOQUEADAS:', areaIdsToKeepBlocked);
+            console.log('ℹ️ Áreas que se DESBLOQUEARÁN:', selectedAreaIds);
+            console.log('ℹ️ Áreas con 10/10 excluidas del POST (se manejan en otro flujo)');
+            console.log('📊 Total áreas a enviar:', areaIdsToKeepBlocked.length, '(debe ser ~3)');
+            
+            await lifeWheelService.unlockAreas({
+              lifeWheelAreaIds: areaIdsToKeepBlocked
+            });
+            console.log('✅ Áreas desbloqueadas desde modal');
+          } catch (unlockError) {
+            console.error('⚠️ Error al desbloquear áreas (no crítico):', unlockError);
+            // No bloqueamos el flujo si falla el unlock
+          }
+        } else {
+          console.log('❌ NO se envió POST desde modal. Razones:', {
+            isAnsweredFalse: lifeWheel.isAnswered === false,
+            notAlreadyUnlocked: !alreadyUnlocked
+          });
+        }
+
         // 5️⃣ Actualizar localStorage para recordar la selección del usuario
         localStorage.setItem(
           'userAreaSelection',
           JSON.stringify({
             areaIds: selectedAreaIds,
             areaIdsWithAreaId: areasToSend.map(a => a.areaId),
+            scores: lifeWheel.lifeAreas.reduce((acc, area) => {
+              acc[area.id] = area.score;
+              return acc;
+            }, {} as Record<string, number>), // 🆕 Guardar scores iniciales
             timestamp: new Date().toISOString(),
-            lifeWheelId: lifeWheel.id
+            lifeWheelId: lifeWheel.id,
+            isAnswered: true // ✨ Marcar como ya respondido
           })
         );
 
@@ -443,7 +805,8 @@ export const HomePage = () => {
                 {lifeWheel.lifeAreas
                   .sort((a, b) => a.score - b.score)
                   .map((area) => {
-                    const isEnabled = enabledAreaIds.has(area.id);
+                    const hasMaxScore = area.score >= 10; // Área con objetivo cumplido
+                    const isEnabled = enabledAreaIds.has(area.id) && !hasMaxScore; // Deshabilitar si tiene 10/10
                     return (
                       <div
                         key={area.id}
@@ -451,14 +814,18 @@ export const HomePage = () => {
                           ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 shadow-sm'
                           : !area.isArchived
                             ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300'
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
+                            : hasMaxScore
+                              ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 opacity-75'
+                              : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
                           }`}
                       >
                         <div className="flex items-center justify-center text-2xl sm:text-4xl flex-shrink-0 relative"
                           style={{
                             filter: isEnabled
                               ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
-                              : 'grayscale(50%)'
+                              : hasMaxScore
+                                ? 'grayscale(30%)'
+                                : 'grayscale(50%)'
                           }}>
                           {getAreaIcon(area.areaName)}
                           {!isEnabled && !area.isArchived && (
@@ -468,10 +835,17 @@ export const HomePage = () => {
                               </svg>
                             </div>
                           )}
-                          {!isEnabled && area.isArchived && (
+                          {!isEnabled && area.isArchived && !hasMaxScore && (
                             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                          {hasMaxScore && (
+                            <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center shadow-lg">
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
                           )}
@@ -482,7 +856,9 @@ export const HomePage = () => {
                               ? 'text-green-900'
                               : !area.isArchived
                                 ? 'text-amber-900'
-                                : 'text-gray-700'
+                                : hasMaxScore
+                                  ? 'text-green-800'
+                                  : 'text-gray-700'
                               }`}>
                               {t(getAreaTranslationKey(area.areaName))}
                             </p>
@@ -494,7 +870,9 @@ export const HomePage = () => {
                             ? 'text-green-700'
                             : !area.isArchived
                               ? 'text-amber-700'
-                              : 'text-gray-700'
+                              : hasMaxScore
+                                ? 'text-green-700'
+                                : 'text-gray-700'
                             }`}>
                             {!area.isArchived ? '—' : `${area.score}/10`}
                           </p>

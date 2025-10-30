@@ -355,8 +355,12 @@
     "loadingProjects": "Loading projects...",
     "noActiveProjects": "No active projects",
     "noSomedayProjects": "No someday projects",
+    "expectedScore": "Expected score",
     "noCompletedProjects": "No completed projects",
     "noCancelledProjects": "No cancelled projects",
+    "cannotComplete": "Cannot Complete Project",
+    "cannotCompleteWithoutActions": "Cannot complete project: You need to create at least one action and complete it before marking the project as completed.",
+    "cannotCompleteWithPendingActions": "Cannot complete project: {{completed}} of {{total}} actions completed. Please complete all actions first.",
     "create": {
       "title": "Create Project",
       "subtitle": "90-Day Transformation",
@@ -371,6 +375,8 @@
       "projectTitlePlaceholder": "e.g., Improve Physical Fitness",
       "description": "Description",
       "descriptionPlaceholder": "Describe your transformation goals and action plan...",
+      "expectedScore": "By accomplishing this project, what score (e.g., 1-10) would you add to this project for your area of life?",
+      "expectedScorePlaceholder": "e.g., 8",
       "startDate": "Start Date",
       "endDate": "End Date (3-6 months)",
       "startDateHelp": "Must start from tomorrow onwards",
@@ -402,7 +408,8 @@
       "back": "Back",
       "createProject": "Create Project",
       "projects": "projects",
-      "maxReached": "Max Reached - 2/2 projects"
+      "maxReached": "Max Reached - 2/2 projects",
+      "goalAchieved": "Goal Achieved - 10/10"
     },
     "goals": {
       "title": "Project Goals",

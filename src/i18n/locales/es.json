@@ -355,8 +355,12 @@
     "loadingProjects": "Cargando proyectos...",
     "noActiveProjects": "No hay proyectos activos",
     "noSomedayProjects": "No hay proyectos para algún día",
+    "expectedScore": "Puntuación esperada",
     "noCompletedProjects": "No hay proyectos completados",
     "noCancelledProjects": "No hay proyectos cancelados",
+    "cannotComplete": "No se Puede Completar el Proyecto",
+    "cannotCompleteWithoutActions": "No se puede completar el proyecto: Debes crear al menos una acción y completarla antes de marcar el proyecto como completado.",
+    "cannotCompleteWithPendingActions": "No se puede completar el proyecto: {{completed}} de {{total}} acciones completadas. Por favor, completa todas las acciones primero.",
     "create": {
       "title": "Crear Proyecto",
       "subtitle": "Transformación de 90 Días",
@@ -370,6 +374,8 @@
       "projectTitle": "Título del Proyecto",
       "projectTitlePlaceholder": "ej: Mejorar Condición Física",
       "description": "Descripción",
+      "expectedScore": "Al lograr este proyecto, ¿qué puntuación (ej: 1-10) agregaría a este proyecto para el área de tu vida?)",
+      "expectedScorePlaceholder": "ej: 8",
       "descriptionPlaceholder": "Describe tus objetivos de transformación y plan de acción...",
       "startDate": "Fecha de Inicio",
       "endDate": "Fecha de Fin (3-6 meses)",
@@ -402,7 +408,8 @@
       "back": "Volver",
       "createProject": "Crear Proyecto",
       "projects": "proyectos",
-      "maxReached": "Máximo Alcanzado - 2/2 proyectos"
+      "maxReached": "Máximo Alcanzado - 2/2 proyectos",
+      "goalAchieved": "Objetivo Alcanzado - 10/10"
     },
     "goals": {
       "title": "Objetivos del Proyecto",

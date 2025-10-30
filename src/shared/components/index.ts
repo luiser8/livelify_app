@@ -14,3 +14,5 @@ export { TermsAndConditions } from './TermsAndConditions';
 export { LanguageSelector, LanguageSelectorCompact } from './LanguageSelector';
 export { LifeScoreCard } from './LifeScoreCard';
 export { default as Pagination } from './Pagination/Pagination';
+export { AlertBanner } from './AlertBanner';
+export type { AlertBannerProps, AlertType } from './AlertBanner';

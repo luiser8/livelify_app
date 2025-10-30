@@ -13,6 +13,7 @@ export interface CreateProjectFromAreaRequest {
   lifeWheelAreaId: string;
   title: string;
   description: string;
+  expectedScore: number;
   startDate: string; // ISO date format: YYYY-MM-DD
   endDate: string; // ISO date format: YYYY-MM-DD
 }
@@ -56,6 +57,7 @@ export interface Project {
   title: string;
   description: string;
   status: ProjectStatus;
+  expectedScore: number;
   createdAt: string;
   updatedAt: string;
   detail: ProjectDetail;
@@ -181,7 +183,7 @@ export const projectService = {
    */
   updateStatus: async (projectId: string, status: ProjectStatus): Promise<{ success: boolean; project: Project }> => {
     const result = await apiClient.put<{ success: boolean; project: Project }>(`/projects/${projectId}/status`, { status });
-    
+
     // Invalidar cachés después de actualizar status
     apiCache.remove('projects_all');
     // No podemos saber qué área específica sin hacer otra llamada, así que limpiamos todo lo relacionado con proyectos
@@ -192,7 +194,8 @@ export const projectService = {
       }
     });
     apiCache.remove('user_me');
-    
+    apiCache.remove('lifewheel_me');
+    apiCache.remove('projects_all');
     return result;
   },
 };

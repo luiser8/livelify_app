@@ -15,6 +15,7 @@ export const CreateProjectPage = () => {
   const { areaId: urlAreaId } = useParams<{ areaId?: string }>();
   
   const [lifeAreas, setLifeAreas] = useState<LifeWheelArea[]>([]);
+  const [lifeAreasSelected, setLifeAreasSelected] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(urlAreaId ? 2 : 1); // Si viene con área, ir directo a step 2
   const [selectedAreaId, setSelectedAreaId] = useState<string>(urlAreaId || '');
@@ -32,6 +33,7 @@ export const CreateProjectPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    expectedScore: 0,
     startDate: getTomorrowDate(),
     endDate: '',
   });
@@ -45,18 +47,18 @@ export const CreateProjectPage = () => {
         setLoading(true);
         const lifeWheelData = await lifeWheelService.getMyLifeWheel();
         setLifeAreas(lifeWheelData.lifeAreas);
+        setLifeAreasSelected(lifeWheelData.lifeAreasSelected || []);
 
         // Cargar TODOS los proyectos del usuario para contar proyectos por área
         try {
           const allProjectsData = await projectService.getAllProjects();
           const countMap = new Map<string, number>();
           
-          // Contar proyectos ACTIVOS por área
+          // Contar TODOS los proyectos por área (sin importar el status)
+          // Esto incluye ACTIVE, SOMEDAY, COMPLETED, CANCELLED
           allProjectsData.projects.forEach(project => {
-            if (project.status === 'ACTIVE') {
-              const currentCount = countMap.get(project.lifeWheelAreaId) || 0;
-              countMap.set(project.lifeWheelAreaId, currentCount + 1);
-            }
+            const currentCount = countMap.get(project.lifeWheelAreaId) || 0;
+            countMap.set(project.lifeWheelAreaId, currentCount + 1);
           });
           
           setProjectCountByArea(countMap);
@@ -88,9 +90,21 @@ export const CreateProjectPage = () => {
           const result = getSelectableAreas(lifeWheelData.lifeAreas);
           let enabledAreaIds = result.selectableAreaIds;
 
-          // Si requiere selección del usuario, verificar localStorage o backend
-          if (result.requiresUserSelection && result.candidateAreas) {
-            // Intentar recuperar selección guardada en localStorage
+          // Priorizar lifeAreasSelected del backend si existe
+          if (lifeWheelData.lifeAreasSelected && lifeWheelData.lifeAreasSelected.length === 3) {
+            const backendSelectedIds = lifeWheelData.lifeAreasSelected
+              .map((sel: any) => {
+                const fullArea = lifeWheelData.lifeAreas.find((a: any) => a.areaId === sel.areaId);
+                // Verificar que el área exista y no esté bloqueada
+                return (fullArea && !fullArea.isBlocked) ? fullArea.id : null;
+              })
+              .filter(Boolean) as string[];
+
+            if (backendSelectedIds.length === 3) {
+              enabledAreaIds = new Set(backendSelectedIds);
+            }
+          } else if (result.requiresUserSelection && result.candidateAreas) {
+            // Si no hay backend selection, intentar recuperar selección guardada en localStorage
             const storedSelection = localStorage.getItem('userAreaSelection');
             if (storedSelection) {
               try {
@@ -114,20 +128,6 @@ export const CreateProjectPage = () => {
                 console.error('Error parsing stored selection:', e);
               }
             }
-            
-            // Si no hay localStorage, revisar backend
-            if (!storedSelection && lifeWheelData.lifeAreasSelected && lifeWheelData.lifeAreasSelected.length > 0) {
-              const backendSelectedIds = lifeWheelData.lifeAreasSelected
-                .map((sel: any) => {
-                  const fullArea = lifeWheelData.lifeAreas.find((a: any) => a.areaId === sel.areaId);
-                  return fullArea?.id ?? null;
-                })
-                .filter(Boolean) as string[];
-
-              if (backendSelectedIds.length === 3) {
-                enabledAreaIds = new Set(backendSelectedIds);
-              }
-            }
           }
 
           if (!enabledAreaIds.has(urlAreaId)) {
@@ -137,10 +137,17 @@ export const CreateProjectPage = () => {
 
           try {
             const projectsData = await projectService.getProjectsByArea(urlAreaId);
-            const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
+            // Contar TODOS los proyectos, no solo activos
+            const totalProjects = projectsData.projects.length;
 
-            // Si ya tiene 2 proyectos activos, redirigir
-            if (activeProjects.length >= 2) {
+            // Si ya tiene 2 proyectos en total, redirigir
+            if (totalProjects >= 2) {
+              navigate(`/area/${urlAreaId}/projects`);
+              return;
+            }
+
+            // Si el área ya alcanzó 10/10, redirigir (objetivo cumplido)
+            if (selectedArea.score >= 10) {
               navigate(`/area/${urlAreaId}/projects`);
               return;
             }
@@ -172,12 +179,57 @@ export const CreateProjectPage = () => {
   // Obtener las áreas seleccionables usando la nueva lógica inteligente
   const getLowestScoringAreaIds = () => {
     if (!allAreasEvaluated) {
-      // Si no todas están evaluadas, permitir todas las evaluadas
-      return new Set(lifeAreas.filter(area => area.isArchived).map(area => area.id));
+      // Si no todas están evaluadas, permitir solo las evaluadas y no bloqueadas
+      return new Set(lifeAreas.filter(area => area.isArchived && !area.isBlocked).map(area => area.id));
     }
 
-    // Si todas están evaluadas, usar la lógica inteligente
+    // Priorizar lifeAreasSelected del backend si existe
+    if (lifeAreasSelected && lifeAreasSelected.length === 3) {
+      const backendSelectedIds = lifeAreasSelected
+        .map((sel: any) => {
+          const fullArea = lifeAreas.find((a: any) => a.areaId === sel.areaId);
+          // Verificar que el área exista y no esté bloqueada
+          return (fullArea && !fullArea.isBlocked) ? fullArea.id : null;
+        })
+        .filter(Boolean) as string[];
+
+      if (backendSelectedIds.length === 3) {
+        return new Set(backendSelectedIds);
+      }
+    }
+
+    // Si no hay backend selection, usar la lógica inteligente
     const result = getSelectableAreas(lifeAreas);
+    
+    // Si requiere selección del usuario, intentar recuperar de localStorage
+    if (result.requiresUserSelection && result.candidateAreas) {
+      const storedSelection = localStorage.getItem('userAreaSelection');
+      if (storedSelection) {
+        try {
+          const parsed = JSON.parse(storedSelection);
+          const allSelectableAreas = [
+            ...(result.autoSelectedAreas || []),
+            ...(result.candidateAreas || [])
+          ];
+          
+          const stillValid =
+            Array.isArray(parsed.areaIds) &&
+            parsed.areaIds.length === 3 &&
+            parsed.areaIds.every((id: string) => {
+              const area = lifeAreas.find(a => a.id === id);
+              // Verificar que el área exista, esté en las seleccionables y no esté bloqueada
+              return area && !area.isBlocked && allSelectableAreas.some(selArea => selArea.id === id);
+            });
+
+          if (stillValid) {
+            return new Set(parsed.areaIds);
+          }
+        } catch (e) {
+          console.error('Error parsing stored selection:', e);
+        }
+      }
+    }
+
     return result.selectableAreaIds;
   };
 
@@ -189,10 +241,18 @@ export const CreateProjectPage = () => {
       return;
     }
 
-    // Verificar que el área no tenga ya 2 proyectos activos
-    const activeProjectsCount = projectCountByArea.get(areaId) || 0;
-    if (activeProjectsCount >= 2) {
-      // Redirigir al área si ya tiene 2 proyectos activos
+    // Verificar que el área no tenga ya 2 proyectos en total (sin importar status)
+    const totalProjectsCount = projectCountByArea.get(areaId) || 0;
+    if (totalProjectsCount >= 2) {
+      // Redirigir al área si ya tiene 2 proyectos en total
+      navigate(`/area/${areaId}/projects`);
+      return;
+    }
+
+    // Verificar que el área no haya alcanzado el puntaje máximo de 10/10
+    const selectedArea = lifeAreas.find(a => a.id === areaId);
+    if (selectedArea && selectedArea.score >= 10) {
+      // Si ya tiene 10/10, redirigir al área (objetivo cumplido)
       navigate(`/area/${areaId}/projects`);
       return;
     }
@@ -270,10 +330,18 @@ export const CreateProjectPage = () => {
       
       // Verificar una vez más el límite de proyectos antes de crear (doble validación)
       const projectsData = await projectService.getProjectsByArea(selectedAreaId);
-      const activeProjects = projectsData.projects.filter(p => p.status === 'ACTIVE');
+      const totalProjects = projectsData.projects.length;
 
-      if (activeProjects.length >= 2) {
-        // Si ya tiene 2 proyectos activos, redirigir
+      if (totalProjects >= 2) {
+        // Si ya tiene 2 proyectos en total, redirigir
+        navigate(`/area/${selectedAreaId}/projects`);
+        return;
+      }
+
+      // Verificar que el área no haya alcanzado 10/10 (doble validación)
+      const areaToValidate = lifeAreas.find(a => a.id === selectedAreaId);
+      if (areaToValidate && areaToValidate.score >= 10) {
+        // Si ya tiene 10/10, redirigir (objetivo cumplido)
         navigate(`/area/${selectedAreaId}/projects`);
         return;
       }
@@ -371,10 +439,11 @@ export const CreateProjectPage = () => {
               {lifeAreas.map((area) => {
                 const potentialPoints = Math.max(0, 10 - area.score);
                 const isEvaluated = area.isArchived;
-                const activeProjectsCount = projectCountByArea.get(area.id) || 0;
-                const hasReachedLimit = activeProjectsCount >= 2;
-                const isEnabled = enabledAreaIds.has(area.id) && !hasReachedLimit;
-                const isLocked = isEvaluated && (!enabledAreaIds.has(area.id) || hasReachedLimit);
+                const totalProjectsCount = projectCountByArea.get(area.id) || 0;
+                const hasReachedLimit = totalProjectsCount >= 2;
+                const hasMaxScore = area.score >= 10; // Ya alcanzó el objetivo de 10/10
+                const isEnabled = enabledAreaIds.has(area.id) && !hasReachedLimit && !hasMaxScore;
+                const isLocked = isEvaluated && (!enabledAreaIds.has(area.id) || hasReachedLimit || hasMaxScore);
                 
                 return (
                   <button
@@ -421,16 +490,16 @@ export const CreateProjectPage = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base sm:text-lg font-bold text-gray-900">{!area.isArchived ? '—' : area.score}</span>
                           <span className="text-xs sm:text-sm text-gray-500">/10</span>
-                          {/* Mostrar contador de proyectos activos - siempre en áreas habilitadas */}
-                          {isEnabled && (
+                          {/* Mostrar contador de proyectos totales - siempre visible en áreas evaluadas */}
+                          {isEvaluated && (
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-auto ${
                               hasReachedLimit 
                                 ? 'bg-red-100 text-red-700' 
-                                : activeProjectsCount > 0
+                                : totalProjectsCount > 0
                                   ? 'bg-blue-100 text-blue-700'
                                   : 'bg-gray-100 text-gray-600'
                             }`}>
-                              {activeProjectsCount}/2 {t('projects.create.projects')}
+                              {totalProjectsCount}/2 {t('projects.create.projects')}
                             </span>
                           )}
                         </div>
@@ -440,6 +509,10 @@ export const CreateProjectPage = () => {
                               +{potentialPoints} {t('projects.create.potential')}
                             </span>
                           </div>
+                        ) : hasMaxScore ? (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
+                            ✅ {t('projects.create.goalAchieved')}
+                          </span>
                         ) : hasReachedLimit ? (
                           <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">
                             🔒 {t('projects.create.maxReached')}
@@ -582,6 +655,23 @@ export const CreateProjectPage = () => {
                     rows={4}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder={t('projects.create.descriptionPlaceholder')}
+                    required
+                  />
+                </div>
+
+                {/* Expected Score */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    {t('projects.create.expectedScore')} *
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.expectedScore}
+                    onChange={(e) => setFormData({ ...formData, expectedScore: parseInt(e.target.value) })}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder={t('projects.create.expectedScorePlaceholder')}
+                    min={0}
+                    max={10}
                     required
                   />
                 </div>

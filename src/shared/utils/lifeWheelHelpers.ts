@@ -8,6 +8,7 @@ export interface LifeArea {
   areaName: string;
   score: number;
   isArchived: boolean;
+  isBlocked?: boolean;
 }
 
 /**
@@ -28,8 +29,12 @@ export interface LifeArea {
  * @returns Set con los IDs de las áreas seleccionables y metadata
  */
 export const getSelectableAreas = (lifeAreas: LifeArea[]) => {
-  // Filtrar solo áreas evaluadas (isArchived) y no perfectas
-  const evaluatedAreas = lifeAreas.filter(area => area.isArchived && area.score < 10);
+  // Filtrar solo áreas evaluadas (isArchived), no perfectas Y no bloqueadas
+  const evaluatedAreas = lifeAreas.filter(area => 
+    area.isArchived && 
+    area.score < 10 && 
+    !area.isBlocked
+  );
   
   if (evaluatedAreas.length === 0) {
     return {

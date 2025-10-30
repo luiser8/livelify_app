@@ -113,7 +113,8 @@ export const goalService = {
     apiCache.remove('goals_me');
     apiCache.remove(`goals_project_${data.projectDetailId}`);
     apiCache.remove('user_me'); // Dashboard también muestra goals
-    
+    apiCache.remove('projects_all');
+    apiCache.remove('actions_me');
     return response;
   },
 
@@ -130,6 +131,9 @@ export const goalService = {
       apiCache.remove(`goals_project_${data.projectDetailId}`);
     }
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
+    apiCache.remove('goals_me');
+    apiCache.remove('actions_me');
     
     return response;
   },
@@ -151,6 +155,9 @@ export const goalService = {
       }
     });
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
+    apiCache.remove('goals_me');
+    apiCache.remove('actions_me');
     
     return response;
   },
@@ -171,6 +178,9 @@ export const goalService = {
       }
     });
     apiCache.remove('user_me');
+    apiCache.remove('projects_all');
+    apiCache.remove('goals_me');
+    apiCache.remove('actions_me');
     
     return response;
   },

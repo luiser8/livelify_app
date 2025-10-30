@@ -12,6 +12,7 @@ export interface LifeArea {
   areaName: string;
   score: number;
   isArchived: boolean;
+  isBlocked?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -31,6 +32,7 @@ export interface LifeWheelResponse {
   id: string;
   userId: string;
   globalScore: number;
+  isAnswered?: boolean;
   lifeAreas: LifeArea[];
   lifeAreasSelected: LifeWheelSelectedAreas[];
   createdAt: string;
@@ -49,12 +51,25 @@ export interface LifeWheelSelectedAreasResponse {
   }>;
 }
 
+export interface UnlockAreasRequest {
+  lifeWheelAreaIds: string[];
+}
+
+export interface UnlockAreasResponse {
+  success: boolean;
+  message?: string;
+  unlockedAreas?: Array<{
+    id: string;
+    isBlocked: boolean;
+  }>;
+}
+
 export const lifeWheelService = {
   /**
    * Obtiene el Life Wheel del usuario actual (CON CACHÉ)
    * Endpoint: GET /lifewheel/me
    * Requiere: Bearer token en Authorization header (automático)
-   * 
+   *
    * Configuración de caché:
    * - Tipo: NORMAL (desde env)
    * - TTL: VITE_CACHE_TTL_NORMAL
@@ -65,7 +80,6 @@ export const lifeWheelService = {
       'lifewheel_me',
       () => apiClient.get<LifeWheelResponse>('/lifewheel/me'),
       apiCache,
-      
     );
   },
 
@@ -73,16 +87,32 @@ export const lifeWheelService = {
    * Agrega áreas al Life Wheel
    * Endpoint: POST /lifewheel/add-lifewheel-areas
    * Requiere: Bearer token en Authorization header (automático)
-   * 
+   *
    * NOTA: Invalida el caché después de agregar áreas
    */
   addLifeWheelAreas: async (data: LifeWheelSelectedAreasRequest): Promise<LifeWheelSelectedAreasResponse> => {
     const result = await apiClient.post<LifeWheelSelectedAreasResponse>('/lifewheel/add-lifewheel-areas', data);
-    
     // Invalidar caché después de agregar áreas
     apiCache.remove('lifewheel_me');
     apiCache.remove('user_me'); // También invalidar user_me porque contiene lifeWheel
-    
+    return result;
+  },
+
+  /**
+   * Desbloquea áreas del Life Wheel
+   * Endpoint: POST /lifewheel/unlock-areas
+   * Requiere: Bearer token en Authorization header (automático)
+   *
+   * @param data - Objeto con array de IDs de áreas a desbloquear
+   * @returns Respuesta con las áreas desbloqueadas
+   *
+   * NOTA: Invalida el caché después de desbloquear áreas
+   */
+  unlockAreas: async (data: UnlockAreasRequest): Promise<UnlockAreasResponse> => {
+    const result = await apiClient.post<UnlockAreasResponse>('/lifewheel/unlock-areas', data);
+    // Invalidar caché después de desbloquear áreas
+    apiCache.remove('lifewheel_me');
+    apiCache.remove('user_me'); // También invalidar user_me porque contiene lifeWheel
     return result;
   },
 };

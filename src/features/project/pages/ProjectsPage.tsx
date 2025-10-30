@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader, Copyright } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright, AlertBanner } from '@/shared/components';
 import { projectService, lifeWheelService, type GetAllProjectsResponse, type Project, type ProjectStatus, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants } from '@/shared/utils/lifeAreaHelpers';
 
@@ -19,6 +19,7 @@ export const ProjectsPage = () => {
   const [showSomedayProjects, setShowSomedayProjects] = useState(false);
   const [showCompletedProjects, setShowCompletedProjects] = useState(false);
   const [showCancelledProjects, setShowCancelledProjects] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +45,27 @@ export const ProjectsPage = () => {
     return lifeAreas.find(area => area.id === lifeWheelAreaId);
   };
 
-  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus, project: Project) => {
+    // Validar que todas las acciones estén completadas antes de marcar como COMPLETED
+    if (newStatus === 'COMPLETED') {
+      // Caso 1: No hay acciones creadas (totalActions === 0)
+      if (project.detail.totalActions === 0) {
+        setErrorMessage(t('projects.cannotCompleteWithoutActions'));
+        setTimeout(() => setErrorMessage(null), 5000);
+        return;
+      }
+      
+      // Caso 2: Hay acciones pero no todas están completadas
+      if (project.detail.completedActions < project.detail.totalActions) {
+        setErrorMessage(t('projects.cannotCompleteWithPendingActions', {
+          completed: project.detail.completedActions,
+          total: project.detail.totalActions
+        }));
+        setTimeout(() => setErrorMessage(null), 5000);
+        return;
+      }
+    }
+    
     try {
       await projectService.updateStatus(projectId, newStatus);
       // Recargar datos
@@ -111,7 +132,17 @@ export const ProjectsPage = () => {
             <div className="flex-1 min-w-0">
               <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 truncate">{project.title}</h3>
               <p className="text-xs sm:text-sm text-gray-500 mb-2 truncate">{area?.areaName || 'Unknown Area'}</p>
-              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{project.description}</p>
+              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2">{project.description}</p>
+              
+              {/* Expected Score */}
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  {t('projects.expectedScore')}: {project.expectedScore}
+                </span>
+              </div>
             </div>
           </div>
           <button
@@ -262,7 +293,7 @@ export const ProjectsPage = () => {
                 <label className="block text-xs font-medium text-gray-600 mb-1">{t('projects.changeStatus')}</label>
                 <select
                   value={project.status}
-                  onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
+                  onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus, project)}
                   className="w-full py-2 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-medium"
                 >
                   <option value="ACTIVE">🟢 {t('projects.active')}</option>
@@ -299,6 +330,17 @@ export const ProjectsPage = () => {
         showSearch={false}
         showFilter={false}
       />
+
+      {/* Error Message Banner */}
+      {errorMessage && (
+        <AlertBanner
+          type="error"
+          title={t('projects.cannotComplete')}
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+          autoCloseDuration={5000}
+        />
+      )}
 
       {/* Contenido principal */}
       <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
