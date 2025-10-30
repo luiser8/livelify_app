@@ -447,8 +447,8 @@ export const HomePage = () => {
                 console.log('✅ Áreas con 10/10 bloqueadas automáticamente');
                 
                 // Actualizar enabledAreaIds removiendo las áreas con 10/10
-                const updatedEnabledAreas = Array.from(newEnabledAreas).filter(
-                  id => !areaIdsToBlock.includes(id)
+                const updatedEnabledAreas = Array.from(newEnabledAreas as Set<string>).filter(
+                  (id: string) => !areaIdsToBlock.includes(id)
                 );
                 setEnabledAreaIds(new Set(updatedEnabledAreas));
                 
