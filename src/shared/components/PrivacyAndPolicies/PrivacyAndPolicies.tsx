@@ -40,7 +40,11 @@ export const PrivacyAndPolicies = ({ isOpen, onClose, onAcceptRead }: PrivacyAnd
         const blob = await documentsService.getPdf(currentLanguage, 'privacy');
         blobUrl = documentsService.createBlobUrl(blob);
         // Agregar parámetros para ocultar menús y barras de herramientas del PDF
-        const cleanPdfUrl = `${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+        // En móvil usamos zoom=125 para texto más grande, en desktop FitH
+        const isMobile = window.innerWidth < 640;
+        const cleanPdfUrl = isMobile 
+          ? `${blobUrl}#toolbar=0&navpanes=0&scrollbar=1&zoom=125`
+          : `${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
         setPdfUrl(cleanPdfUrl);
       } catch (err) {
         console.error('Error loading privacy policy PDF:', err);
@@ -78,11 +82,11 @@ export const PrivacyAndPolicies = ({ isOpen, onClose, onAcceptRead }: PrivacyAnd
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[95vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white sm:rounded-2xl shadow-2xl max-w-5xl w-full h-full sm:h-[95vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
             {t('privacy.title')}
           </h2>
           <button
@@ -142,11 +146,11 @@ export const PrivacyAndPolicies = ({ isOpen, onClose, onAcceptRead }: PrivacyAnd
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50 space-y-3">
+        <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50 space-y-3">
           {/* Indicator message */}
           {!hasScrolledToBottom && !isLoading && !error && (
-            <div className="flex items-center justify-center gap-2 text-amber-600 text-sm">
-              <svg className="w-5 h-5 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center justify-center gap-2 text-amber-600 text-xs sm:text-sm">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               <span className="font-medium">{t('terms.scrollToEnablePrivacy')}</span>
@@ -161,7 +165,7 @@ export const PrivacyAndPolicies = ({ isOpen, onClose, onAcceptRead }: PrivacyAnd
               onClose();
             }}
             disabled={isLoading || !hasScrolledToBottom}
-            className="w-full py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full py-3 px-4 sm:px-6 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:bg-indigo-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {t('terms.closeButton')}
           </button>
