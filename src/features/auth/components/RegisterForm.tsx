@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input, TermsAndConditions } from '@/shared/components';
 import { PrivacyAndPolicies } from '@/shared/components/PrivacyAndPolicies/PrivacyAndPolicies';
+import { formatPhoneNumber, getPhoneFormat, cleanPhoneNumber, validatePhoneLength } from '@/shared/utils';
 import countryCodes from '@/shared/utils/countryCodesData';
 
 export interface RegisterFormData {
@@ -86,8 +87,14 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     // Phone
     if (!phoneNumber) {
       newErrors.phone = t('auth.validation.phoneRequired');
-    } else if (!/^[\d\s-()]+$/.test(phoneNumber)) {
-      newErrors.phone = t('auth.validation.phoneInvalid');
+    } else {
+      const cleanNumber = cleanPhoneNumber(phoneNumber);
+      if (cleanNumber.length === 0) {
+        newErrors.phone = t('auth.validation.phoneRequired');
+      } else if (!validatePhoneLength(phoneNumber, countryCode)) {
+        const format = getPhoneFormat(countryCode);
+        newErrors.phone = t('auth.validation.phoneInvalid') + ` (${format.maxLength} ${t('auth.validation.digitsRequired')})`;
+      }
     }
 
     // Address
@@ -119,8 +126,9 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     e.preventDefault();
 
     if (validate()) {
-      // Combinar código de país con número de teléfono
-      const fullPhone = `${countryCode}${phoneNumber}`;
+      // Combinar código de país con número de teléfono (solo números, sin formato)
+      const cleanNumber = cleanPhoneNumber(phoneNumber);
+      const fullPhone = `${countryCode}${cleanNumber}`;
       onSubmit({ ...formData, phone: fullPhone });
     }
   };
@@ -129,11 +137,14 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     setCountryCode(code);
     setShowCountryDropdown(false);
     setCountrySearchTerm('');
+    // Limpiar el número de teléfono al cambiar de país para aplicar el nuevo formato
+    setPhoneNumber('');
   };
 
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d\s-()]/g, ''); // Solo números, espacios, guiones y paréntesis
-    setPhoneNumber(value);
+    // Aplicar formato automático según el código de país
+    const formatted = formatPhoneNumber(e.target.value, countryCode);
+    setPhoneNumber(formatted);
     if (errors.phone) {
       setErrors(prev => ({ ...prev, phone: undefined }));
     }
@@ -144,6 +155,9 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
     country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) || 
     country.dial_code.includes(countrySearchTerm)
   );
+
+  // Obtener el placeholder dinámico según el código de país
+  const phoneFormat = getPhoneFormat(countryCode);
 
   // Verificar si puede aceptar los términos (solo si leyó ambos documentos)
   const canAcceptTerms = hasReadTerms && hasReadPrivacy;
@@ -269,13 +283,19 @@ export const RegisterForm = ({ onSubmit, isLoading = false, serverError }: Regis
           <div className="flex-1">
             <input
               type="tel"
-              placeholder="000-000-0000"
+              placeholder={phoneFormat.placeholder}
               value={phoneNumber}
               onChange={handlePhoneNumberChange}
               disabled={isLoading}
               autoComplete="tel"
               className="w-full h-12 sm:h-14 px-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/40 focus:bg-white/15 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             />
+            {/* Mostrar formato esperado */}
+            {!errors.phone && phoneNumber.length === 0 && (
+              <p className="text-white/50 text-xs mt-1 ml-1">
+                {t('auth.register.phoneFormat')}: {phoneFormat.mask}
+              </p>
+            )}
           </div>
         </div>
         {errors.phone && (

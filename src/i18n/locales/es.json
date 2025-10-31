@@ -80,6 +80,7 @@
       "email": "Correo electrónico",
       "emailPlaceholder": "tu@email.com",
       "phone": "Teléfono",
+      "phoneFormat": "Formato",
       "phonePlaceholder": "+1234567890",
       "address": "Dirección",
       "addressPlaceholder": "Calle Principal 123, Ciudad, País",
@@ -117,6 +118,7 @@
       "lastNameRequired": "El apellido es requerido",
       "phoneRequired": "El teléfono es requerido",
       "phoneInvalid": "Formato de teléfono inválido",
+      "digitsRequired": "dígitos requeridos",
       "addressRequired": "La dirección es requerida",
       "termsRequired": "Debes aceptar los términos y condiciones"
     },

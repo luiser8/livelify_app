@@ -80,6 +80,7 @@
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "phone": "Phone",
+      "phoneFormat": "Format",
       "phonePlaceholder": "+1234567890",
       "address": "Address",
       "addressPlaceholder": "123 Main St, City, Country",
@@ -117,6 +118,7 @@
       "lastNameRequired": "Last name is required",
       "phoneRequired": "Phone is required",
       "phoneInvalid": "Invalid phone format",
+      "digitsRequired": "digits required",
       "addressRequired": "Address is required",
       "termsRequired": "You must accept the terms and conditions"
     },

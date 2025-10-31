@@ -7,5 +7,6 @@ export * from './jwt';
 export * from './lifeAreaHelpers';
 export * from './pdfCache';
 export * from './lifeWheelHelpers';
+export * from './phoneFormatters';
 export { apiCache, cacheApiCall, ApiCache, type CacheConfig } from './apiCache';
 
