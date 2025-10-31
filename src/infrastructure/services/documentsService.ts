@@ -25,6 +25,7 @@ export const documentsService = {
     // 1. Intentar obtener del caché primero
     const cachedBlob = await pdfCache.get(cacheKey, language);
     if (cachedBlob) {
+      // El blob del caché ya debería tener el tipo correcto (si se guardó con el fix)
       return cachedBlob;
     }
 
@@ -41,9 +42,16 @@ export const documentsService = {
       throw new Error(`Failed to fetch terms or privacy policy PDF: ${response.statusText}`);
     }
 
-    const blob = await response.blob();
+    const rawBlob = await response.blob();
 
-    // 3. Guardar en caché para futuras peticiones
+    // --- ✅ SOLUCIÓN AÑADIDA ---
+    // Forzamos el tipo MIME a 'application/pdf'.
+    // Esto es crucial para que el navegador renderice el blob correctamente
+    // cuando está activa la cabecera 'X-Content-Type-Options: nosniff'.
+    const blob = new Blob([rawBlob], { type: 'application/pdf' });
+    // -------------------------
+
+    // 3. Guardar en caché el blob CORREGIDO para futuras peticiones
     await pdfCache.set(cacheKey, blob, language);
 
     return blob;
@@ -73,6 +81,12 @@ export const documentsService = {
    * @returns URL temporal para usar en un iframe o visor
    */
   createBlobUrl: (blob: Blob): string => {
+    // Nos aseguramos de que el blob tenga el tipo correcto antes de crear la URL
+    // (Aunque getPdf ya debería haberlo corregido)
+    if (blob.type !== 'application/pdf') {
+      const correctedBlob = new Blob([blob], { type: 'application/pdf' });
+      return URL.createObjectURL(correctedBlob);
+    }
     return URL.createObjectURL(blob);
   },
 
@@ -84,4 +98,3 @@ export const documentsService = {
     URL.revokeObjectURL(url);
   },
 };
-
