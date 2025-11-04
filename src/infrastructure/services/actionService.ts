@@ -7,6 +7,22 @@ import { cacheApiCall, apiCache } from '@/shared/utils/apiCache';
 export type EnergyLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /**
+ * Interfaz para el presupuesto de una acción
+ */
+export interface ActionBudget {
+  id: string;
+  baseCapital: number;
+  multiplier: number;
+  totalCapital: number;
+  monthlyBudget: number;
+  dailyBudget: number;
+  projectMonths: number;
+  projectDays: number;
+  currencyCode: string;
+  currencySymbol: string;
+}
+
+/**
  * Interfaz para una Action
  */
 export interface Action {
@@ -23,6 +39,7 @@ export interface Action {
   completedAt: string | null;
   isOverdue: boolean;
   daysUntilDue: number;
+  budget?: ActionBudget; // Presupuesto de la acción (opcional)
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +55,8 @@ export interface CreateActionRequest {
   timeEstimate: number;
   dueDate: string;
   contextId: string;
+  baseCapital: number; // Presupuesto de la acción
+  currencyCode: string; // Código de moneda
 }
 
 /**
@@ -101,7 +120,7 @@ export const actionService = {
    * NOTA: Invalida cachés relacionados
    */
   async createAction(data: CreateActionRequest): Promise<CreateActionResponse> {
-    const response = await apiClient.post<CreateActionResponse>('/actions', data);
+    const response = await apiClient.post<CreateActionResponse>('/actions/add', data);
     
     // Invalidar cachés después de crear
     apiCache.remove('actions_me');

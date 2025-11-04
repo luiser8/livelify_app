@@ -21,6 +21,8 @@ export interface Goal {
   saved: number;
   progress: number;
   isCompleted: boolean;
+  totalMonthlyBudget: number | null; // Presupuesto mensual total de las acciones
+  totalDailyBudget: number | null;   // Presupuesto diario total de las acciones
   createdAt: string;
   updatedAt: string;
 }
@@ -32,8 +34,6 @@ export interface CreateGoalRequest {
   projectDetailId: string;
   goalType: GoalType;
   content: string;
-  baseCapital: number;
-  currencyCode: string;
 }
 
 /**

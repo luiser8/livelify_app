@@ -5,6 +5,7 @@ import { LoginForm } from '../components';
 import { useAuth } from '@/features/auth/context';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
 import { LanguageSelector, Copyright } from '@/shared/components';
+import { translateError } from '@/shared/utils';
 
 /**
  * Página de inicio de sesión
@@ -32,14 +33,9 @@ export const LoginPage = () => {
     } catch (error) {
       console.error('Error de login:', error);
 
-      // Manejar diferentes tipos de errores
-      if (error instanceof Error) {
-        setError(error.message);
-      } else if (typeof error === 'object' && error !== null && 'message' in error) {
-        setError(String(error.message));
-      } else {
-        setError(t('auth.errors.loginFailed'));
-      }
+      // Traducir el error usando la utilidad
+      const translatedError = translateError(error, t);
+      setError(translatedError);
     } finally {
       setIsLoading(false);
     }

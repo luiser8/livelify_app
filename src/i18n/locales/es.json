@@ -129,6 +129,57 @@
       "emailAlreadyExists": "Este correo ya está registrado"
     }
   },
+  "errors": {
+    "unknown": "Ocurrió un error inesperado",
+    "generic": "Algo salió mal. Por favor, intenta de nuevo.",
+    "auth": {
+      "invalidCredentials": "Correo o contraseña inválidos",
+      "userNotFound": "Usuario no encontrado",
+      "unauthorized": "No tienes autorización para realizar esta acción",
+      "tokenExpired": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+      "invalidToken": "Token de autenticación inválido",
+      "sessionExpired": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+      "emailExists": "Este correo ya está registrado",
+      "phoneExists": "Este número de teléfono ya está registrado"
+    },
+    "network": {
+      "failedToFetch": "No se pudo conectar al servidor. Por favor, verifica tu conexión a internet.",
+      "timeout": "La solicitud tomó demasiado tiempo. Por favor, intenta de nuevo."
+    },
+    "validation": {
+      "generic": "Por favor, revisa tu información e intenta de nuevo",
+      "invalidInput": "Entrada inválida",
+      "requiredField": "Este campo es requerido",
+      "invalidFormat": "Formato inválido"
+    },
+    "server": {
+      "internal": "Error del servidor. Por favor, intenta más tarde.",
+      "unavailable": "Servicio temporalmente no disponible. Por favor, intenta más tarde.",
+      "badGateway": "Error de conexión. Por favor, intenta de nuevo."
+    },
+    "permissions": {
+      "forbidden": "No tienes permiso para acceder a este recurso"
+    },
+    "resource": {
+      "notFound": "Recurso no encontrado",
+      "alreadyExists": "Este recurso ya existe"
+    },
+    "http": {
+      "generic": "Error {{statusCode}}: Falló la solicitud",
+      "badRequest": "Solicitud inválida. Por favor, verifica tus datos.",
+      "unauthorized": "Autenticación requerida. Por favor, inicia sesión.",
+      "forbidden": "Acceso denegado.",
+      "notFound": "El recurso solicitado no fue encontrado.",
+      "timeout": "Tiempo de espera agotado. Por favor, intenta de nuevo.",
+      "conflict": "Este recurso ya existe.",
+      "unprocessable": "No se pudo procesar tu solicitud.",
+      "tooManyRequests": "Demasiadas solicitudes. Por favor, espera un momento.",
+      "serverError": "Error del servidor. Por favor, intenta más tarde.",
+      "badGateway": "Error de conexión. Por favor, intenta de nuevo.",
+      "serviceUnavailable": "Servicio temporalmente no disponible.",
+      "gatewayTimeout": "Tiempo de espera del servidor agotado. Por favor, intenta de nuevo."
+    }
+  },
   "home": {
     "title": "Rueda de la Vida",
     "subtitle": "Tu viaje de transformación",
@@ -302,6 +353,12 @@
       "cannotDelete": "No se puede eliminar: tiene {{count}} acción asociada",
       "cannotDelete_plural": "No se puede eliminar: tiene {{count}} acciones asociadas"
     },
+    "contextCreated": "✅ ¡Contexto '{{name}}' creado exitosamente!",
+    "contextDeleted": "🗑️ Contexto '{{name}}' eliminado exitosamente",
+    "profileUpdated": "✅ ¡Perfil actualizado exitosamente!",
+    "errorCreatingContext": "Error al crear el contexto. Por favor, intenta de nuevo.",
+    "errorDeletingContext": "Error al eliminar el contexto. Por favor, intenta de nuevo.",
+    "errorUpdatingProfile": "Error al actualizar el perfil. Por favor, intenta de nuevo.",
     "actions": {
       "logout": "Cerrar Sesión"
     }
@@ -309,6 +366,7 @@
   "projects": {
     "title": "Proyectos",
     "myProjects": "Mis Proyectos",
+    "newProject": "Nuevo Proyecto",
     "createProject": "Crear Proyecto",
     "noProjects": "Aún no hay proyectos",
     "noProjectsDescription": "Crea tu primer proyecto para comenzar tu viaje de transformación.",
@@ -320,6 +378,8 @@
     "status": "Estado",
     "loading": "Cargando proyectos...",
     "viewGoals": "Ver Objetivos",
+    "moreOptions": "Más Opciones",
+    "lessOptions": "Menos Opciones",
     "active": "Activo",
     "completed": "Completado",
     "someday": "Algún día",
@@ -363,6 +423,14 @@
     "cannotComplete": "No se Puede Completar el Proyecto",
     "cannotCompleteWithoutActions": "No se puede completar el proyecto: Debes crear al menos una acción y completarla antes de marcar el proyecto como completado.",
     "cannotCompleteWithPendingActions": "No se puede completar el proyecto: {{completed}} de {{total}} acciones completadas. Por favor, completa todas las acciones primero.",
+    "statusChanged": {
+      "active": "Estado del proyecto cambiado a Activo",
+      "someday": "Estado del proyecto cambiado a Algún Día/Quizás",
+      "completed": "🎉 ¡Felicitaciones! Proyecto marcado como Completado",
+      "cancelled": "Estado del proyecto cambiado a Cancelado",
+      "error": "Error al actualizar el estado del proyecto. Por favor, intenta de nuevo."
+    },
+    "projectCreated": "🎉 ¡Proyecto '{{title}}' creado exitosamente!",
     "create": {
       "title": "Crear Proyecto",
       "subtitle": "Transformación de 90 Días",
@@ -407,6 +475,7 @@
       "aiRecommendationMessage": "Basado en tu evaluación de la Rueda de la Vida, {{areaName}} tiene la puntuación más baja ({{score}}/10) y el mayor potencial de mejora! Comenzar aquí podría mejorar tu puntuación general de vida en un 15%.",
       "viewAllAreas": "Ver Detalles de Todas las Áreas",
       "creating": "Creando Proyecto...",
+      "errorCreating": "Error al crear el proyecto. Por favor, intenta de nuevo.",
       "back": "Volver",
       "createProject": "Crear Proyecto",
       "projects": "proyectos",
@@ -441,6 +510,9 @@
       "haveTip1": "Comienza con 'Habré...' - describe resultados y logros tangibles",
       "haveTip2": "Enfócate en hitos verificables y resultados específicos",
       "yourGoals": "Tus Objetivos {{type}}",
+      "newGoal": "Nuevo Objetivo",
+      "goal": "objetivo",
+      "goals": "objetivos",
       "addGoal": "Agregar Objetivo {{type}}",
       "noGoals": "Aún no hay objetivos {{type}}",
       "createFirst": "Crear Primer Objetivo {{type}}",
@@ -473,7 +545,13 @@
       "continueToActions": "Continuar a Acciones",
       "backToProject": "Volver al Proyecto",
       "minimumGoals": "Necesitas al menos 3 objetivos BE, 3 DO y 1 HAVE para continuar",
-      "characters": "caracteres"
+      "characters": "caracteres",
+      "goalCreated": "Objetivo creado exitosamente: {{type}}",
+      "errorCreating": "Error al crear el objetivo. Por favor, intenta de nuevo.",
+      "actionsBudget": "Presupuesto de Acciones",
+      "monthlyBudget": "Mensual",
+      "dailyBudget": "Diario",
+      "noActionsBudget": "Sin acciones con presupuesto"
     }
   },
   "assessment": {
@@ -551,6 +629,8 @@
       "chooseAnswer": "Elige tu respuesta para continuar",
       "submitting": "Enviando...",
       "completeAssessment": "Enviar Evaluación del Área",
+      "answersSubmitted": "✅ ¡Evaluación de {{area}} completada exitosamente!",
+      "errorSubmitting": "Error al enviar las respuestas. Por favor, intenta de nuevo.",
       "resetAnswers": "Resetear Respuestas",
       "resetModalTitle": "Resetear Respuestas",
       "resetModalMessage": "¿Estás seguro de que quieres resetear todas tus respuestas? Esta acción no se puede deshacer y volverás a la primera pregunta.",
@@ -588,6 +668,8 @@
     "noProjects": "Aún no hay proyectos en esta área",
     "createFirstProject": "Crea tu primer proyecto",
     "progress": "Progreso",
+    "timeline": "Línea de Tiempo",
+    "completedActions": "Acciones Completadas",
     "actionsComplete": "{{completed}} de {{total}} acciones completadas",
     "actionsMore": "{{remaining}} más",
     "status": {
@@ -602,6 +684,7 @@
     "endDate": "Fin",
     "buttons": {
       "goals": "📝 Objetivos",
+      "viewGoals": "Ver Objetivos",
       "edit": "Editar",
       "viewDetails": "Ver Detalles"
     }
@@ -716,6 +799,13 @@
     "medium": "Media",
     "high": "Alta",
     "time": "Tiempo (min)",
+    "budget": "Presupuesto",
+    "baseCapital": "Capital Base",
+    "totalCapital": "Capital Total",
+    "monthlyBudget": "Mensual",
+    "dailyBudget": "Diario",
+    "currency": "Moneda",
+    "optional": "Opcional",
     "dueDate": "Fecha Límite *",
     "dueDateHint": "El proyecto termina el",
     "dateGuidelines": "📅 Guías de Fecha",
@@ -735,7 +825,11 @@
     "min": "min",
     "daysOverdue": "d vencidos",
     "noActionsInContext": "No hay acciones en este contexto",
-    "createActionAbove": "Crea una nueva acción arriba"
+    "createActionAbove": "Crea una nueva acción arriba",
+    "actionCreated": "✅ ¡Acción '{{title}}' creada exitosamente!",
+    "actionCompleted": "🎉 ¡Acción '{{title}}' completada!",
+    "errorCreating": "Error al crear la acción. Por favor, intenta de nuevo.",
+    "errorCompleting": "Error al completar la acción. Por favor, intenta de nuevo."
   },
   "footer": {
     "createdBy": "Creado por",

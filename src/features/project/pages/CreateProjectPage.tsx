@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey, getSelectableAreas } from '@/shared/utils';
-import { PageHeader, Copyright, BottomNav } from '@/shared/components';
+import { PageHeader, Copyright, BottomNav, AlertBanner } from '@/shared/components';
 
 /**
  * Página de creación de proyecto - Multi-step
@@ -21,6 +21,7 @@ export const CreateProjectPage = () => {
   const [selectedAreaId, setSelectedAreaId] = useState<string>(urlAreaId || '');
   const [creating, setCreating] = useState(false);
   const [projectCountByArea, setProjectCountByArea] = useState<Map<string, number>>(new Map());
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Calcular fechas mínimas y máximas
   const getTomorrowDate = () => {
@@ -351,6 +352,10 @@ export const CreateProjectPage = () => {
         ...formData,
       });
 
+      // Guardar mensaje de éxito en sessionStorage para mostrarlo en la siguiente página
+      sessionStorage.setItem('projectCreated', 'true');
+      sessionStorage.setItem('projectTitle', formData.title);
+
       // Navigate back to appropriate page after creating project
       if (urlAreaId) {
         navigate(`/area/${urlAreaId}/projects`);
@@ -359,6 +364,7 @@ export const CreateProjectPage = () => {
       }
     } catch (error) {
       console.error('Error creating project:', error);
+      setErrorMessage(t('projects.create.errorCreating'));
     } finally {
       setCreating(false);
     }

@@ -129,6 +129,57 @@
       "emailAlreadyExists": "This email is already registered"
     }
   },
+  "errors": {
+    "unknown": "An unexpected error occurred",
+    "generic": "Something went wrong. Please try again.",
+    "auth": {
+      "invalidCredentials": "Invalid email or password",
+      "userNotFound": "User not found",
+      "unauthorized": "You are not authorized to perform this action",
+      "tokenExpired": "Your session has expired. Please log in again.",
+      "invalidToken": "Invalid authentication token",
+      "sessionExpired": "Your session has expired. Please log in again.",
+      "emailExists": "This email is already registered",
+      "phoneExists": "This phone number is already registered"
+    },
+    "network": {
+      "failedToFetch": "Unable to connect to the server. Please check your internet connection.",
+      "timeout": "The request took too long. Please try again."
+    },
+    "validation": {
+      "generic": "Please check your input and try again",
+      "invalidInput": "Invalid input",
+      "requiredField": "This field is required",
+      "invalidFormat": "Invalid format"
+    },
+    "server": {
+      "internal": "Server error. Please try again later.",
+      "unavailable": "Service temporarily unavailable. Please try again later.",
+      "badGateway": "Connection error. Please try again."
+    },
+    "permissions": {
+      "forbidden": "You don't have permission to access this resource"
+    },
+    "resource": {
+      "notFound": "Resource not found",
+      "alreadyExists": "This resource already exists"
+    },
+    "http": {
+      "generic": "Error {{statusCode}}: Request failed",
+      "badRequest": "Invalid request. Please check your data.",
+      "unauthorized": "Authentication required. Please log in.",
+      "forbidden": "Access denied.",
+      "notFound": "The requested resource was not found.",
+      "timeout": "Request timeout. Please try again.",
+      "conflict": "This resource already exists.",
+      "unprocessable": "Unable to process your request.",
+      "tooManyRequests": "Too many requests. Please wait a moment.",
+      "serverError": "Server error. Please try again later.",
+      "badGateway": "Connection error. Please try again.",
+      "serviceUnavailable": "Service temporarily unavailable.",
+      "gatewayTimeout": "Server timeout. Please try again."
+    }
+  },
   "home": {
     "title": "Life Wheel",
     "subtitle": "Your transformation journey",
@@ -302,6 +353,12 @@
       "cannotDelete": "Cannot delete: has {{count}} associated action",
       "cannotDelete_plural": "Cannot delete: has {{count}} associated actions"
     },
+    "contextCreated": "✅ Context '{{name}}' created successfully!",
+    "contextDeleted": "🗑️ Context '{{name}}' deleted successfully",
+    "profileUpdated": "✅ Profile updated successfully!",
+    "errorCreatingContext": "Error creating context. Please try again.",
+    "errorDeletingContext": "Error deleting context. Please try again.",
+    "errorUpdatingProfile": "Error updating profile. Please try again.",
     "actions": {
       "logout": "Log Out"
     }
@@ -309,6 +366,7 @@
   "projects": {
     "title": "Projects",
     "myProjects": "My Projects",
+    "newProject": "New Project",
     "createProject": "Create Project",
     "noProjects": "No projects yet",
     "noProjectsDescription": "Create your first project to start your transformation journey.",
@@ -320,6 +378,8 @@
     "status": "Status",
     "loading": "Loading projects...",
     "viewGoals": "View Goals",
+    "moreOptions": "More Options",
+    "lessOptions": "Less Options",
     "active": "Active",
     "completed": "Completed",
     "someday": "Someday",
@@ -363,6 +423,14 @@
     "cannotComplete": "Cannot Complete Project",
     "cannotCompleteWithoutActions": "Cannot complete project: You need to create at least one action and complete it before marking the project as completed.",
     "cannotCompleteWithPendingActions": "Cannot complete project: {{completed}} of {{total}} actions completed. Please complete all actions first.",
+    "statusChanged": {
+      "active": "Project status changed to Active",
+      "someday": "Project status changed to Someday/Maybe",
+      "completed": "🎉 Congratulations! Project marked as Completed",
+      "cancelled": "Project status changed to Cancelled",
+      "error": "Error updating project status. Please try again."
+    },
+    "projectCreated": "🎉 Project '{{title}}' created successfully!",
     "create": {
       "title": "Create Project",
       "subtitle": "90-Day Transformation",
@@ -407,6 +475,7 @@
       "aiRecommendationMessage": "Based on your Life Wheel assessment, {{areaName}} has the lowest score ({{score}}/10) and highest improvement potential! Starting here could improve your overall life score by 15%.",
       "viewAllAreas": "View All Areas Details",
       "creating": "Creating Project...",
+      "errorCreating": "Error creating project. Please try again.",
       "back": "Back",
       "createProject": "Create Project",
       "projects": "projects",
@@ -441,6 +510,9 @@
       "haveTip1": "Start with 'I will have...' - describe tangible outcomes and achievements",
       "haveTip2": "Focus on verifiable milestones and specific results",
       "yourGoals": "Your {{type}} Goals",
+      "newGoal": "New Goal",
+      "goal": "goal",
+      "goals": "goals",
       "addGoal": "Add {{type}} Goal",
       "noGoals": "No {{type}} goals yet",
       "createFirst": "Create First {{type}} Goal",
@@ -473,7 +545,13 @@
       "continueToActions": "Continue to Actions",
       "backToProject": "Back to Project",
       "minimumGoals": "You need at least 3 BE, 3 DO, and 1 HAVE goals to continue",
-      "characters": "characters"
+      "characters": "characters",
+      "goalCreated": "Goal created successfully: {{type}}",
+      "errorCreating": "Error creating goal. Please try again.",
+      "actionsBudget": "Actions Budget",
+      "monthlyBudget": "Monthly",
+      "dailyBudget": "Daily",
+      "noActionsBudget": "No actions with budget"
     }
   },
   "assessment": {
@@ -551,6 +629,8 @@
       "chooseAnswer": "Choose your answer to continue",
       "submitting": "Submitting...",
       "completeAssessment": "Send Area Assessment",
+      "answersSubmitted": "✅ {{area}} assessment completed successfully!",
+      "errorSubmitting": "Error submitting answers. Please try again.",
       "resetAnswers": "Reset Answers",
       "resetModalTitle": "Reset Answers",
       "resetModalMessage": "Are you sure you want to reset all your answers? This action cannot be undone and you will return to the first question.",
@@ -588,6 +668,8 @@
     "noProjects": "No projects yet in this area",
     "createFirstProject": "Create your first project",
     "progress": "Progress",
+    "timeline": "Timeline",
+    "completedActions": "Completed Actions",
     "actionsComplete": "{{completed}} of {{total}} actions complete",
     "actionsMore": "{{remaining}} more",
     "status": {
@@ -602,6 +684,7 @@
     "endDate": "End",
     "buttons": {
       "goals": "📝 Goals",
+      "viewGoals": "View Goals",
       "edit": "Edit",
       "viewDetails": "View Details"
     }
@@ -716,6 +799,13 @@
     "medium": "Medium",
     "high": "High",
     "time": "Time (min)",
+    "budget": "Budget",
+    "baseCapital": "Base Capital",
+    "totalCapital": "Total Capital",
+    "monthlyBudget": "Monthly",
+    "dailyBudget": "Daily",
+    "currency": "Currency",
+    "optional": "Optional",
     "dueDate": "Due Date *",
     "dueDateHint": "Project ends on",
     "dateGuidelines": "📅 Date Guidelines",
@@ -735,7 +825,11 @@
     "min": "min",
     "daysOverdue": "d overdue",
     "noActionsInContext": "No actions in this context",
-    "createActionAbove": "Create a new action above"
+    "createActionAbove": "Create a new action above",
+    "actionCreated": "✅ Action '{{title}}' created successfully!",
+    "actionCompleted": "🎉 Action '{{title}}' completed!",
+    "errorCreating": "Error creating action. Please try again.",
+    "errorCompleting": "Error completing action. Please try again."
   },
   "footer": {
     "createdBy": "Created by",

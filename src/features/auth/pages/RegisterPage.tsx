@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/context';
 import { registerUseCase } from '@/core/usecases/auth/registerUseCase';
 import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
 import { LanguageSelector, Copyright } from '@/shared/components';
+import { translateError } from '@/shared/utils';
 
 /**
  * Página de registro
@@ -48,14 +49,9 @@ export const RegisterPage = () => {
     } catch (error) {
       console.error('Error de registro:', error);
 
-      // Manejar diferentes tipos de errores
-      if (error instanceof Error) {
-        setError(error.message);
-      } else if (typeof error === 'object' && error !== null && 'message' in error) {
-        setError(String(error.message));
-      } else {
-        setError(t('auth.errors.registerFailed'));
-      }
+      // Traducir el error usando la utilidad
+      const translatedError = translateError(error, t);
+      setError(translatedError);
     } finally {
       setIsLoading(false);
     }

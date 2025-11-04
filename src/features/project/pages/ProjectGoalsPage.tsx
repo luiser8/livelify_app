@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { goalService, projectService, actionService, lifeWheelService, type Goal, type GoalType, type Project } from '@/infrastructure/services';
-import { PageHeader, BottomNav, Copyright } from '@/shared/components';
+import { PageHeader, BottomNav, Copyright, AlertBanner } from '@/shared/components';
 import { getSelectableAreas } from '@/shared/utils';
 
 /**
@@ -20,12 +20,12 @@ export const ProjectGoalsPage = () => {
   const [currentStep, setCurrentStep] = useState<'BE' | 'DO' | 'HAVE'>('BE');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Form state para crear goal
   const [formData, setFormData] = useState({
     content: '',
-    baseCapital: 0,
-    currencyCode: 'USD',
   });
 
   useEffect(() => {
@@ -107,13 +107,19 @@ export const ProjectGoalsPage = () => {
         projectDetailId: project.detail.id,
         goalType,
         content: formData.content,
-        baseCapital: formData.baseCapital,
-        currencyCode: formData.currencyCode,
       });
 
       setGoals([...goals, result.goal]);
-      setFormData({ content: '', baseCapital: 0, currencyCode: 'USD' });
+      setFormData({ content: '' });
       setShowCreateForm(false);
+
+      // Mostrar mensaje de éxito
+      const typeLabels = {
+        'BE': t('projects.goals.beGoals'),
+        'DO': t('projects.goals.doGoals'),
+        'HAVE': t('projects.goals.haveGoals')
+      };
+      setSuccessMessage(t('projects.goals.goalCreated', { type: typeLabels[goalType] }));
 
       // Avanzar al siguiente step
       if (goalType === 'BE' && goals.filter(g => g.goalType === 'BE').length >= 2) {
@@ -123,6 +129,7 @@ export const ProjectGoalsPage = () => {
       }
     } catch (error) {
       console.error('Error creating goal:', error);
+      setErrorMessage(t('projects.goals.errorCreating'));
     } finally {
       setCreating(false);
     }
@@ -228,71 +235,72 @@ export const ProjectGoalsPage = () => {
         showFilter={false}
       />
 
-      {/* Goals Stats */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{goals.length}</div>
-              <div className="text-xs text-gray-500">{t('projects.goals.totalGoals')}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{beGoals.length}</div>
-              <div className="text-xs text-gray-500">BE</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{doGoals.length}</div>
-              <div className="text-xs text-gray-500">DO</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{haveGoals.length}</div>
-              <div className="text-xs text-gray-500">HAVE</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Success Message Banner */}
+      {successMessage && (
+        <AlertBanner
+          type="success"
+          title={t('common.success')}
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+          autoCloseDuration={3000}
+        />
+      )}
+
+      {/* Error Message Banner */}
+      {errorMessage && (
+        <AlertBanner
+          type="error"
+          title={t('common.error')}
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+          autoCloseDuration={5000}
+        />
+      )}
 
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto w-full px-6">
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <button
               onClick={() => setCurrentStep('BE')}
-              className={`flex-1 py-3 px-4 font-semibold transition-all relative ${
+              className={`flex-1 py-4 px-6 font-semibold transition-all relative ${
                 currentStep === 'BE' 
-                  ? 'text-red-600 border-b-2 border-red-600' 
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-red-600 border-b-3 border-red-600' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <div className="flex items-center justify-center gap-2">
-                <span>🎯 {t('projects.goals.beGoals')}</span>
-                <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{beGoals.length}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                <span className="text-2xl sm:text-xl">🎯</span>
+                <span className="text-sm sm:text-base">{t('projects.goals.beGoals')}</span>
+                <span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-bold">{beGoals.length}</span>
               </div>
             </button>
             <button
               onClick={() => setCurrentStep('DO')}
-              className={`flex-1 py-3 px-4 font-semibold transition-all relative ${
+              className={`flex-1 py-4 px-6 font-semibold transition-all relative ${
                 currentStep === 'DO' 
-                  ? 'text-purple-600 border-b-2 border-purple-600' 
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-purple-600 border-b-3 border-purple-600' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <div className="flex items-center justify-center gap-2">
-                <span>⚡ {t('projects.goals.doGoals')}</span>
-                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{doGoals.length}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                <span className="text-2xl sm:text-xl">⚡</span>
+                <span className="text-sm sm:text-base">{t('projects.goals.doGoals')}</span>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-bold">{doGoals.length}</span>
               </div>
             </button>
             <button
               onClick={() => setCurrentStep('HAVE')}
-              className={`flex-1 py-3 px-4 font-semibold transition-all relative ${
+              className={`flex-1 py-4 px-6 font-semibold transition-all relative ${
                 currentStep === 'HAVE' 
-                  ? 'text-blue-600 border-b-2 border-blue-600' 
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-b-3 border-blue-600' 
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <div className="flex items-center justify-center gap-2">
-                <span>🏆 {t('projects.goals.haveGoals')}</span>
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{haveGoals.length}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                <span className="text-2xl sm:text-xl">🏆</span>
+                <span className="text-sm sm:text-base">{t('projects.goals.haveGoals')}</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-bold">{haveGoals.length}</span>
               </div>
             </button>
           </div>
@@ -301,11 +309,36 @@ export const ProjectGoalsPage = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto w-full px-6 py-6">
-        {/* Tab Header */}
-        <div className={`bg-gradient-to-r ${getStepColor()} rounded-2xl p-6 mb-6 text-white shadow-lg`}>
-          <div className="text-5xl mb-3">{getStepIcon()}</div>
-          <h2 className="text-3xl font-bold mb-2">{getStepTitle()}</h2>
-          <p className="text-white/90 text-lg">{getStepSubtitle()}</p>
+        {/* Header con botón de crear */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="text-4xl">{getStepIcon()}</div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{getStepTitle()}</h2>
+              <p className="text-sm text-gray-600">{currentGoals.length} {currentGoals.length === 1 ? t('projects.goals.goal') : t('projects.goals.goals')}</p>
+            </div>
+          </div>
+
+          {currentGoals.length < 3 && (
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className={`w-full sm:w-auto px-4 sm:px-6 py-2 text-sm sm:text-base rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap ${
+                currentStep === 'BE' ? 'bg-red-600 hover:bg-red-700' :
+                currentStep === 'DO' ? 'bg-purple-600 hover:bg-purple-700' :
+                'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {t('projects.goals.newGoal')}
+            </button>
+          )}
+        </div>
+
+        {/* Subtitle card */}
+        <div className={`bg-linear-to-r ${getStepColor()} rounded-xl p-4 mb-6 text-white shadow-md`}>
+          <p className="text-white/95 text-sm sm:text-base">{getStepSubtitle()}</p>
         </div>
 
         {/* Tips */}
@@ -355,24 +388,59 @@ export const ProjectGoalsPage = () => {
           </div>
         </div>
 
+        {/* Create Form - AHORA APARECE PRIMERO */}
+        {showCreateForm && currentGoals.length < 3 && (
+          <div className={`rounded-2xl p-6 mb-6 border-2 shadow-lg animate-slideDown ${
+            currentStep === 'BE' ? 'bg-red-50 border-red-300' :
+            currentStep === 'DO' ? 'bg-purple-50 border-purple-300' :
+            'bg-blue-50 border-blue-300'
+          }`}>
+            <h4 className="font-bold text-gray-900 text-xl mb-4">✨ {t('projects.goals.createNew', { type: currentStep })}</h4>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('projects.goals.goalDescription')} *
+                </label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder={`e.g., ${goalExamples[currentStep][0]}`}
+                  maxLength={120}
+                />
+                <p className="text-xs text-gray-500 mt-1">{formData.content.length}/120 {t('projects.goals.characters')}</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setFormData({ content: '' });
+                  }}
+                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  {t('projects.goals.cancel')}
+                </button>
+                <button
+                  onClick={() => handleCreateGoal(currentStep)}
+                  disabled={creating || !formData.content.trim()}
+                  className={`flex-1 py-3 px-4 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    currentStep === 'BE' ? 'bg-red-600 hover:bg-red-700' :
+                    currentStep === 'DO' ? 'bg-purple-600 hover:bg-purple-700' :
+                    'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {creating ? t('projects.goals.creating') : `✓ ${t('projects.goals.addGoal', { type: currentStep })}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Current Goals */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-900">{t('projects.goals.yourGoals', { type: currentStep })}</h3>
-            {currentGoals.length < 3 && (
-              <button
-                onClick={() => setShowCreateForm(!showCreateForm)}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  currentStep === 'BE' ? 'bg-red-600 hover:bg-red-700' :
-                  currentStep === 'DO' ? 'bg-purple-600 hover:bg-purple-700' :
-                  'bg-blue-600 hover:bg-blue-700'
-                } text-white`}
-              >
-                + {t('projects.goals.addGoal', { type: currentStep })}
-              </button>
-            )}
-          </div>
-
           {currentGoals.length === 0 ? (
             <div className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-gray-300">
               <div className="text-6xl mb-4">{getStepIcon()}</div>
@@ -420,20 +488,39 @@ export const ProjectGoalsPage = () => {
                         )}
                       </div>
                       <p className="text-gray-900 text-lg mb-3 leading-relaxed">{goal.content}</p>
-                      {goal.baseCapital > 0 && (
-                        <div className="flex items-center gap-6 text-sm bg-gray-50 rounded-lg p-3">
-                          <div>
-                            <span className="text-gray-500">{t('projects.goals.baseCapital')}: </span>
-                            <span className="font-bold text-gray-900">{goal.currencyCode} ${goal.baseCapital.toLocaleString()}</span>
+                      
+                      {/* Budget Info */}
+                      {goal.totalMonthlyBudget !== null && goal.totalDailyBudget !== null ? (
+                        <div className="mt-3 p-3 bg-linear-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-900">{t('projects.goals.actionsBudget')}</span>
                           </div>
-                          <div>
-                            <span className="text-gray-500">{t('projects.goals.multiplier')}: </span>
-                            <span className="font-bold text-indigo-600">{goal.multiplier}x</span>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="bg-white/70 rounded px-2 py-1">
+                              <span className="text-gray-600 block">{t('projects.goals.monthlyBudget')}</span>
+                              <span className="font-bold text-emerald-800">
+                                ${goal.totalMonthlyBudget.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="bg-white/70 rounded px-2 py-1">
+                              <span className="text-gray-600 block">{t('projects.goals.dailyBudget')}</span>
+                              <span className="font-bold text-teal-800">
+                                ${goal.totalDailyBudget.toFixed(2)}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-gray-500">{t('projects.goals.target')}: </span>
-                            <span className="font-bold text-green-600">{goal.currencyCode} ${(goal.baseCapital * goal.multiplier).toLocaleString()}</span>
-                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="text-xs text-gray-500 text-center">
+                            {t('projects.goals.noActionsBudget')}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -476,89 +563,6 @@ export const ProjectGoalsPage = () => {
             </div>
           )}
         </div>
-
-        {/* Create Form */}
-        {showCreateForm && currentGoals.length < 3 && (
-          <div className={`rounded-2xl p-6 mb-6 border-2 shadow-lg ${
-            currentStep === 'BE' ? 'bg-red-50 border-red-200' :
-            currentStep === 'DO' ? 'bg-purple-50 border-purple-200' :
-            'bg-blue-50 border-blue-200'
-          }`}>
-            <h4 className="font-bold text-gray-900 text-xl mb-4">✨ {t('projects.goals.createNew', { type: currentStep })}</h4>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('projects.goals.goalDescription')} *
-                </label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder={`e.g., ${goalExamples[currentStep][0]}`}
-                  maxLength={120}
-                />
-                <p className="text-xs text-gray-500 mt-1">{formData.content.length}/120 {t('projects.goals.characters')}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('projects.goals.baseCapital')} ({t('projects.goals.optional')})
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.baseCapital || ''}
-                    onChange={(e) => setFormData({ ...formData, baseCapital: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="0"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('projects.goals.currencyCode')}
-                  </label>
-                  <select
-                    value={formData.currencyCode}
-                    onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="MXN">MXN</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setFormData({ content: '', baseCapital: 0, currencyCode: 'USD' });
-                  }}
-                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  {t('projects.goals.cancel')}
-                </button>
-                <button
-                  onClick={() => handleCreateGoal(currentStep)}
-                  disabled={creating || !formData.content.trim()}
-                  className={`flex-1 py-3 px-4 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    currentStep === 'BE' ? 'bg-red-600 hover:bg-red-700' :
-                    currentStep === 'DO' ? 'bg-purple-600 hover:bg-purple-700' :
-                    'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {creating ? t('projects.goals.creating') : `✓ ${t('projects.goals.addGoal', { type: currentStep })}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Examples Section */}
         {!showCreateForm && (

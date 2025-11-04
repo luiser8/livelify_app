@@ -13,6 +13,7 @@ export const AssessmentIntroPage = () => {
   const { t } = useTranslation();
   const [lifeWheel, setLifeWheel] = useState<LifeWheelResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [markingAsAnswered, setMarkingAsAnswered] = useState(false);
 
   useEffect(() => {
     const fetchLifeWheel = async () => {
@@ -35,6 +36,24 @@ export const AssessmentIntroPage = () => {
       return;
     }
     navigate(`/assessment/area/${areaId}`);
+  };
+
+  const handleViewLifeWheel = async () => {
+    setMarkingAsAnswered(true);
+    try {
+      // Marcar como respondido en el backend
+      await lifeWheelService.markAsAnswered();
+      
+      // El cache ya se limpió automáticamente en el servicio
+      // Navegar al home donde se recargará con isAnswered: true
+      navigate('/home');
+    } catch (error) {
+      console.error('Error marking as answered:', error);
+      // Navegar de todas formas
+      navigate('/home');
+    } finally {
+      setMarkingAsAnswered(false);
+    }
   };
 
   // Verificar si todas las áreas están completadas
@@ -88,10 +107,11 @@ export const AssessmentIntroPage = () => {
               </div>
               
               <button
-                onClick={() => navigate('/home')}
-                className="w-full py-4 sm:py-5 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg transform hover:scale-105"
+                onClick={handleViewLifeWheel}
+                disabled={markingAsAnswered}
+                className="w-full py-4 sm:py-5 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl sm:rounded-2xl transition-all shadow-lg text-base sm:text-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t('assessment.intro.viewLifeWheel')} →
+                {markingAsAnswered ? t('assessment.intro.loading') : `${t('assessment.intro.viewLifeWheel')} →`}
               </button>
             </div>
           </div>

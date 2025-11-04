@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader, ConfirmModal, Copyright, Pagination } from '@/shared/components';
+import { BottomNav, PageHeader, ConfirmModal, Copyright, Pagination, AlertBanner } from '@/shared/components';
 import { useAuth } from '@/features/auth/context';
 import { contextService, userService, type Context, type UpdateUserData } from '@/infrastructure/services';
 import countryCodes from '@/shared/utils/countryCodesData';
@@ -40,6 +40,8 @@ export const ProfilePage = () => {
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,8 +100,12 @@ export const ProfilePage = () => {
       setAllContexts([...allContexts, newContext]);
       setNewContextName('');
       setShowCreateForm(false);
+      
+      // Mostrar mensaje de éxito
+      setSuccessMessage(t('profile.contextCreated', { name: contextNameWithAt }));
     } catch (error) {
       console.error('Error creating context:', error);
+      setErrorMessage(t('profile.errorCreatingContext'));
     } finally {
       setCreating(false);
     }
@@ -128,6 +134,9 @@ export const ProfilePage = () => {
       await contextService.deleteContext(contextToDelete.id);
       setAllContexts(allContexts.filter(ctx => ctx.id !== contextToDelete.id));
       setShowDeleteModal(false);
+      
+      // Mostrar mensaje de éxito
+      setSuccessMessage(t('profile.contextDeleted', { name: contextToDelete.name }));
       setContextToDelete(null);
 
       // Si después de eliminar la página actual queda vacía, retroceder a la anterior
@@ -136,7 +145,9 @@ export const ProfilePage = () => {
       }
     } catch (error) {
       console.error('Error deleting context:', error);
-      alert(t('profile.contexts.deleteError'));
+      setErrorMessage(t('profile.errorDeletingContext'));
+      setShowDeleteModal(false);
+      setContextToDelete(null);
     } finally {
       setDeleting(false);
     }
@@ -281,9 +292,13 @@ export const ProfilePage = () => {
         saveUserToStorage(updatedUser);
       }
 
+      // Mostrar mensaje de éxito
+      setSuccessMessage(t('profile.profileUpdated'));
+
       handleCloseEditModal();
     } catch (error) {
       console.error('Error updating profile:', error);
+      setErrorMessage(t('profile.errorUpdatingProfile'));
     } finally {
       setUpdating(false);
     }
@@ -298,6 +313,28 @@ export const ProfilePage = () => {
         showSearch={false}
         showFilter={false}
       />
+
+      {/* Success Message Banner */}
+      {successMessage && (
+        <AlertBanner
+          type="success"
+          title={t('common.success')}
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+          autoCloseDuration={3000}
+        />
+      )}
+
+      {/* Error Message Banner */}
+      {errorMessage && (
+        <AlertBanner
+          type="error"
+          title={t('common.error')}
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+          autoCloseDuration={5000}
+        />
+      )}
 
       <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
         <div className="space-y-4 sm:space-y-6">

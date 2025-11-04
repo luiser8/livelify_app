@@ -8,5 +8,6 @@ export * from './lifeAreaHelpers';
 export * from './pdfCache';
 export * from './lifeWheelHelpers';
 export * from './phoneFormatters';
+export * from './errorTranslator';
 export { apiCache, cacheApiCall, ApiCache, type CacheConfig } from './apiCache';
 

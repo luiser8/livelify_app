@@ -166,13 +166,15 @@ export const HomePage = () => {
     // Nuevo comportamiento solicitado:
     // Si NO hay localStorage válido y NO hay backendSelected,
     // y SÍ hay empates/duplicados (result.hasMultipleTied o candidateAreas>3)
+    // Y el usuario ha completado todas las evaluaciones (isAnswered === true)
     // → mostrar modal para que el usuario elija.
     // -----------------------------
     const noStorage = !storedSelection;
     const noBackend = !Array.isArray(backendSelected) || backendSelected.length === 0;
     const hasTies = Boolean(result.hasMultipleTied) || (result.candidateAreas && result.candidateAreas.length > 3);
+    const hasCompletedAssessment = lifeWheelResponse?.isAnswered === true;
 
-    if (noStorage && noBackend && hasTies) {
+    if (noStorage && noBackend && hasTies && hasCompletedAssessment) {
       setSelectionData({
         candidateAreas: result.candidateAreas || [],
         autoSelectedAreas: result.autoSelectedAreas || [],
@@ -196,19 +198,6 @@ export const HomePage = () => {
       const newEnabledAreas = calculateEnabledAreas(lifeWheel.lifeAreas, lifeWheel);
       setEnabledAreaIds(newEnabledAreas as Set<string>);
 
-      console.log('🔍 DEBUG - Condiciones para unlock automático:', {
-        allAreasAnswered,
-        showSelectionModal,
-        isAnswered: lifeWheel.isAnswered,
-        enabledAreasSize: newEnabledAreas.size,
-        allAreas: lifeWheel.lifeAreas.map(a => ({
-          name: a.areaName,
-          score: a.score,
-          isBlocked: a.isBlocked,
-          isArchived: a.isArchived
-        }))
-      });
-
       // 🔹 Verificar si ya se desbloquearon las áreas (desde localStorage)
       const storedSelection = localStorage.getItem('userAreaSelection');
       let alreadyUnlocked = false;
@@ -216,19 +205,17 @@ export const HomePage = () => {
       if (storedSelection) {
         try {
           const parsed = JSON.parse(storedSelection);
-          alreadyUnlocked = parsed.isAnswered === true;
-          console.log('🔍 DEBUG - localStorage:', { alreadyUnlocked, parsed });
+          alreadyUnlocked = parsed.isAnswered === true && parsed.areasUnlocked === true;
         } catch (e) {
           console.error('Error parsing localStorage:', e);
         }
       }
 
       // 🔹 Si todas las áreas están respondidas Y NO hay modal mostrado
-      // Y isAnswered === false (primera vez completando el assessment)
-      // Y NO se ha desbloqueado previamente (localStorage.isAnswered !== true)
+      // Y isAnswered === true (usuario completó el assessment)
+      // Y NO se ha desbloqueado previamente (localStorage.areasUnlocked !== true)
       // → Desbloquear las 3 áreas automáticamente
-      if (allAreasAnswered && !showSelectionModal && lifeWheel.isAnswered === false && !alreadyUnlocked) {
-        console.log('✅ Cumple condiciones para unlock automático');
+      if (allAreasAnswered && !showSelectionModal && lifeWheel.isAnswered === true && !alreadyUnlocked) {
         if (newEnabledAreas.size === 3) {
           const areaIdsToUnlock = Array.from(newEnabledAreas) as string[];
           
@@ -241,18 +228,11 @@ export const HomePage = () => {
             )
             .map(area => area.id);
           
-          console.log('🚀 Enviando POST /unlock-areas con áreas a MANTENER BLOQUEADAS:', areaIdsToKeepBlocked);
-          console.log('ℹ️ Áreas que se DESBLOQUEARÁN:', areaIdsToUnlock);
-          console.log('ℹ️ Áreas con 10/10 excluidas del POST (se manejan en otro flujo)');
-          console.log('📊 Total áreas a enviar:', areaIdsToKeepBlocked.length, '(debe ser ~3)');
-          
           // Llamar al servicio de unlock enviando las áreas que permanecerán bloqueadas
           lifeWheelService.unlockAreas({
             lifeWheelAreaIds: areaIdsToKeepBlocked
           })
             .then(() => {
-              console.log('✅ Áreas desbloqueadas automáticamente (sin empates)');
-              
               // Guardar en localStorage que ya se desbloquearon
               const areaIdsWithAreaId = lifeWheel.lifeAreas
                 .filter(area => areaIdsToUnlock.includes(area.id))
@@ -269,29 +249,22 @@ export const HomePage = () => {
                 JSON.stringify({
                   areaIds: areaIdsToUnlock,
                   areaIdsWithAreaId,
-                  scores: currentScores, // 🆕 Guardar scores iniciales
+                  scores: currentScores,
                   timestamp: new Date().toISOString(),
                   lifeWheelId: lifeWheel.id,
-                  isAnswered: true // ✨ Marcar como ya respondido
+                  isAnswered: true,
+                  areasUnlocked: true // ✨ Flag para evitar enviar múltiples veces
                 })
               );
             })
             .catch((error) => {
-              console.error('⚠️ Error al desbloquear áreas automáticamente:', error);
+              console.error('Error al desbloquear áreas automáticamente:', error);
             });
-        } else {
-          console.log('⚠️ No hay exactamente 3 áreas habilitadas:', newEnabledAreas.size);
         }
-      } else {
-        console.log('❌ NO cumple condiciones para unlock automático');
       }
 
       // 🆕 NUEVA VALIDACIÓN: Detectar áreas que alcanzaron 10/10 y bloquearlas automáticamente
       // Esta validación se ejecuta SIEMPRE que haya localStorage (independiente del unlock automático)
-      console.log('🔍 DEBUG - Verificando localStorage para detección 10/10:', {
-        hasStoredSelection: !!storedSelection,
-        enabledAreasSize: newEnabledAreas.size
-      });
       
       // 🆕 NUEVO: Validar si el backend tiene isAnswered=false y enviar POST
       // Esto sucede cuando el usuario vuelve a Home después del assessment inicial
@@ -306,30 +279,12 @@ export const HomePage = () => {
       
       const alreadySynced = parsedStorage?.backendSynced === true && backendIsActuallySynced;
       
-      console.log('🔍 DEBUG - Validando sincronización con backend:', {
-        hasStoredSelection: !!storedSelection,
-        backendIsAnswered: lifeWheel.isAnswered,
-        backendNeedsSync,
-        localStorageSynced: parsedStorage?.backendSynced === true,
-        blockedAreasInBackend,
-        expectedBlockedAreas,
-        backendIsActuallySynced,
-        alreadySynced,
-        enabledAreasSize: newEnabledAreas.size
-      });
-      
       if (backendNeedsSync && !alreadySynced) {
-        console.log('🚀 Backend tiene isAnswered=false - Enviando POST para sincronizar');
-        
         // Obtener áreas a mantener bloqueadas (las que NO están en las 3 habilitadas)
         // En este caso de primera sincronización, incluir TODAS las áreas no seleccionadas
         const areaIdsToKeepBlocked = lifeWheel.lifeAreas
           .filter(area => !enabledAreasList.includes(area.id))
           .map(area => area.id);
-        
-        console.log('📋 Áreas DESBLOQUEADAS (frontend):', enabledAreasList);
-        console.log('🔒 Áreas BLOQUEADAS (enviar al backend):', areaIdsToKeepBlocked);
-        console.log('📊 Total áreas bloqueadas en POST:', areaIdsToKeepBlocked.length);
         
         // Enviar POST al backend con las áreas a MANTENER BLOQUEADAS
         // (el endpoint unlock-areas recibe las áreas a bloquear, no las que se desbloquean)
@@ -337,8 +292,6 @@ export const HomePage = () => {
           lifeWheelAreaIds: areaIdsToKeepBlocked
         })
           .then(async () => {
-            console.log('✅ POST enviado - Backend sincronizado');
-            
             // Marcar como sincronizado en localStorage
             const currentScores: Record<string, number> = {};
             lifeWheel.lifeAreas.forEach(area => {
@@ -366,22 +319,17 @@ export const HomePage = () => {
             try {
               const updatedLifeWheel = await lifeWheelService.getMyLifeWheel();
               setLifeWheel(updatedLifeWheel);
-              console.log('✅ LifeWheel actualizado desde backend');
             } catch (error) {
-              console.error('⚠️ Error al recargar lifeWheel:', error);
+              console.error('Error al recargar lifeWheel:', error);
             }
           })
           .catch((error) => {
-            console.error('⚠️ Error al enviar POST unlock-areas:', error);
+            console.error('Error al enviar POST unlock-areas:', error);
           });
-      } else if (backendNeedsSync && alreadySynced) {
-        console.log('ℹ️ Backend ya fue sincronizado anteriormente');
       }
       
       // Si NO hay localStorage pero ya se desbloquearon áreas, inicializarlo
       if (!storedSelection && newEnabledAreas.size > 0 && allAreasAnswered) {
-        console.log('🔧 Inicializando localStorage con scores actuales');
-        
         const currentScores: Record<string, number> = {};
         lifeWheel.lifeAreas.forEach(area => {
           currentScores[area.id] = area.score;
@@ -404,8 +352,6 @@ export const HomePage = () => {
             backendSynced: backendNeedsSync // Marcar si se necesitó sync
           })
         );
-        
-        console.log('✅ localStorage inicializado');
       }
       
       if (storedSelection) {
@@ -413,39 +359,24 @@ export const HomePage = () => {
           const parsed = JSON.parse(storedSelection);
           const previousScores = parsed.scores || {};
           
-          console.log('🔍 DEBUG - Comparando scores:', {
-            previousScores,
-            hasScores: Object.keys(previousScores).length > 0,
-            currentScores: lifeWheel.lifeAreas.map(a => ({ id: a.id, name: a.areaName, score: a.score }))
-          });
-          
           // Detectar áreas que alcanzaron 10/10
           const areasReachedMaxScore = lifeWheel.lifeAreas.filter(area => {
             const previousScore = previousScores[area.id];
             const currentScore = area.score;
-            
-            console.log(`🔍 Área ${area.areaName}: prev=${previousScore}, curr=${currentScore}`);
             
             // Si antes tenía menos de 10 y ahora tiene 10 o más
             return previousScore !== undefined && previousScore < 10 && currentScore >= 10;
           });
 
           if (areasReachedMaxScore.length > 0) {
-            console.log('🎯 Áreas que alcanzaron 10/10:', areasReachedMaxScore.map(a => a.areaName));
-            
             // Obtener IDs de SOLO las áreas que alcanzaron 10/10 para bloquearlas
             const areaIdsToBlock = areasReachedMaxScore.map(area => area.id);
-            
-            console.log('🔒 Enviando POST /unlock-areas para bloquear SOLO áreas con 10/10:', areaIdsToBlock);
-            console.log('📊 Total áreas en POST:', areaIdsToBlock.length);
             
             // Enviar al backend SOLO las áreas que alcanzaron 10/10
             lifeWheelService.unlockAreas({
               lifeWheelAreaIds: areaIdsToBlock
             })
               .then(async () => {
-                console.log('✅ Áreas con 10/10 bloqueadas automáticamente');
-                
                 // Actualizar enabledAreaIds removiendo las áreas con 10/10
                 const updatedEnabledAreas = Array.from(newEnabledAreas as Set<string>).filter(
                   (id: string) => !areaIdsToBlock.includes(id)
@@ -456,16 +387,13 @@ export const HomePage = () => {
                 try {
                   const updatedLifeWheel = await lifeWheelService.getMyLifeWheel();
                   setLifeWheel(updatedLifeWheel);
-                  console.log('✅ LifeWheel actualizado desde backend');
                 } catch (error) {
-                  console.error('⚠️ Error al recargar lifeWheel:', error);
+                  console.error('Error al recargar lifeWheel:', error);
                 }
               })
               .catch((error) => {
-                console.error('⚠️ Error al bloquear áreas con 10/10:', error);
+                console.error('Error al bloquear áreas con 10/10:', error);
               });
-          } else {
-            console.log('✅ No se detectaron áreas que alcanzaron 10/10');
           }
           
           // IMPORTANTE: Actualizar scores SIEMPRE (no solo cuando hay cambios)
@@ -473,8 +401,6 @@ export const HomePage = () => {
           lifeWheel.lifeAreas.forEach(area => {
             currentScores[area.id] = area.score;
           });
-          
-          console.log('💾 Actualizando scores en localStorage:', currentScores);
           
           localStorage.setItem(
             'userAreaSelection',
@@ -508,7 +434,7 @@ export const HomePage = () => {
         if (storedSelection) {
           try {
             const parsed = JSON.parse(storedSelection);
-            alreadyUnlocked = parsed.isAnswered === true;
+            alreadyUnlocked = parsed.isAnswered === true && parsed.areasUnlocked === true;
           } catch (e) {
             console.error('Error parsing localStorage:', e);
           }
@@ -553,14 +479,8 @@ export const HomePage = () => {
         });
 
         // 4.5️⃣ Desbloquear las 3 áreas seleccionadas 
-        // (solo si isAnswered === false Y no se ha desbloqueado previamente)
-        console.log('🔍 DEBUG - Modal confirmado. Condiciones unlock:', {
-          isAnswered: lifeWheel.isAnswered,
-          alreadyUnlocked,
-          selectedAreaIds
-        });
-        
-        if (lifeWheel.isAnswered === false && !alreadyUnlocked) {
+        // (solo si isAnswered === true Y no se ha desbloqueado previamente)
+        if (lifeWheel.isAnswered === true && !alreadyUnlocked) {
           try {
             // 🔹 Obtener las áreas que PERMANECERÁN BLOQUEADAS (las que NO están en selectedAreaIds)
             // IMPORTANTE: NO incluir áreas con 10/10 (se manejan en otro flujo)
@@ -571,24 +491,13 @@ export const HomePage = () => {
               )
               .map(area => area.id);
             
-            console.log('🚀 Enviando POST /unlock-areas desde modal con áreas a MANTENER BLOQUEADAS:', areaIdsToKeepBlocked);
-            console.log('ℹ️ Áreas que se DESBLOQUEARÁN:', selectedAreaIds);
-            console.log('ℹ️ Áreas con 10/10 excluidas del POST (se manejan en otro flujo)');
-            console.log('📊 Total áreas a enviar:', areaIdsToKeepBlocked.length, '(debe ser ~3)');
-            
             await lifeWheelService.unlockAreas({
               lifeWheelAreaIds: areaIdsToKeepBlocked
             });
-            console.log('✅ Áreas desbloqueadas desde modal');
           } catch (unlockError) {
-            console.error('⚠️ Error al desbloquear áreas (no crítico):', unlockError);
+            console.error('Error al desbloquear áreas (no crítico):', unlockError);
             // No bloqueamos el flujo si falla el unlock
           }
-        } else {
-          console.log('❌ NO se envió POST desde modal. Razones:', {
-            isAnsweredFalse: lifeWheel.isAnswered === false,
-            notAlreadyUnlocked: !alreadyUnlocked
-          });
         }
 
         // 5️⃣ Actualizar localStorage para recordar la selección del usuario
@@ -600,10 +509,11 @@ export const HomePage = () => {
             scores: lifeWheel.lifeAreas.reduce((acc, area) => {
               acc[area.id] = area.score;
               return acc;
-            }, {} as Record<string, number>), // 🆕 Guardar scores iniciales
+            }, {} as Record<string, number>),
             timestamp: new Date().toISOString(),
             lifeWheelId: lifeWheel.id,
-            isAnswered: true // ✨ Marcar como ya respondido
+            isAnswered: true,
+            areasUnlocked: true // ✨ Flag para evitar enviar múltiples veces
           })
         );
 
@@ -620,7 +530,7 @@ export const HomePage = () => {
         setSelectionData(null);
       }
     } catch (error) {
-      console.error('❌ Error al guardar la selección:', error);
+      console.error('Error al guardar la selección:', error);
       alert(t('home.selectionModal.errorMessage') || 'Error al guardar la selección. Intenta nuevamente.');
     } finally {
       setSavingSelection(false);

@@ -115,4 +115,21 @@ export const lifeWheelService = {
     apiCache.remove('user_me'); // También invalidar user_me porque contiene lifeWheel
     return result;
   },
+
+  /**
+   * Marca el Life Wheel como completamente respondido
+   * Endpoint: PUT /lifewheel/mark-as-answered
+   * Requiere: Bearer token en Authorization header (automático)
+   *
+   * @returns Respuesta con el Life Wheel actualizado
+   *
+   * NOTA: Invalida el caché después de marcar como respondido
+   */
+  markAsAnswered: async (): Promise<LifeWheelResponse> => {
+    const result = await apiClient.put<LifeWheelResponse>('/lifewheel/mark-as-answered');
+    // Invalidar caché después de marcar como respondido
+    apiCache.remove('lifewheel_me');
+    apiCache.remove('user_me'); // También invalidar user_me porque contiene lifeWheel
+    return result;
+  },
 };

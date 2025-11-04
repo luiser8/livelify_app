@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BottomNav, PageHeader, Copyright } from '@/shared/components';
+import { BottomNav, PageHeader, Copyright, AlertBanner } from '@/shared/components';
 import {
   actionService,
   goalService,
@@ -37,6 +37,8 @@ export const ActionsPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedContextFilter, setSelectedContextFilter] = useState<string>('all');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     goalId: '',
     title: '',
@@ -45,6 +47,8 @@ export const ActionsPage = () => {
     timeEstimate: 30,
     dueDate: '',
     contextId: '',
+    baseCapital: 0,
+    currencyCode: 'USD',
   });
 
   useEffect(() => {
@@ -134,7 +138,12 @@ export const ActionsPage = () => {
         timeEstimate: formData.timeEstimate,
         dueDate: dueDateISO,
         contextId: formData.contextId,
+        baseCapital: formData.baseCapital,
+        currencyCode: formData.currencyCode,
       });
+
+      // Mostrar mensaje de éxito
+      setSuccessMessage(t('actions.actionCreated', { title: formData.title }));
 
       await fetchData();
       setShowCreateForm(false);
@@ -147,9 +156,12 @@ export const ActionsPage = () => {
         timeEstimate: 30,
         dueDate: '',
         contextId: '',
+        baseCapital: 0,
+        currencyCode: 'USD',
       });
     } catch (error) {
       console.error('Error creating action:', error);
+      setErrorMessage(t('actions.errorCreating'));
     } finally {
       setCreating(false);
     }
@@ -157,10 +169,18 @@ export const ActionsPage = () => {
 
   const handleCompleteAction = async (actionId: string) => {
     try {
+      const action = actions.find(a => a.id === actionId);
       await actionService.completeAction(actionId);
+      
+      // Mostrar mensaje de éxito
+      if (action) {
+        setSuccessMessage(t('actions.actionCompleted', { title: action.title }));
+      }
+      
       await fetchData();
     } catch (error) {
       console.error('Error completing action:', error);
+      setErrorMessage(t('actions.errorCompleting'));
     }
   };
 
@@ -241,26 +261,29 @@ export const ActionsPage = () => {
         showFilter={false}
       />
 
+      {/* Success Message Banner */}
+      {successMessage && (
+        <AlertBanner
+          type="success"
+          title={t('common.success')}
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+          autoCloseDuration={3000}
+        />
+      )}
+
+      {/* Error Message Banner */}
+      {errorMessage && (
+        <AlertBanner
+          type="error"
+          title={t('common.error')}
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+          autoCloseDuration={5000}
+        />
+      )}
+
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalActions}</div>
-            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.totalActions')}</div>
-          </div>
-          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.pendingActions}</div>
-            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.pending')}</div>
-          </div>
-          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.completedActions}</div>
-            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.completed')}</div>
-          </div>
-          <div className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-            <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.overdueActions}</div>
-            <div className="text-xs sm:text-sm text-gray-500 leading-tight">{t('actions.overdue')}</div>
-          </div>
-        </div>
 
         {/* Filtro de contextos y botón crear */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -318,6 +341,8 @@ export const ActionsPage = () => {
                     timeEstimate: 30,
                     dueDate: '',
                     contextId: '',
+                    baseCapital: 0,
+                    currencyCode: 'USD',
                   });
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -455,6 +480,42 @@ export const ActionsPage = () => {
                 </div>
               </div>
 
+              {/* Budget Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('actions.budget')} ({t('actions.optional')})
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.baseCapital || ''}
+                    onChange={(e) => setFormData({ ...formData, baseCapital: parseFloat(e.target.value) || 0 })}
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('actions.currency')}
+                  </label>
+                  <select
+                    value={formData.currencyCode}
+                    onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  >
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="MXN">MXN - Mexican Peso</option>
+                    <option value="CAD">CAD - Canadian Dollar</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                  </select>
+                </div>
+              </div>
+
               {/* Due Date */}
               <div className="space-y-3 sm:space-y-4">
                 <div>
@@ -478,9 +539,9 @@ export const ActionsPage = () => {
                 </div>
 
                 {/* Info about date selection */}
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                  <div className="flex items-start gap-2">
-                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                  <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                                  <div className="flex items-start gap-2">
+                                    <svg className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div className="text-xs text-blue-700">
@@ -547,7 +608,7 @@ export const ActionsPage = () => {
                     <div className="flex items-start justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                             <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                             </svg>
@@ -610,9 +671,9 @@ export const ActionsPage = () => {
                                       </h5>
                                       
                                       {!action.completed && (
-                                        <button
+                                          <button
                                           onClick={() => handleCompleteAction(action.id)}
-                                          className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all shadow-md flex items-center justify-center gap-2 flex-shrink-0 whitespace-nowrap"
+                                          className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all shadow-md flex items-center justify-center gap-2 shrink-0 whitespace-nowrap"
                                         >
                                           <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -624,6 +685,47 @@ export const ActionsPage = () => {
                                     
                                     {action.description && (
                                       <p className="text-sm text-gray-600 mb-3">{action.description}</p>
+                                    )}
+
+                                    {/* Budget Info */}
+                                    {action.budget && action.budget.baseCapital > 0 && (
+                                      <div className="mb-3 p-3 bg-linear-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                                            </svg>
+                                          </div>
+                                          <span className="text-sm font-bold text-emerald-900">{t('actions.budget')}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                          <div className="bg-white/70 rounded px-2 py-1.5">
+                                            <span className="text-gray-600 block">{t('actions.baseCapital')}</span>
+                                            <span className="font-bold text-emerald-800">
+                                              {action.budget.currencySymbol}{action.budget.baseCapital.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="bg-white/70 rounded px-2 py-1.5">
+                                            <span className="text-gray-600 block">{t('actions.totalCapital')}</span>
+                                            <span className="font-bold text-emerald-800">
+                                              {action.budget.currencySymbol}{action.budget.totalCapital.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="bg-white/70 rounded px-2 py-1.5">
+                                            <span className="text-gray-600 block">{t('actions.monthlyBudget')}</span>
+                                            <span className="font-bold text-teal-800">
+                                              {action.budget.currencySymbol}{action.budget.monthlyBudget.toFixed(2)}
+                                            </span>
+                                          </div>
+                                          <div className="bg-white/70 rounded px-2 py-1.5">
+                                            <span className="text-gray-600 block">{t('actions.dailyBudget')}</span>
+                                            <span className="font-bold text-teal-800">
+                                              {action.budget.currencySymbol}{action.budget.dailyBudget.toFixed(2)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
                                     )}
 
                                     {/* Goal and Project Info */}
