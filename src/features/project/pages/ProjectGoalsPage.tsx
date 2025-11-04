@@ -490,7 +490,7 @@ export const ProjectGoalsPage = () => {
                       <p className="text-gray-900 text-lg mb-3 leading-relaxed">{goal.content}</p>
                       
                       {/* Budget Info */}
-                      {goal.totalMonthlyBudget !== null && goal.totalDailyBudget !== null ? (
+                      {goal.totalMonthlyBudget !== null && goal.totalDailyBudget !== null && goal.totalMonthlyBudget !== undefined && goal.totalDailyBudget !== undefined ? (
                         <div className="mt-3 p-3 bg-linear-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
@@ -505,13 +505,13 @@ export const ProjectGoalsPage = () => {
                             <div className="bg-white/70 rounded px-2 py-1">
                               <span className="text-gray-600 block">{t('projects.goals.monthlyBudget')}</span>
                               <span className="font-bold text-emerald-800">
-                                ${goal.totalMonthlyBudget.toFixed(2)}
+                                ${Number(goal.totalMonthlyBudget).toFixed(2)}
                               </span>
                             </div>
                             <div className="bg-white/70 rounded px-2 py-1">
                               <span className="text-gray-600 block">{t('projects.goals.dailyBudget')}</span>
                               <span className="font-bold text-teal-800">
-                                ${goal.totalDailyBudget.toFixed(2)}
+                                ${Number(goal.totalDailyBudget).toFixed(2)}
                               </span>
                             </div>
                           </div>

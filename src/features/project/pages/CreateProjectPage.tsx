@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { projectService, lifeWheelService, type LifeWheelArea } from '@/infrastructure/services';
 import { getAreaIcon, getAreaColorVariants, getAreaTranslationKey, getSelectableAreas } from '@/shared/utils';
-import { PageHeader, Copyright, BottomNav, AlertBanner } from '@/shared/components';
+import { PageHeader, Copyright, BottomNav } from '@/shared/components';
 
 /**
  * Página de creación de proyecto - Multi-step
@@ -21,7 +21,7 @@ export const CreateProjectPage = () => {
   const [selectedAreaId, setSelectedAreaId] = useState<string>(urlAreaId || '');
   const [creating, setCreating] = useState(false);
   const [projectCountByArea, setProjectCountByArea] = useState<Map<string, number>>(new Map());
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_, setErrorMessage] = useState<string | null>(null);
   
   // Calcular fechas mínimas y máximas
   const getTomorrowDate = () => {

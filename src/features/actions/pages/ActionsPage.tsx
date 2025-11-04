@@ -25,7 +25,7 @@ export const ActionsPage = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [contexts, setContexts] = useState<Context[]>([]);
-  const [stats, setStats] = useState({
+  const [_, setStats] = useState({
     totalActions: 0,
     completedActions: 0,
     pendingActions: 0,
