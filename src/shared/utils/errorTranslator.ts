@@ -14,9 +14,17 @@ export const translateError = (error: unknown, t: TFunction): string => {
     errorMessage = error;
   } else if (error instanceof Error) {
     errorMessage = error.message;
-  } else if (typeof error === 'object' && error !== null && 'message' in error) {
-    errorMessage = String(error.message);
-  } else {
+  } else if (typeof error === 'object' && error !== null) {
+    // Manejar ApiError (con message, status, code)
+    if ('message' in error) {
+      errorMessage = String(error.message);
+    } else if ('error' in error) {
+      // Manejar formato { error: "mensaje" }
+      errorMessage = String((error as any).error);
+    }
+  }
+  
+  if (!errorMessage) {
     return t('errors.unknown');
   }
 
@@ -35,6 +43,13 @@ export const translateError = (error: unknown, t: TFunction): string => {
     'token expired': 'errors.auth.tokenExpired',
     'invalid token': 'errors.auth.invalidToken',
     'session expired': 'errors.auth.sessionExpired',
+    'account not activated': 'errors.auth.accountNotActivated',
+    'recovery link has expired': 'errors.auth.recoveryLinkExpired',
+    'recovery link expired': 'errors.auth.recoveryLinkExpired',
+    'password reset link has expired': 'errors.auth.recoveryLinkExpired',
+    'invalid or expired recovery link': 'errors.auth.invalidRecoveryLink',
+    'invalid recovery link': 'errors.auth.invalidRecoveryLink',
+    'expired recovery link': 'errors.auth.recoveryLinkExpired',
     
     // Errores de registro
     'email already exists': 'errors.auth.emailExists',
@@ -42,6 +57,8 @@ export const translateError = (error: unknown, t: TFunction): string => {
     'user already exists': 'errors.auth.emailExists',
     'phone already exists': 'errors.auth.phoneExists',
     'phone already in use': 'errors.auth.phoneExists',
+    'activation link has already been processed': 'errors.activationLinkAlreadyUsed',
+    'activation link has already been used': 'errors.activationLinkAlreadyUsed',
     
     // Errores de red
     'failed to fetch': 'errors.network.failedToFetch',
@@ -55,6 +72,10 @@ export const translateError = (error: unknown, t: TFunction): string => {
     'invalid input': 'errors.validation.invalidInput',
     'required field': 'errors.validation.requiredField',
     'invalid format': 'errors.validation.invalidFormat',
+    'address must be at least 5 characters long': 'auth.validation.addressMinLength',
+    'address must be at least 5 characters': 'auth.validation.addressMinLength',
+    'password must contain at least one uppercase letter, one lowercase letter, and one number': 'auth.validation.passwordComplexity',
+    'password must contain at least one uppercase': 'auth.validation.passwordComplexity',
     
     // Errores de servidor
     'internal server error': 'errors.server.internal',

@@ -58,7 +58,7 @@ login(user); // Guarda en contexto + localStorage
 
 ### 6. Redirección
 ```typescript
-navigate('/home');
+navigate('/app/home');
 ```
 
 ## 📡 Endpoint del Backend
@@ -172,7 +172,7 @@ localStorage:
 const handleLogin = async (email: string, password: string) => {
   const { user } = await loginUseCase({ email, password });
   login(user);
-  navigate('/home');
+  navigate('/app/home');
 };
 
 // 3. loginUseCase llama al backend

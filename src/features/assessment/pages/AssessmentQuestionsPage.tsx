@@ -43,7 +43,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
 
         // Si el área ya está evaluada (isArchived), redirigir al usuario
         if (area && area.isArchived) {
-          navigate('/assessment/intro');
+          navigate('/app/assessment/intro');
           return;
         }
 
@@ -67,7 +67,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching questions:', error);
-        navigate('/assessment/intro');
+        navigate('/app/assessment/intro');
       } finally {
         setLoading(false);
       }
@@ -126,7 +126,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
   };
 
   const handleSkipArea = () => {
-    navigate('/assessment/intro');
+    navigate('/app/assessment/intro');
   };
 
   const handleOpenResetModal = () => {
@@ -159,7 +159,7 @@ export const AssessmentQuestionsPage: React.FC = () => {
       });
 
       if (result.success) {
-        navigate('/assessment/intro');
+        navigate('/app/assessment/intro');
       } else {
         console.error('Error submitting answers:', result.message);
       }

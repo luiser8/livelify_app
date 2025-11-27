@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { AppRouter } from './routes';
-import { AuthProvider } from './features/auth/context';
 
 /**
  * Componente principal de la aplicación
@@ -15,9 +14,7 @@ function App() {
         </div>
       </div>
     }>
-      <AuthProvider>
-        <AppRouter />
-      </AuthProvider>
+      <AppRouter />
     </Suspense>
   );
 }

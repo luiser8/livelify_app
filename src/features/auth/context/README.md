@@ -197,7 +197,7 @@ function LogoutButton() {
   const handleLogout = () => {
     logout();
     // Opcionalmente redirigir
-    window.location.href = '/login';
+    window.location.href = '/app/login';
   };
 
   return (

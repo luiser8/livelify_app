@@ -37,7 +37,7 @@ export const AreaProjectsPage = () => {
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
-          navigate('/assessment/intro');
+          navigate('/app/assessment/intro');
           return;
         }
         
@@ -89,7 +89,7 @@ export const AreaProjectsPage = () => {
         
         if (!enabledAreaIds.has(areaId)) {
           // Si el área no está entre las seleccionables, redirigir al home
-          navigate('/home');
+          navigate('/app/home');
           return;
         }
         
@@ -135,7 +135,7 @@ export const AreaProjectsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500">{t('areaProjects.areaNotFound')}</p>
-          <button onClick={() => navigate('/home')} className="mt-4 text-indigo-600 hover:text-indigo-700">
+          <button onClick={() => navigate('/app/home')} className="mt-4 text-indigo-600 hover:text-indigo-700">
             {t('areaProjects.goBack')}
           </button>
         </div>
@@ -215,7 +215,7 @@ export const AreaProjectsPage = () => {
 
             {/* Botón para crear proyecto */}
             <button
-              onClick={() => navigate(`/area/${areaId}/projects/create`)}
+              onClick={() => navigate(`/app/area/${areaId}/projects/create`)}
               disabled={!canCreateProject}
               className={`w-full sm:w-auto py-3 px-6 font-semibold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
                 !canCreateProject 
@@ -242,7 +242,7 @@ export const AreaProjectsPage = () => {
                     {t('areaProjects.assessmentRequiredDesc')}
                   </p>
                   <button
-                    onClick={() => navigate('/home')}
+                    onClick={() => navigate('/app/home')}
                     className="px-4 py-2 bg-red-600 text-white font-medium text-sm rounded-lg"
                   >
                     {t('areaProjects.completeAssessment')}
@@ -285,7 +285,7 @@ export const AreaProjectsPage = () => {
                 <p className="text-gray-500 text-lg mb-6">{t('areaProjects.noProjects')}</p>
                 {canCreateProject && (
                   <button
-                    onClick={() => navigate(`/area/${areaId}/projects/create`)}
+                    onClick={() => navigate(`/app/area/${areaId}/projects/create`)}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,7 +359,7 @@ export const AreaProjectsPage = () => {
 
                       {/* Botón de Objetivos - Siempre visible */}
                       <button 
-                        onClick={() => navigate(`/projects/${project.id}/goals`)}
+                        onClick={() => navigate(`/app/projects/${project.id}/goals`)}
                         className="shrink-0 px-5 sm:px-8 py-2.5 sm:py-3 rounded-xl font-bold text-white bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-sm sm:text-base whitespace-nowrap"
                       >
                         {t('areaProjects.buttons.viewGoals')}

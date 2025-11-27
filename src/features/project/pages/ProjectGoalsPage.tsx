@@ -47,7 +47,7 @@ export const ProjectGoalsPage = () => {
 
         // Validar que el proyecto existe
         if (!currentProject) {
-          navigate('/home');
+          navigate('/app/home');
           return;
         }
 
@@ -57,7 +57,7 @@ export const ProjectGoalsPage = () => {
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
-          navigate('/assessment/intro');
+          navigate('/app/assessment/intro');
           return;
         }
 
@@ -67,7 +67,7 @@ export const ProjectGoalsPage = () => {
         const enabledAreaIds = result.selectableAreaIds;
 
         if (!enabledAreaIds.has(projectAreaId)) {
-          //navigate('/home');
+          //navigate('/app/home');
           //return;
         }
 
@@ -212,7 +212,7 @@ export const ProjectGoalsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500">{t('projects.goals.projectNotFound')}</p>
-          <button onClick={() => navigate('/projects')} className="mt-4 text-indigo-600 hover:text-indigo-700">
+          <button onClick={() => navigate('/app/projects')} className="mt-4 text-indigo-600 hover:text-indigo-700">
             {t('projects.goals.backToProjects')}
           </button>
         </div>
@@ -538,7 +538,7 @@ export const ProjectGoalsPage = () => {
                   {/* Botón de acciones */}
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => navigate(`/actions?goalId=${goal.id}`)}
+                      onClick={() => navigate(`/app/actions?goalId=${goal.id}`)}
                       className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                         currentStep === 'BE' ? 'bg-red-50 text-red-700 hover:bg-red-100' :
                         currentStep === 'DO' ? 'bg-purple-50 text-purple-700 hover:bg-purple-100' :

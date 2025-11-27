@@ -22,7 +22,7 @@ export const BottomNav = () => {
     {
       id: 'dashboard',
       labelKey: 'nav.dashboard',
-      path: '/dashboard',
+      path: '/app/dashboard',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path 
@@ -37,7 +37,7 @@ export const BottomNav = () => {
     {
       id: 'wheel',
       labelKey: 'nav.wheel',
-      path: '/home',
+      path: '/app/home',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path 
@@ -48,12 +48,12 @@ export const BottomNav = () => {
           />
         </svg>
       ),
-      matchPaths: ['/assessment'],
+      matchPaths: ['/app/assessment'],
     },
     {
       id: 'projects',
       labelKey: 'nav.projects',
-      path: '/projects',
+      path: '/app/projects',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path 
@@ -64,12 +64,12 @@ export const BottomNav = () => {
           />
         </svg>
       ),
-      matchPaths: ['/area', '/projects/'],
+      matchPaths: ['/app/area', '/app/projects/'],
     },
     {
       id: 'actions',
       labelKey: 'nav.actions',
-      path: '/actions',
+      path: '/app/actions',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path 
@@ -84,7 +84,7 @@ export const BottomNav = () => {
     {
       id: 'profile',
       labelKey: 'nav.profile',
-      path: '/profile',
+      path: '/app/profile',
       icon: (isActive) => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path 
@@ -95,7 +95,7 @@ export const BottomNav = () => {
           />
         </svg>
       ),
-      matchPaths: ['/subscription'],
+      matchPaths: ['/app/subscription'],
     },
   ];
 

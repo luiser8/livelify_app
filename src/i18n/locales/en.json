@@ -14,7 +14,8 @@
     "close": "Close",
     "confirm": "Confirm",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "goHome": "Go Home"
   },
   "nav": {
     "home": "Home",
@@ -53,7 +54,7 @@
   },
   "auth": {
     "login": {
-      "title": "Welcome Back",
+      "title": "Welcome back",
       "subtitle": "Sign in to continue your journey",
       "email": "Email",
       "emailPlaceholder": "your@email.com",
@@ -61,7 +62,7 @@
       "passwordPlaceholder": "••••••••",
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot password?",
-      "signIn": "Sign In",
+      "signIn": "Sign in",
       "signingIn": "Signing in...",
       "createAccount": "Create account",
       "noAccount": "Don't have an account?",
@@ -71,7 +72,7 @@
       "continueWithFacebook": "Continue with Facebook"
     },
     "register": {
-      "title": "Create Your Account",
+      "title": "Create your account",
       "subtitle": "Start your transformation journey today",
       "firstName": "First Name",
       "firstNamePlaceholder": "John",
@@ -94,6 +95,11 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "terms": "By signing up, you agree to our Terms of Service and Privacy Policy",
+      "checkYourEmail": "Check Your Email!",
+      "activationEmailSent": "We've sent an activation email to:",
+      "clickActivationLink": "Please click the activation link in the email to activate your account and be able to sign in.",
+      "didntReceiveEmail": "Didn't receive the email?",
+      "checkSpamFolder": "Check your spam or junk folder.",
       "termsAcceptance": {
         "part1": "I accept the",
         "termsLink": "Terms and Conditions",
@@ -106,6 +112,48 @@
         "canAcceptNow": "You can now accept the terms by checking the box",
         "mustReadBothDocuments": "You must read both documents before accepting"
       }
+    },
+    "activatingAccount": "Activating your account",
+    "pleaseWait": "Please wait a moment...",
+    "accountActivated": "Account activated!",
+    "accountActivatedMessage": "Your account has been successfully activated. You can now sign in.",
+    "goToLogin": "Go to Sign In",
+    "activationError": "Error activating account",
+    "passwordRecovery": {
+      "title": "Recover your password",
+      "subtitle": "Enter your email and we'll send you a recovery code",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "sendCode": "Send recovery code",
+      "sendingCode": "Sending...",
+      "backToLogin": "Back to Sign In",
+      "successTitle": "Check Your Email!",
+      "successMessage": "We've sent a recovery code to:",
+      "successInstructions": "Please check your email and follow the instructions to reset your password.",
+      "expirationNotice": "⏱️ The recovery code will expire in 1 hour.",
+      "didntReceiveEmail": "Didn't receive the email?",
+      "checkSpamFolder": "Check your spam or junk folder.",
+      "tryAgain": "Try sending again",
+      "errorSending": "Error sending recovery code. Please try again."
+    },
+    "resetPassword": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter your new password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "resetButton": "Reset Password",
+      "resetting": "Resetting...",
+      "backToLogin": "Back to Sign In",
+      "successTitle": "Password Reset Successfully!",
+      "successMessage": "Your password has been reset successfully. Signing you in...",
+      "goToLogin": "Go to Sign In",
+      "invalidLink": "Invalid or Expired Link",
+      "invalidLinkMessage": "The password reset link is invalid or has expired. Please request a new password recovery.",
+      "requestNewLink": "Request New Link",
+      "passwordRequirements": "Password must be at least 6 characters",
+      "signingIn": "Signing you in..."
     },
     "validation": {
       "emailRequired": "Email is required",
@@ -120,18 +168,18 @@
       "phoneInvalid": "Invalid phone format",
       "digitsRequired": "digits required",
       "addressRequired": "Address is required",
-      "termsRequired": "You must accept the terms and conditions"
-    },
-    "errors": {
-      "loginFailed": "Failed to sign in. Please try again.",
-      "registerFailed": "Failed to create account. Please try again.",
-      "invalidCredentials": "Invalid email or password",
-      "emailAlreadyExists": "This email is already registered"
+      "addressMinLength": "Address must be at least 5 characters long",
+      "termsRequired": "You must accept the terms and conditions",
+      "passwordComplexity": "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     }
   },
   "errors": {
     "unknown": "An unexpected error occurred",
     "generic": "Something went wrong. Please try again.",
+    "loginFailed": "Failed to sign in. Please try again.",
+    "registerFailed": "Failed to create account. Please try again.",
+    "invalidActivationLink": "The activation link is invalid or has expired",
+    "activationLinkAlreadyUsed": "This activation link has already been used. Your account is already activated.",
     "auth": {
       "invalidCredentials": "Invalid email or password",
       "userNotFound": "User not found",
@@ -140,7 +188,11 @@
       "invalidToken": "Invalid authentication token",
       "sessionExpired": "Your session has expired. Please log in again.",
       "emailExists": "This email is already registered",
-      "phoneExists": "This phone number is already registered"
+      "phoneExists": "This phone number is already registered",
+      "accountNotActivated": "Account not activated. Please check your email and activate your account.",
+      "emailAlreadyExists": "This email is already registered",
+      "recoveryLinkExpired": "The recovery link has expired. Please request a new password recovery.",
+      "invalidRecoveryLink": "Invalid or expired recovery link. Please request a new password recovery."
     },
     "network": {
       "failedToFetch": "Unable to connect to the server. Please check your internet connection.",
@@ -359,6 +411,14 @@
     "errorCreatingContext": "Error creating context. Please try again.",
     "errorDeletingContext": "Error deleting context. Please try again.",
     "errorUpdatingProfile": "Error updating profile. Please try again.",
+    "legalDocuments": {
+      "title": "Legal Documents",
+      "description": "View our terms and privacy policies",
+      "terms": "Terms and Conditions",
+      "termsDescription": "View terms of service",
+      "privacy": "Privacy Policy",
+      "privacyDescription": "View privacy policy"
+    },
     "actions": {
       "logout": "Log Out"
     }

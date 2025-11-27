@@ -42,18 +42,18 @@ export const OnboardingPage = () => {
   const handleExplore = () => {
     // Si está autenticado, va al home, sino al login
     if (isAuthenticated) {
-      navigate('/home');
+      navigate('/app/home');
     } else {
-      navigate('/login');
+      navigate('/app/login');
     }
   };
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/app/login');
   };
 
   const handleRegister = () => {
-    navigate('/register');
+    navigate('/app/register');
   };
 
   const handleLogout = () => {
@@ -113,29 +113,27 @@ export const OnboardingPage = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-4 sm:space-y-8 py-4 sm:py-0">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-2 sm:space-y-3 py-2 sm:py-4">
         {/* Logo */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-          <svg
-            className="w-10 h-10 sm:w-12 sm:h-12 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z" />
-          </svg>
+        <div className="flex justify-center -mb-16 sm:-mb-20 md:-mb-24 -mt-20 sm:-mt-24 md:-mt-28">
+          <img
+            src="/logo_white.svg"
+            alt="Livelify"
+            className="h-64 w-64 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96 xl:h-[26rem] xl:w-[26rem]"
+          />
         </div>
 
         {/* Logo text */}
-        <div className="space-y-1">
+        {/* <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0">{t('onboarding.title')}</h1>
           <p className="text-sm sm:text-lg md:text-xl text-white/90 px-2">{t('onboarding.tagline')}</p>
-        </div>
+        </div> */}
 
         {/* Contenido del slide actual con animación */}
-        <div className="space-y-3 sm:space-y-4 min-h-[160px] sm:min-h-[200px] flex flex-col justify-center px-2">
+        <div className="space-y-2 sm:space-y-3 min-h-[120px] sm:min-h-[140px] flex flex-col justify-center px-2">
           <h2 
             key={`title-${currentSlide}`}
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight px-2 sm:px-4 animate-fade-in"
+            className="text-3xl sm:text-3xl md:text-3xl lg:text-4xl font-bold leading-tight px-2 sm:px-4 animate-fade-in"
           >
             {slides[currentSlide].title}
           </h2>
@@ -156,7 +154,7 @@ export const OnboardingPage = () => {
       </div>
 
       {/* Botones de acción y Footer */}
-      <div className="w-full max-w-md space-y-4 sm:space-y-8">
+      <div className="w-full max-w-md space-y-3 sm:space-y-4">
         <button
           onClick={handleExplore}
           className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg text-base sm:text-lg"

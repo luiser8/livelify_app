@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/components';
 
@@ -13,6 +14,7 @@ interface LoginFormProps {
  */
 export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFormProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -49,10 +51,10 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
       {serverError && (
         <div className="p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white text-xs sm:text-sm">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            <span className="break-words">{serverError}</span>
+            <span className="wrap-break-word">{serverError}</span>
           </div>
         </div>
       )}
@@ -79,8 +81,8 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
         disabled={isLoading}
       />
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm">
-        <label className="flex items-center text-white/80 cursor-pointer hover:text-white transition-colors">
+      <div className="flex flex-row items-center justify-between gap-2 text-xs sm:text-sm">
+        <label className="flex items-center text-white/80 cursor-pointer hover:text-white transition-colors shrink-0">
           <input
             type="checkbox"
             className="mr-1.5 sm:mr-2 rounded border-white/30 bg-white/10 text-primary-500 focus:ring-white/50"
@@ -89,7 +91,8 @@ export const LoginForm = ({ onSubmit, isLoading = false, serverError }: LoginFor
         </label>
         <button
           type="button"
-          className="text-white/80 hover:text-white transition-colors whitespace-nowrap"
+          onClick={() => navigate('/app/forgot-password')}
+          className="text-white/80 hover:text-white transition-colors whitespace-nowrap shrink-0"
         >
           {t('auth.login.forgotPassword')}
         </button>

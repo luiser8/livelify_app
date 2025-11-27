@@ -14,7 +14,8 @@
     "close": "Cerrar",
     "confirm": "Confirmar",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "goHome": "Volver al inicio"
   },
   "nav": {
     "home": "Inicio",
@@ -53,7 +54,7 @@
   },
   "auth": {
     "login": {
-      "title": "Bienvenido de Nuevo",
+      "title": "Bienvenido de nuevo",
       "subtitle": "Inicia sesión para continuar tu viaje",
       "email": "Correo electrónico",
       "emailPlaceholder": "tu@email.com",
@@ -61,7 +62,7 @@
       "passwordPlaceholder": "••••••••",
       "rememberMe": "Recordarme",
       "forgotPassword": "¿Olvidaste tu contraseña?",
-      "signIn": "Iniciar Sesión",
+      "signIn": "Iniciar sesión",
       "signingIn": "Iniciando sesión...",
       "createAccount": "Crear cuenta",
       "noAccount": "¿No tienes una cuenta?",
@@ -71,7 +72,7 @@
       "continueWithFacebook": "Continuar con Facebook"
     },
     "register": {
-      "title": "Crea tu Cuenta",
+      "title": "Crea tu cuenta",
       "subtitle": "Comienza tu viaje de transformación hoy",
       "firstName": "Nombre",
       "firstNamePlaceholder": "Juan",
@@ -94,6 +95,11 @@
       "haveAccount": "¿Ya tienes una cuenta?",
       "signIn": "Iniciar sesión",
       "terms": "Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad",
+      "checkYourEmail": "¡Revisa tu correo!",
+      "activationEmailSent": "Te hemos enviado un correo electrónico de activación a:",
+      "clickActivationLink": "Por favor, haz clic en el enlace de activación en el correo para activar tu cuenta y poder iniciar sesión.",
+      "didntReceiveEmail": "¿No recibiste el correo?",
+      "checkSpamFolder": "Revisa tu carpeta de spam o correo no deseado.",
       "termsAcceptance": {
         "part1": "Acepto los",
         "termsLink": "Términos y Condiciones",
@@ -106,6 +112,48 @@
         "canAcceptNow": "Ya puedes aceptar los términos marcando la casilla",
         "mustReadBothDocuments": "Debes leer ambos documentos antes de aceptar"
       }
+    },
+    "activatingAccount": "Activando tu cuenta",
+    "pleaseWait": "Por favor espera un momento...",
+    "accountActivated": "¡Cuenta activada!",
+    "accountActivatedMessage": "Tu cuenta ha sido activada exitosamente. Ahora puedes iniciar sesión.",
+    "goToLogin": "Ir a iniciar sesión",
+    "activationError": "Error al activar la cuenta",
+    "passwordRecovery": {
+      "title": "Recupera tu contraseña",
+      "subtitle": "Ingresa tu correo y te enviaremos un código de recuperación",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@email.com",
+      "sendCode": "Enviar código de recuperación",
+      "sendingCode": "Enviando...",
+      "backToLogin": "Volver a iniciar sesión",
+      "successTitle": "¡Revisa tu correo!",
+      "successMessage": "Hemos enviado un código de recuperación a:",
+      "successInstructions": "Por favor, revisa tu correo electrónico y sigue las instrucciones para restablecer tu contraseña.",
+      "expirationNotice": "⏱️ El código de recuperación expirará en 1 hora.",
+      "didntReceiveEmail": "¿No recibiste el correo?",
+      "checkSpamFolder": "Revisa tu carpeta de spam o correo no deseado.",
+      "tryAgain": "Intentar enviar nuevamente",
+      "errorSending": "Error al enviar el código de recuperación. Por favor, intenta de nuevo."
+    },
+    "resetPassword": {
+      "title": "Restablece tu Contraseña",
+      "subtitle": "Ingresa tu nueva contraseña",
+      "newPassword": "Nueva Contraseña",
+      "newPasswordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmar Contraseña",
+      "confirmPasswordPlaceholder": "••••••••",
+      "resetButton": "Restablecer Contraseña",
+      "resetting": "Restableciendo...",
+      "backToLogin": "Volver a iniciar sesión",
+      "successTitle": "¡Contraseña Restablecida!",
+      "successMessage": "Tu contraseña ha sido restablecida exitosamente. Iniciando sesión...",
+      "goToLogin": "Ir a iniciar sesión",
+      "invalidLink": "Enlace Inválido o Expirado",
+      "invalidLinkMessage": "El enlace de recuperación es inválido o ha expirado. Por favor, solicita una nueva recuperación de contraseña.",
+      "requestNewLink": "Solicitar Nuevo Enlace",
+      "passwordRequirements": "La contraseña debe tener al menos 6 caracteres",
+      "signingIn": "Iniciando sesión..."
     },
     "validation": {
       "emailRequired": "El correo electrónico es requerido",
@@ -120,18 +168,18 @@
       "phoneInvalid": "Formato de teléfono inválido",
       "digitsRequired": "dígitos requeridos",
       "addressRequired": "La dirección es requerida",
-      "termsRequired": "Debes aceptar los términos y condiciones"
-    },
-    "errors": {
-      "loginFailed": "Error al iniciar sesión. Por favor, intenta de nuevo.",
-      "registerFailed": "Error al crear cuenta. Por favor, intenta de nuevo.",
-      "invalidCredentials": "Correo o contraseña inválidos",
-      "emailAlreadyExists": "Este correo ya está registrado"
+      "addressMinLength": "La dirección debe tener al menos 5 caracteres",
+      "termsRequired": "Debes aceptar los términos y condiciones",
+      "passwordComplexity": "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número"
     }
   },
   "errors": {
     "unknown": "Ocurrió un error inesperado",
     "generic": "Algo salió mal. Por favor, intenta de nuevo.",
+    "loginFailed": "Error al iniciar sesión. Por favor, intenta de nuevo.",
+    "registerFailed": "Error al crear cuenta. Por favor, intenta de nuevo.",
+    "invalidActivationLink": "El enlace de activación no es válido o ha expirado",
+    "activationLinkAlreadyUsed": "Este enlace de activación ya ha sido usado. Tu cuenta ya está activada.",
     "auth": {
       "invalidCredentials": "Correo o contraseña inválidos",
       "userNotFound": "Usuario no encontrado",
@@ -140,7 +188,11 @@
       "invalidToken": "Token de autenticación inválido",
       "sessionExpired": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
       "emailExists": "Este correo ya está registrado",
-      "phoneExists": "Este número de teléfono ya está registrado"
+      "phoneExists": "Este número de teléfono ya está registrado",
+      "accountNotActivated": "Cuenta no activada. Por favor, revisa tu correo electrónico y activa tu cuenta.",
+      "emailAlreadyExists": "Este correo ya está registrado",
+      "recoveryLinkExpired": "El enlace de recuperación ha expirado. Por favor, solicita una nueva recuperación de contraseña.",
+      "invalidRecoveryLink": "Enlace de recuperación inválido o expirado. Por favor, solicita una nueva recuperación de contraseña."
     },
     "network": {
       "failedToFetch": "No se pudo conectar al servidor. Por favor, verifica tu conexión a internet.",
@@ -359,6 +411,14 @@
     "errorCreatingContext": "Error al crear el contexto. Por favor, intenta de nuevo.",
     "errorDeletingContext": "Error al eliminar el contexto. Por favor, intenta de nuevo.",
     "errorUpdatingProfile": "Error al actualizar el perfil. Por favor, intenta de nuevo.",
+    "legalDocuments": {
+      "title": "Documentos Legales",
+      "description": "Consulta nuestros términos y políticas de privacidad",
+      "terms": "Términos y Condiciones",
+      "termsDescription": "Ver términos de servicio",
+      "privacy": "Política de Privacidad",
+      "privacyDescription": "Ver política de privacidad"
+    },
     "actions": {
       "logout": "Cerrar Sesión"
     }

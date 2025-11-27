@@ -1,177 +1,52 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { OnboardingPage } from '../features/onboarding/pages';
-import { LoginPage, RegisterPage } from '../features/auth/pages';
-import { HomePage } from '../features/home/pages';
-import { DashboardPage } from '../features/dashboard/pages';
-import { ActionsPage } from '../features/actions/pages';
-import { ProfilePage } from '../features/profile/pages';
-import { SubscriptionPage } from '../features/subscription/pages';
-import { ProjectsPage, AreaProjectsPage, CreateProjectPage, ProjectGoalsPage } from '../features/project/pages';
-import { AssessmentIntroPage, AssessmentQuestionsPage } from '../features/assessment/pages';
-import { ProtectedRoute } from './ProtectedRoute';
-import { PublicRoute } from './PublicRoute';
-import { ErrorBoundary, NotFoundPage, SessionExpiredModal } from '../shared/components';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { ErrorBoundary, NotFoundPage } from '../shared/components';
+import { MainAppRouter } from './MainAppRouter';
+import LandingHomePage from '../features/landing/home/HomePage';
+import { trackPageView, trackFbPageView } from '../features/landing/config/analytics';
+import { AuthProvider } from '../features/auth/context';
+
+/**
+ * Componente para escuchar cambios de ruta y rastrear analytics
+ */
+function AnalyticsListener() {
+  const location = useLocation();
+  useEffect(() => {
+    const path = location.pathname + location.search;
+    trackPageView(path);
+    trackFbPageView();
+  }, [location]);
+  return null;
+}
 
 /**
  * Configuración de rutas de la aplicación
+ * - / -> Landing page
+ * - /app/* -> Aplicación principal de Livelify
  */
 export const AppRouter = () => {
-  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    // Listener para el evento de sesión expirada
-    const handleSessionExpired = () => {
-      // Prevenir múltiples disparos del evento
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setShowSessionExpiredModal(true);
-      }, 100);
-    };
-
-    window.addEventListener('session-expired', handleSessionExpired);
-
-    return () => {
-      window.removeEventListener('session-expired', handleSessionExpired);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <AnalyticsListener />
         <Routes>
-        {/* Ruta de onboarding/landing - accesible siempre */}
-        <Route path="/" element={<OnboardingPage />} />
+          {/* Landing page en la raíz */}
+          <Route path="/" element={<LandingHomePage />} />
 
-        {/* Rutas de autenticación - solo accesibles si NO está autenticado */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
+          {/* Todas las rutas de la aplicación bajo /app */}
+          <Route 
+            path="/app/*" 
+            element={
+              <AuthProvider>
+                <MainAppRouter />
+              </AuthProvider>
+            } 
+          />
 
-        {/* Rutas protegidas - requieren autenticación */}
-        <Route 
-          path="/home" 
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/actions" 
-          element={
-            <ProtectedRoute>
-              <ActionsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/subscription" 
-          element={
-            <ProtectedRoute>
-              <SubscriptionPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/projects" 
-          element={
-            <ProtectedRoute>
-              <ProjectsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/projects/create" 
-          element={
-            <ProtectedRoute>
-              <CreateProjectPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/projects/:projectId/goals" 
-          element={
-            <ProtectedRoute>
-              <ProjectGoalsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/area/:areaId/projects" 
-          element={
-            <ProtectedRoute>
-              <AreaProjectsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/area/:areaId/projects/create" 
-          element={
-            <ProtectedRoute>
-              <CreateProjectPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/assessment/intro" 
-          element={
-            <ProtectedRoute>
-              <AssessmentIntroPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/assessment/area/:areaId" 
-          element={
-            <ProtectedRoute>
-              <AssessmentQuestionsPage />
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Ruta 404 - Not Found */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-
-      {/* Modal de sesión expirada */}
-      <SessionExpiredModal 
-        isOpen={showSessionExpiredModal} 
-        onClose={() => setShowSessionExpiredModal(false)} 
-      />
-    </BrowserRouter>
+          {/* Ruta 404 - Not Found */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 };

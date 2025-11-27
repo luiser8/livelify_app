@@ -10,13 +10,16 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      // Aliases específicos primero (más específico a menos específico)
+      '@/config/env': path.resolve(__dirname, './src/config/env'),
+      '@/config': path.resolve(__dirname, './src/features/landing/config'),
+      '@/home': path.resolve(__dirname, './src/features/landing/home'),
       '@/core': path.resolve(__dirname, './src/core'),
       '@/features': path.resolve(__dirname, './src/features'),
       '@/shared': path.resolve(__dirname, './src/shared'),
       '@/infrastructure': path.resolve(__dirname, './src/infrastructure'),
       '@/routes': path.resolve(__dirname, './src/routes'),
-      '@/config': path.resolve(__dirname, './src/config'),
+      '@': path.resolve(__dirname, './src/features/landing'),
     },
   },
 });

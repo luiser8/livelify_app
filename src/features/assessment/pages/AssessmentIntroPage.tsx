@@ -35,7 +35,7 @@ export const AssessmentIntroPage = () => {
     if (isArchived) {
       return;
     }
-    navigate(`/assessment/area/${areaId}`);
+    navigate(`/app/assessment/area/${areaId}`);
   };
 
   const handleViewLifeWheel = async () => {
@@ -46,11 +46,11 @@ export const AssessmentIntroPage = () => {
       
       // El cache ya se limpió automáticamente en el servicio
       // Navegar al home donde se recargará con isAnswered: true
-      navigate('/home');
+      navigate('/app/home');
     } catch (error) {
       console.error('Error marking as answered:', error);
       // Navegar de todas formas
-      navigate('/home');
+      navigate('/app/home');
     } finally {
       setMarkingAsAnswered(false);
     }

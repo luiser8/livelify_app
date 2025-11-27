@@ -7,7 +7,7 @@ interface PublicRouteProps {
 
 /**
  * Componente para rutas públicas (login/register)
- * Si el usuario ya está autenticado, redirige a /home
+ * Si el usuario ya está autenticado, redirige a /app/home
  */
 export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,7 +23,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
   // Si ya está autenticado, redirigir a home
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/app/home" replace />;
   }
 
   // Si no está autenticado, mostrar el contenido (login/register)

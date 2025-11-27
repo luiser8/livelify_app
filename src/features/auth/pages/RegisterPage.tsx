@@ -2,27 +2,29 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
-import { useAuth } from '@/features/auth/context';
 import { registerUseCase } from '@/core/usecases/auth/registerUseCase';
-import { loginUseCase } from '@/core/usecases/auth/loginUseCase';
-import { LanguageSelector, Copyright } from '@/shared/components';
+import { LanguageSelector, Copyright, Button } from '@/shared/components';
 import { translateError } from '@/shared/utils';
 
 /**
  * Página de registro
  */
 export const RegisterPage = () => {
-  const { t } = useTranslation();
-  const { login } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>('');
 
   const handleRegister = async (formData: RegisterFormData) => {
     setIsLoading(true);
     setError('');
 
     try {
+      // Detectar el idioma actual del usuario
+      const currentLanguage = i18n.language || 'es';
+
       // Preparar datos para el backend (sin confirmPassword)
       const registerData = {
         email: formData.email,
@@ -33,18 +35,15 @@ export const RegisterPage = () => {
         phone: formData.phone,
         avatarUrl: formData.avatarUrl || 'https://example.com/avatar.jpg',
         acceptTermsAndPolicies: formData.acceptedTermsAndPolicies,
+        language: currentLanguage,
       };
 
       const registerResult = await registerUseCase(registerData);
 
       if (registerResult.success) {
-        const loginResult = await loginUseCase({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        login(loginResult.user);
-        navigate('/login');
+        // No iniciar sesión automáticamente, solo mostrar mensaje de éxito
+        setRegisteredEmail(formData.email);
+        setRegistrationSuccess(true);
       }
     } catch (error) {
       console.error('Error de registro:', error);
@@ -58,12 +57,80 @@ export const RegisterPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/login');
+    navigate('/app/login');
   };
 
   const handleSignIn = () => {
-    navigate('/login');
+    navigate('/app/login');
   };
+
+  // Pantalla de éxito después del registro
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-primary via-secondary to-accent flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+          {/* Logo */}
+          <div className="flex justify-center -mb-14 -mt-14">
+            <img 
+              src="/logo.svg" 
+              alt="Livelify" 
+              className="h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 xl:h-96 xl:w-96"
+            />
+          </div>
+
+          {/* Success Icon */}
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+              <svg
+                className="h-8 w-8 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"
+                />
+              </svg>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {t('auth.register.checkYourEmail') || '¡Revisa tu correo!'}
+            </h2>
+            
+            <p className="text-gray-600 mb-2">
+              {t('auth.register.activationEmailSent') || 'Te hemos enviado un correo electrónico a:'}
+            </p>
+            
+            <p className="text-primary-600 font-semibold mb-6">
+              {registeredEmail}
+            </p>
+            
+            <p className="text-gray-600 mb-6">
+              {t('auth.register.clickActivationLink') || 'Por favor, haz clic en el enlace de activación en el correo para activar tu cuenta y poder iniciar sesión.'}
+            </p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800">
+                <strong>{t('auth.register.didntReceiveEmail') || '¿No recibiste el correo?'}</strong>
+                <br />
+                {t('auth.register.checkSpamFolder') || 'Revisa tu carpeta de spam o correo no deseado.'}
+              </p>
+            </div>
+
+            <Button
+              onClick={handleSignIn}
+              className="w-full"
+            >
+              {t('auth.goToLogin') || 'Ir a iniciar sesión'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-4 sm:px-6 py-4 sm:py-8 text-white">
@@ -90,22 +157,20 @@ export const RegisterPage = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-4 sm:space-y-6 py-4 sm:py-8">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-2 sm:space-y-4 py-2 sm:py-4">
         {/* Logo */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-          <svg
-            className="w-10 h-10 sm:w-12 sm:h-12 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z" />
-          </svg>
+        <div className="flex justify-center -mb-16 sm:-mb-20 md:-mb-24 -mt-4 sm:-mt-6 md:-mt-6">
+          <img
+            src="/logo_white.svg"
+            alt="Livelify"
+            className="h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 xl:h-96 xl:w-96"
+          />
         </div>
 
         {/* Logo text */}
-        <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0">{t('auth.register.title')}</h1>
-          <p className="text-sm sm:text-lg md:text-xl text-white/90 px-2">{t('auth.register.subtitle')}</p>
+        <div className="space-y-0.5 sm:space-y-1">
+          <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold mb-0">{t('auth.register.title')}</h1>
+          <p className="text-xs sm:text-base md:text-lg text-white/90 px-2">{t('auth.register.subtitle')}</p>
         </div>
 
         {/* Formulario de registro */}

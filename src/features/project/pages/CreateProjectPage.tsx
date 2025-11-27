@@ -73,7 +73,7 @@ export const CreateProjectPage = () => {
         
         if (!allAreasAnswered) {
           // Si no todas las áreas están respondidas, redirigir al assessment
-          navigate('/assessment/intro');
+          navigate('/app/assessment/intro');
           return;
         }
 
@@ -83,7 +83,7 @@ export const CreateProjectPage = () => {
 
           // Validar que el área exista
           if (!selectedArea) {
-            navigate('/home');
+            navigate('/app/home');
             return;
           }
 
@@ -132,7 +132,7 @@ export const CreateProjectPage = () => {
           }
 
           if (!enabledAreaIds.has(urlAreaId)) {
-            navigate('/home');
+            navigate('/app/home');
             return;
           }
 
@@ -143,13 +143,13 @@ export const CreateProjectPage = () => {
 
             // Si ya tiene 2 proyectos en total, redirigir
             if (totalProjects >= 2) {
-              navigate(`/area/${urlAreaId}/projects`);
+              navigate(`/app/area/${urlAreaId}/projects`);
               return;
             }
 
             // Si el área ya alcanzó 10/10, redirigir (objetivo cumplido)
             if (selectedArea.score >= 10) {
-              navigate(`/area/${urlAreaId}/projects`);
+              navigate(`/app/area/${urlAreaId}/projects`);
               return;
             }
           } catch (error) {
@@ -246,7 +246,7 @@ export const CreateProjectPage = () => {
     const totalProjectsCount = projectCountByArea.get(areaId) || 0;
     if (totalProjectsCount >= 2) {
       // Redirigir al área si ya tiene 2 proyectos en total
-      navigate(`/area/${areaId}/projects`);
+      navigate(`/app/area/${areaId}/projects`);
       return;
     }
 
@@ -254,7 +254,7 @@ export const CreateProjectPage = () => {
     const selectedArea = lifeAreas.find(a => a.id === areaId);
     if (selectedArea && selectedArea.score >= 10) {
       // Si ya tiene 10/10, redirigir al área (objetivo cumplido)
-      navigate(`/area/${areaId}/projects`);
+      navigate(`/app/area/${areaId}/projects`);
       return;
     }
 
@@ -335,7 +335,7 @@ export const CreateProjectPage = () => {
 
       if (totalProjects >= 2) {
         // Si ya tiene 2 proyectos en total, redirigir
-        navigate(`/area/${selectedAreaId}/projects`);
+        navigate(`/app/area/${selectedAreaId}/projects`);
         return;
       }
 
@@ -343,7 +343,7 @@ export const CreateProjectPage = () => {
       const areaToValidate = lifeAreas.find(a => a.id === selectedAreaId);
       if (areaToValidate && areaToValidate.score >= 10) {
         // Si ya tiene 10/10, redirigir (objetivo cumplido)
-        navigate(`/area/${selectedAreaId}/projects`);
+        navigate(`/app/area/${selectedAreaId}/projects`);
         return;
       }
 
@@ -358,9 +358,9 @@ export const CreateProjectPage = () => {
 
       // Navigate back to appropriate page after creating project
       if (urlAreaId) {
-        navigate(`/area/${urlAreaId}/projects`);
+        navigate(`/app/area/${urlAreaId}/projects`);
       } else {
-        navigate('/projects');
+        navigate('/app/projects');
       }
     } catch (error) {
       console.error('Error creating project:', error);
@@ -554,7 +554,7 @@ export const CreateProjectPage = () => {
                       {t('projects.create.assessmentRequiredMessage')}
                     </p>
                     <button
-                      onClick={() => navigate('/home')}
+                      onClick={() => navigate('/app/home')}
                       className="w-full sm:w-auto px-4 py-2 bg-amber-600 text-white font-medium text-xs sm:text-sm rounded-lg hover:bg-amber-700 transition-colors"
                     >
                       {t('projects.create.completeAssessment')}
@@ -605,7 +605,7 @@ export const CreateProjectPage = () => {
             {/* View All Areas Details */}
             <div className="text-center pt-4">
               <button 
-                onClick={() => navigate('/home')}
+                onClick={() => navigate('/app/home')}
                 className="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
               >
                 {t('projects.create.viewAllAreas')}

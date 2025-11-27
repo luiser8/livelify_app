@@ -29,7 +29,7 @@ export const LoginPage = () => {
       login(user);
 
       // Redirigir al home
-      navigate('/home');
+      navigate('/app/home');
     } catch (error) {
       console.error('Error de login:', error);
 
@@ -42,11 +42,11 @@ export const LoginPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/');
+    navigate('/app');
   };
 
   const handleSignUp = () => {
-    navigate('/register');
+    navigate('/app/register');
   };
 
   return (
@@ -74,22 +74,20 @@ export const LoginPage = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-4 sm:space-y-8 py-4 sm:py-0">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-3 sm:space-y-2 py-1 sm:py-2">
         {/* Logo */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-          <svg
-            className="w-10 h-10 sm:w-12 sm:h-12 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z" />
-          </svg>
+        <div className="flex justify-center -mb-16 sm:-mb-20 md:-mb-24 -mt-16 sm:-mt-20 md:-mt-24">
+          <img
+            src="/logo_white.svg"
+            alt="Livelify"
+            className="h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 xl:h-96 xl:w-96"
+          />
         </div>
 
         {/* Logo text */}
-        <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0">{t('auth.login.title')}</h1>
-          <p className="text-sm sm:text-lg md:text-xl text-white/90 px-2">{t('auth.login.subtitle')}</p>
+        <div className="space-y-0.5 sm:space-y-1">
+          <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold mb-0">{t('auth.login.title')}</h1>
+          <p className="text-xs sm:text-base md:text-lg text-white/90 px-2">{t('auth.login.subtitle')}</p>
         </div>
 
         {/* Formulario de login */}
@@ -128,7 +126,7 @@ export const LoginPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="w-full max-w-md pb-2 sm:pb-4 px-4 sm:px-0">
+      <div className="w-full max-w-md pb-1 sm:pb-2 px-4 sm:px-0">
         <p className="text-center text-white/80 text-xs sm:text-sm">
           {t('auth.login.noAccount')}{' '}
           <button

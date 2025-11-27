@@ -48,13 +48,13 @@ export const HomePage = () => {
   }, []);
 
   const handleStartAssessment = () => {
-    navigate('/assessment/intro');
+    navigate('/app/assessment/intro');
   };
 
   const handleAreaClick = (areaId: string) => {
     // No permitir acceso a ninguna área hasta que todas estén completadas
     if (!allAreasAnswered) {
-      navigate('/assessment/intro');
+      navigate('/app/assessment/intro');
       return;
     }
 
@@ -69,7 +69,7 @@ export const HomePage = () => {
       return; // No permitir clic en áreas con objetivo cumplido
     }
 
-    navigate(`/area/${areaId}/projects`);
+    navigate(`/app/area/${areaId}/projects`);
   };
 
   const hasScores = lifeWheel?.lifeAreas && lifeWheel.lifeAreas.some(area => area.isArchived);
@@ -557,7 +557,7 @@ export const HomePage = () => {
         title={t('home.title')}
         subtitle={t('home.subtitle')}
         showBackButton={true}
-        backPath="/"
+        backPath="/app"
         showSearch={false}
         showFilter={false}
       />

@@ -587,7 +587,7 @@ export const ActionsPage = () => {
               <h3 className="text-xl font-semibold text-amber-900 mb-2">{t('actions.noContexts')}</h3>
               <p className="text-amber-800 mb-4">{t('actions.needContexts')}</p>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/app/profile')}
                 className="py-2 px-4 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-all"
               >
                 {t('actions.goToProfile')}

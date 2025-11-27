@@ -131,6 +131,14 @@ export interface UpdateUserData {
   password?: string;
 }
 
+export interface ActivateAccountRequest {
+  hash: string;
+}
+
+export interface ActivateAccountResponse {
+  message: string;
+}
+
 export const userService = {
   /**
    * Registra un nuevo usuario
@@ -139,6 +147,15 @@ export const userService = {
    */
   register: async (credentials: RegisterCredentials): Promise<RegisterResponse> => {
     return apiClient.post<RegisterResponse>('/users/register', credentials);
+  },
+
+  /**
+   * Activa la cuenta de un usuario usando el hash recibido por email
+   * Endpoint: POST /users/activate
+   * No requiere autenticación
+   */
+  activateAccount: async (hash: string): Promise<ActivateAccountResponse> => {
+    return apiClient.post<ActivateAccountResponse>('/users/activate', { hash });
   },
 
   /**

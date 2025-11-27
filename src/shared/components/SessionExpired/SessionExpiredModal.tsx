@@ -17,7 +17,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
   // Función para redirigir al login
   const handleLogin = () => {
     localStorage.clear();
-    window.location.href = '/login';
+    window.location.href = '/app/login';
   };
 
   // Resetear countdown cuando aparece el modal

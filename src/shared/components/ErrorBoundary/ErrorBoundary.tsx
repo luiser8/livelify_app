@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReload = () => {
-    window.location.href = '/';
+    window.location.href = '/app';
   };
 
   render() {

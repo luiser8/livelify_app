@@ -34,7 +34,7 @@ export const NotFoundPage: React.FC = () => {
               ← Go Back
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/app')}
               className="py-3 px-6 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all shadow-lg"
             >
               🏠 Go to Home
@@ -46,25 +46,25 @@ export const NotFoundPage: React.FC = () => {
             <p className="text-sm text-gray-500 mb-4">Helpful links:</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/app/dashboard')}
                 className="text-primary-600 hover:text-primary-700 font-medium text-sm underline"
               >
                 Dashboard
               </button>
               <button
-                onClick={() => navigate('/projects')}
+                onClick={() => navigate('/app/projects')}
                 className="text-primary-600 hover:text-primary-700 font-medium text-sm underline"
               >
                 Projects
               </button>
               <button
-                onClick={() => navigate('/actions')}
+                onClick={() => navigate('/app/actions')}
                 className="text-primary-600 hover:text-primary-700 font-medium text-sm underline"
               >
                 Actions
               </button>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/app/profile')}
                 className="text-primary-600 hover:text-primary-700 font-medium text-sm underline"
               >
                 Profile
