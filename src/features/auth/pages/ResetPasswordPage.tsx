@@ -21,24 +21,50 @@ export const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string>('');
   const [errors, setErrors] = useState<{ newPassword?: string; confirmPassword?: string }>({});
   const [success, setSuccess] = useState(false);
   const [invalidLink, setInvalidLink] = useState(false);
+  const [linkAlreadyUsed, setLinkAlreadyUsed] = useState(false);
 
   useEffect(() => {
-    // Capturar el hash desde la URL (query parameter)
-    const hashParam = searchParams.get('hash') || searchParams.get('token');
-    const emailParam = searchParams.get('email');
-    
-    if (!hashParam) {
-      setInvalidLink(true);
-    } else {
+    const verifyHash = async () => {
+      // Capturar el hash desde la URL (query parameter)
+      const hashParam = searchParams.get('hash') || searchParams.get('token');
+      const emailParam = searchParams.get('email');
+      
+      if (!hashParam) {
+        setInvalidLink(true);
+        setIsVerifying(false);
+        return;
+      }
+      
       setHash(hashParam);
       if (emailParam) {
         setEmail(emailParam);
       }
-    }
+
+      // Verificar si el hash es válido
+      try {
+        const response = await authService.verifyPasswordRecovery({ hash: hashParam });
+        
+        if (!response.valid) {
+          if (response.alreadyProcessed) {
+            setLinkAlreadyUsed(true);
+          } else {
+            setInvalidLink(true);
+          }
+        }
+      } catch (err) {
+        console.error('Error verifying hash:', err);
+        setInvalidLink(true);
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyHash();
   }, [searchParams]);
 
   const validate = () => {
@@ -134,6 +160,18 @@ export const ResetPasswordPage = () => {
     navigate('/app/forgot-password');
   };
 
+  // Si está verificando, mostrar loading
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen gradient-livelify flex flex-col items-center justify-center px-4 text-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-white"></div>
+          <p className="text-xl font-medium">{t('auth.resetPassword.verifyingLink')}</p>
+        </div>
+      </div>
+    );
+  }
+
   // Si fue exitoso, mostrar el diseño de activación
   if (success) {
     return (
@@ -196,58 +234,115 @@ export const ResetPasswordPage = () => {
   // Si el link es inválido, mostrar mensaje
   if (invalidLink) {
     return (
-      <div className="min-h-screen gradient-livelify flex flex-col items-center justify-between px-4 sm:px-6 py-4 sm:py-8 text-white">
-        <div className="w-full max-w-6xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-          <button
-            onClick={handleBackToLogin}
-            className="text-white/90 hover:text-white transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {t('auth.resetPassword.backToLogin')}
-          </button>
-          <LanguageSelector />
-        </div>
-
-        <div className="flex-1 flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-4 sm:space-y-8 py-4 sm:py-0">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-500/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-            <svg
-              className="w-10 h-10 sm:w-12 sm:h-12 text-red-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+      <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+          {/* Logo */}
+          <div className="flex justify-center -mb-16 sm:-mb-20 md:-mb-24 -mt-16 sm:-mt-20 md:-mt-24">
+            <img
+              src="/logo.svg"
+              alt="Livelify"
+              className="h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 xl:h-96 xl:w-96"
+            />
           </div>
 
-          <div className="space-y-4 max-w-md">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-              {t('auth.resetPassword.invalidLink')}
-            </h1>
-
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4 sm:p-6 space-y-4 text-left">
-              <p className="text-white/90 text-sm sm:text-base">
-                {t('auth.resetPassword.invalidLinkMessage')}
-              </p>
+          {/* Error State */}
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg
+                className="h-6 w-6 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
             </div>
-
-            <button
-              onClick={handleRequestNewLink}
-              className="w-full py-3 px-6 bg-cream text-primary-700 font-semibold rounded-xl hover:bg-cream-dark transition-all transform hover:scale-105 shadow-lg"
-            >
-              {t('auth.resetPassword.requestNewLink')}
-            </button>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {t('auth.resetPassword.invalidLink')}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {t('auth.resetPassword.invalidLinkMessage')}
+            </p>
+            <div className="space-y-3">
+              <Button
+                onClick={handleRequestNewLink}
+                className="w-full"
+              >
+                {t('auth.resetPassword.requestNewLink')}
+              </Button>
+              <Button
+                onClick={handleBackToLogin}
+                variant="outline"
+                className="w-full"
+              >
+                {t('auth.resetPassword.goToLogin')}
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        <Copyright variant="dark" />
+  // Si el link ya fue usado, mostrar mensaje específico
+  if (linkAlreadyUsed) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+          {/* Logo */}
+          <div className="flex justify-center -mb-16 sm:-mb-20 md:-mb-24 -mt-16 sm:-mt-20 md:-mt-24">
+            <img
+              src="/logo.svg"
+              alt="Livelify"
+              className="h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 xl:h-96 xl:w-96"
+            />
+          </div>
+
+          {/* Error State */}
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+              <svg
+                className="h-6 w-6 text-yellow-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {t('auth.resetPassword.linkAlreadyUsed')}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {t('auth.resetPassword.linkAlreadyUsedMessage')}
+            </p>
+            <div className="space-y-3">
+              <Button
+                onClick={handleRequestNewLink}
+                className="w-full"
+              >
+                {t('auth.resetPassword.requestNewLink')}
+              </Button>
+              <Button
+                onClick={handleBackToLogin}
+                variant="outline"
+                className="w-full"
+              >
+                {t('auth.resetPassword.goToLogin')}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

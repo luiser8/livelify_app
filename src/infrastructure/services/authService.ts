@@ -44,6 +44,16 @@ export interface ResetPasswordResponse {
   email?: string; // El email puede venir en la respuesta para hacer login automático
 }
 
+export interface VerifyPasswordRecoveryRequest {
+  hash: string;
+}
+
+export interface VerifyPasswordRecoveryResponse {
+  valid: boolean;
+  message: string;
+  alreadyProcessed?: boolean;
+}
+
 export const authService = {
   /**
    * Inicia sesión con email y password
@@ -91,6 +101,14 @@ export const authService = {
    */
   resetPassword: async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
     return apiClient.post<ResetPasswordResponse>('/auth/reset-password', data);
+  },
+
+  /**
+   * Verifica si un hash de recuperación de contraseña es válido
+   * Endpoint: POST /auth/verify-password-recovery
+   */
+  verifyPasswordRecovery: async (data: VerifyPasswordRecoveryRequest): Promise<VerifyPasswordRecoveryResponse> => {
+    return apiClient.post<VerifyPasswordRecoveryResponse>('/auth/verify-password-recovery', data);
   },
 };
 

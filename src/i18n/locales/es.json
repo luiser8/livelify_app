@@ -151,6 +151,9 @@
       "goToLogin": "Ir a iniciar sesión",
       "invalidLink": "Enlace Inválido o Expirado",
       "invalidLinkMessage": "El enlace de recuperación es inválido o ha expirado. Por favor, solicita una nueva recuperación de contraseña.",
+      "linkAlreadyUsed": "Enlace Ya Utilizado",
+      "linkAlreadyUsedMessage": "Este enlace de recuperación de contraseña ya ha sido utilizado. Si necesitas restablecer tu contraseña nuevamente, por favor solicita un nuevo enlace.",
+      "verifyingLink": "Verificando enlace...",
       "requestNewLink": "Solicitar Nuevo Enlace",
       "passwordRequirements": "La contraseña debe tener al menos 6 caracteres",
       "signingIn": "Iniciando sesión..."

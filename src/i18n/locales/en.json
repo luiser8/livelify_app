@@ -151,6 +151,9 @@
       "goToLogin": "Go to Sign In",
       "invalidLink": "Invalid or Expired Link",
       "invalidLinkMessage": "The password reset link is invalid or has expired. Please request a new password recovery.",
+      "linkAlreadyUsed": "Link Already Used",
+      "linkAlreadyUsedMessage": "This password reset link has already been used. If you need to reset your password again, please request a new link.",
+      "verifyingLink": "Verifying link...",
       "requestNewLink": "Request New Link",
       "passwordRequirements": "Password must be at least 6 characters",
       "signingIn": "Signing you in..."
