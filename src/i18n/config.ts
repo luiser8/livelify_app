@@ -22,8 +22,7 @@ i18n
   .use(initReactI18next) // Pasa i18n a react-i18next
   .init({
     resources,
-    fallbackLng: 'en', // Idioma por defecto si no se detecta
-    lng: 'es', // Idioma inicial (español como preferencia)
+    fallbackLng: 'es', // Idioma por defecto si no se detecta
     debug: false, // Activar en desarrollo si necesitas debug
     
     interpolation: {

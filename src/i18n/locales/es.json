@@ -17,6 +17,18 @@
     "next": "Siguiente",
     "goHome": "Volver al inicio"
   },
+  "notFound": {
+    "title": "404",
+    "heading": "Página No Encontrada",
+    "message": "Lo sentimos, no pudimos encontrar la página que buscas. La página pudo haber sido movida, eliminada, o nunca existió.",
+    "goBack": "Volver Atrás",
+    "goHome": "Ir al Inicio",
+    "helpfulLinks": "Enlaces útiles:",
+    "dashboard": "Panel",
+    "projects": "Proyectos",
+    "actions": "Acciones",
+    "profile": "Perfil"
+  },
   "nav": {
     "home": "Inicio",
     "dashboard": "Panel",
