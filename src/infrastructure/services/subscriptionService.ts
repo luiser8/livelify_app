@@ -58,6 +58,7 @@ export interface AddSubscriptionRequest {
   planId: string;
   currencyId: string;
   amountPaid?: number;
+  type?: 'FREE' | 'PREMIUM';
 }
 
 export interface UpdateSubscriptionRequest {
@@ -115,7 +116,10 @@ export const subscriptionService = {
    * NOTA: Invalida caché de suscripción
    */
   subscribeToPlan: async (data: AddSubscriptionRequest): Promise<UserSubscription> => {
-    const result = await apiClient.post<UserSubscription>('/users/add-subscription', data);
+    const result = await apiClient.post<UserSubscription>('/users/add-subscription', {
+      ...data,
+      type: 'FREE',
+    });
 
     // Invalidar caché después de suscribirse
     apiCache.remove('subscription_me');

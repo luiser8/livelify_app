@@ -15,6 +15,7 @@ export interface RegisterCredentials {
   phone: string;
   avatarUrl?: string;
   acceptTermsAndPolicies: boolean;
+  typeCreation?: 'APPLICATION' | 'EXTERNAL';
 }
 
 export interface UserProfile {
@@ -146,7 +147,10 @@ export const userService = {
    * No requiere autenticación
    */
   register: async (credentials: RegisterCredentials): Promise<RegisterResponse> => {
-    return apiClient.post<RegisterResponse>('/users/register', credentials);
+    return apiClient.post<RegisterResponse>('/users/register', {
+      ...credentials,
+      typeCreation: 'APPLICATION',
+    });
   },
 
   /**
